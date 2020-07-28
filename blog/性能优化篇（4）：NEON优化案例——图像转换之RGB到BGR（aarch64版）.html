@@ -1,0 +1,994 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="4neonrgbbgraarch64">
+  </h1>
+  <p align="center">
+   性能优化篇（4）：NEON优化案例——图像转换之RGB到BGR（aarch64版）
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Sunday, 1. December 2019 1 07:13AM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul>
+     <li>
+      <p>
+       <a href="#jump为什么要交换图像颜色通道">
+        为什么要交换图像颜色通道
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump实现一个基本的图像颜色通道交换函数">
+        实现一个基本的图像颜色通道交换函数
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump利用NEON加速图像颜色通道交换">
+        利用 NEON 加速图像颜色通道交换
+       </a>
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump为什么要交换图像颜色通道">
+    为什么要交换图像颜色通道
+   </span>
+  </h3>
+  <p>
+   对于只有
+   <code>
+    R
+   </code>
+   、
+   <code>
+    G
+   </code>
+   、
+   <code>
+    B
+   </code>
+   三种通道的图像来说，OpenCV默认的通道排列方式为
+   <code>
+    BGR
+   </code>
+   而非常见的
+   <code>
+    RGB
+   </code>
+   。在一个应用内，如果同时存在“有些图像处理函数以
+   <code>
+    RGB
+   </code>
+   图像作为输入输出，而有些图像处理函数以
+   <code>
+    BGR
+   </code>
+   图像作为输入输出”，那么在调用这些函数前需要进行图像颜色通道转换，以满足接口的输入要求。由于图像颜色通道转换比较耗时，甚至可能成为性能瓶颈。因此，研究如何加速图像颜色通道交换就非常有意义了。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump实现一个基本的图像颜色通道交换函数">
+    实现一个基本的图像颜色通道交换函数
+   </span>
+  </h3>
+  <p>
+   如何将一个大小为
+   <code>
+    1920x1080
+   </code>
+   的
+   <code>
+    RGB
+   </code>
+   图像转换成相同大小的
+   <code>
+    BGR
+   </code>
+   图像呢？
+  </p>
+  <p>
+   首先实现一个最简单的转换函数
+   <code>
+    simple_rgb2bgr()
+   </code>
+   ，完整实现如下：
+  </p>
+  <pre><code>#define CHANNELS 3
+
+void simple_rgb2bgr(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+    {
+        // swap R and B channel
+        const auto r_channel = *(img + i);
+        *(img + i) = *(img + i + 2);
+        *(img + i + 2) = r_channel;
+    }
+}
+</code></pre>
+  <p>
+   <code>
+    simple_rgb2bgr()
+   </code>
+   函数将一个二维的图像看作是一维的，意味着只需要一个循环就可以遍历所有的像素。这种用法的好处在于，遵循空间局部性原理以高效利用
+   <code>
+    cache
+   </code>
+   从而改善程序性能，而不必关心二维图像在内存中的存储顺序——是行主序还是列主序。如果用两个循环的话会比较繁琐，移植性也不好。
+  </p>
+  <p>
+   上述函数在
+   <code>
+    Jetson TX2
+   </code>
+   上运行时会耗时 3~4ms 左右，在其他机器上运行时耗时会有所不同。如果该耗时不可接受，那么只能想办法对其进行加速。常见的加速思路有以下几种：1）任务级并行（利用多线程）；2）数据级并行（利用 GPU）；3）利用 SIMD。这里我们只研究第三种加速方式——利用 SIMD，它没有“任务级并行所需要的正确的调度协作和占用更多的 CPU 资源”，也没有“数据级并行所带来的 GPU 与 CPU 之间数据传输开销”。
+  </p>
+  <hr/>
+  <h3 id="neon">
+   <span id="jump利用NEON加速图像颜色通道交换">
+    利用 NEON 加速图像颜色通道交换
+   </span>
+  </h3>
+  <p>
+   首先，实现一个基本的利用
+   <code>
+    NEON
+   </code>
+   加速图像颜色通道交换的函数
+   <code>
+    rgb2bgr_with_neon()
+   </code>
+   ，完整实现如下：
+  </p>
+  <pre><code>#include "arm_neon.h"
+
+void rgb2bgr_with_neon(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    const int stride_bytes = 48;
+
+    for (int i = 0; i &lt; total_bytes; i += stride_bytes)
+    {
+        uint8_t *target = img + i;
+
+        // swap R and B channel with NEON
+        uint8x16x3_t a = vld3q_u8(target);
+        uint8x16x3_t b;
+        b.val[0] = a.val[2];
+        b.val[1] = a.val[1];
+        b.val[2] = a.val[0];
+        vst3q_u8(target, b);
+    }
+}
+</code></pre>
+  <p>
+   上述函数没有考虑图像像素个数非整除时的情形，这个放到后面进行。该函数的实现用到了两个
+   <code>
+    NEON Intrinsics
+   </code>
+   ，分别是
+   <code>
+    vld3q_u8
+   </code>
+   和
+   <code>
+    vst3q_u8
+   </code>
+   ，两者都定义在
+   <code>
+    arm_neon.h
+   </code>
+   文件中。
+  </p>
+  <p>
+   <code>
+    vld3q_u8
+   </code>
+   的函数原型为
+   <code>
+    uint8x16x3_t vld3q_u8 (const uint8_t * __a)
+   </code>
+   ，作用为以步长为 3 交叉地加载数据到三个连续的 128-bit 的向量寄存器。具体地：将内存地址
+   <code>
+    __a
+   </code>
+   、
+   <code>
+    __a+3
+   </code>
+   、…、
+   <code>
+    __a+45
+   </code>
+   处的内容分别赋值给向量寄存器
+   <code>
+    Vn
+   </code>
+   的
+   <code>
+    lane[0]
+   </code>
+   、
+   <code>
+    lane[1]
+   </code>
+   、…、
+   <code>
+    lane[15]
+   </code>
+   ，将内存地址
+   <code>
+    __a+1
+   </code>
+   、
+   <code>
+    __a+4
+   </code>
+   、…、
+   <code>
+    __a+46
+   </code>
+   处的内容分别赋值给向量寄存器
+   <code>
+    Vn+1
+   </code>
+   的
+   <code>
+    lane[0]
+   </code>
+   、
+   <code>
+    lane[1]
+   </code>
+   、…、
+   <code>
+    lane[15]
+   </code>
+   ，将内存地址
+   <code>
+    __a+2
+   </code>
+   、
+   <code>
+    __a+5
+   </code>
+   、…、
+   <code>
+    __a+47
+   </code>
+   处的内容分别赋值给向量寄存器
+   <code>
+    Vn+2
+   </code>
+   的
+   <code>
+    lane[0]
+   </code>
+   、
+   <code>
+    lane[1]
+   </code>
+   、…、
+   <code>
+    lane[15]
+   </code>
+   。也就是说，
+   <code>
+    vld3q_u8
+   </code>
+   在上述函数中的作用为：将连续 16 个像素的 R 通道： R0、R1、… 、R15 加载到向量寄存器
+   <code>
+    Vn
+   </code>
+   ，将连续 16 个像素的 G 通道： G0、G1、… 、G15 加载到向量寄存器
+   <code>
+    Vn+1
+   </code>
+   ，将连续 16 个像素的 B 通道： B0、B1、… 、B15 加载到向量寄存器
+   <code>
+    Vn+2
+   </code>
+   。
+  </p>
+  <p>
+   <code>
+    vst3q_u8
+   </code>
+   的函数原型为
+   <code>
+    void vst3q_u8 (uint8_t * __a, uint8x16x3_t val)
+   </code>
+   ，作用为以步长为 3 交叉地存储数据到内存中。
+  </p>
+  <p>
+   由于每一次迭代可以同时处理 16 个连续的像素，这些像素占用 48 字节（48（bytes） = 16（像素个数） * 3（通道数））。所以，变量
+   <code>
+    stride_bytes
+   </code>
+   的值为 48。
+  </p>
+  <p>
+   由于
+   <code>
+    aarch64
+   </code>
+   指令集中没有
+   <code>
+    ARM
+   </code>
+   指令集中的
+   <code>
+    VSWP
+   </code>
+   指令。因此，这里引入一个类型为
+   <code>
+    uint8x16x3_t
+   </code>
+   的临时向量
+   <code>
+    b
+   </code>
+   用于交换
+   <code>
+    R
+   </code>
+   和
+   <code>
+    B
+   </code>
+   通道。 g++ 带优化选项
+   <code>
+    -Og
+   </code>
+   编译时，语句
+   <code>
+    b.val[0] = a.val[2]; b.val[1] = a.val[1]; b.val[2] = a.val[0];
+   </code>
+   对应三条
+   <code>
+    MOV
+   </code>
+   指令。
+  </p>
+  <p>
+   在通道交换完成后，用语句
+   <code>
+    vst3q_u8(target, b);
+   </code>
+   将交换后的结果写入内存。这样，一次交换操作就完成了。
+  </p>
+  <p>
+   现在考虑图像像素个数非整除时的情形，完整实现如下：
+  </p>
+  <pre><code>void rgb2bgr_with_neon(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    const int stride_bytes = 48;
+    const int left_bytes = total_bytes % stride_bytes;
+    const int multiply_bytes = total_bytes - left_bytes;
+
+    for (int i = 0; i &lt; multiply_bytes; i += stride_bytes)
+    {
+        uint8_t *target = img + i;
+
+        // swap R and B channel with NEON
+        uint8x16x3_t a = vld3q_u8(target);
+        uint8x16x3_t b;
+        b.val[0] = a.val[2];
+        b.val[1] = a.val[1];
+        b.val[2] = a.val[0];
+        vst3q_u8(target, b);
+    }
+
+    // handling non-multiply array lengths
+    for (int i = multiply_bytes; i &lt; total_bytes; i += CHANNELS)
+    {
+        const auto r_channel = *(img + i);
+        *(img + i) = *(img + i + 2);
+        *(img + i + 2) = r_channel;
+    }
+}
+</code></pre>
+  <p>
+   为了验证
+   <code>
+    rgb2bgr_with_neon()
+   </code>
+   函数的正确性，这里引入两个函数：
+   <code>
+    init()
+   </code>
+   和
+   <code>
+    check()
+   </code>
+   。
+   <code>
+    init()
+   </code>
+   函数用于初始化图像，
+   <code>
+    check()
+   </code>
+   函数用于检查交换后的图像是否正确。完整实现如下：
+  </p>
+  <pre><code>#include &lt;iostream&gt;
+
+#define RED 255
+#define GREEN 125
+#define BLUE 80
+
+#define CHECK(img, height, width)               \
+if (check(img, height, width))                  \
+{                                               \
+    std::cout &lt;&lt; "Correct:img.\n";              \
+}                                               \
+else                                            \
+{                                               \
+    std::cout &lt;&lt; "Error:img.\n";                \
+}
+
+void init(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; )
+    {
+        *(img + i++) = RED;
+        *(img + i++) = GREEN;
+        *(img + i++) = BLUE;
+    }
+}
+
+bool check(const uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+    {
+        if (*(img + i) != BLUE || *(img + i + 1) != GREEN || 
+                *(img + i + 2) != RED)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+  <p>
+   完整的程序为
+   <code>
+    main.cpp
+   </code>
+   ：
+  </p>
+  <pre><code>#include "arm_neon.h"
+#include &lt;iostream&gt;
+
+#define HEIGHT 1080
+#define WIDTH 1920
+#define CHANNELS 3
+#define RED 255
+#define GREEN 125
+#define BLUE 80
+
+#define CHECK(img, height, width)               \
+if (check(img, height, width))                  \
+{                                               \
+    std::cout &lt;&lt; "Correct:img.\n";              \
+}                                               \
+else                                            \
+{                                               \
+    std::cout &lt;&lt; "Error:img.\n";                \
+}
+
+void init(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; )
+    {
+        *(img + i++) = RED;
+        *(img + i++) = GREEN;
+        *(img + i++) = BLUE;
+    }
+}
+
+bool check(const uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+    {
+        if (*(img + i) != BLUE || *(img + i + 1) != GREEN || 
+                *(img + i + 2) != RED)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void simple_rgb2bgr(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+    {
+        // swap R and B channel
+        const auto r_channel = *(img + i);
+        *(img + i) = *(img + i + 2);
+        *(img + i + 2) = r_channel;
+    }
+}
+
+void rgb2bgr_with_neon(uint8_t *img, int height, int width)
+{
+    const int total_bytes = height * width * CHANNELS;
+    const int stride_bytes = 48;
+    const int left_bytes = total_bytes % stride_bytes;
+    const int multiply_bytes = total_bytes - left_bytes;
+
+    for (int i = 0; i &lt; multiply_bytes; i += stride_bytes)
+    {
+        uint8_t *target = img + i;
+
+        // swap R and B channel with NEON
+        uint8x16x3_t a = vld3q_u8(target);
+        uint8x16x3_t b;
+        b.val[0] = a.val[2];
+        b.val[1] = a.val[1];
+        b.val[2] = a.val[0];
+        vst3q_u8(target, b);
+    }
+
+    // handling non-multiply array lengths
+    for (int i = multiply_bytes; i &lt; total_bytes; i += CHANNELS)
+    {
+        const auto r_channel = *(img + i);
+        *(img + i) = *(img + i + 2);
+        *(img + i + 2) = r_channel;
+    }
+}
+
+uint8_t *rgb_img1 = nullptr;
+uint8_t *rgb_img2 = nullptr;
+
+int main()
+{
+    rgb_img1 = new uint8_t[HEIGHT * WIDTH * CHANNELS];
+    rgb_img2 = new uint8_t[HEIGHT * WIDTH * CHANNELS];
+
+    init(rgb_img1, HEIGHT, WIDTH);
+    init(rgb_img2, HEIGHT, WIDTH);
+
+    simple_rgb2bgr(rgb_img1, HEIGHT, WIDTH);
+    rgb2bgr_with_neon(rgb_img2, HEIGHT, WIDTH);
+
+    CHECK(rgb_img1, HEIGHT, WIDTH);
+    CHECK(rgb_img2, HEIGHT, WIDTH);
+
+    delete [] rgb_img2;
+    delete [] rgb_img1;
+    return 0;
+}
+</code></pre>
+  <p>
+   编译程序（On Jetson TX2）：
+  </p>
+  <pre><code>g++ -std=c++11 -g -Og -o main_Og main.cpp
+</code></pre>
+  <p>
+   统计函数耗时（On Jetson TX2）：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      启动程序方式
+     </th>
+     <th>
+      第一次执行耗时(us)
+     </th>
+     <th>
+      第二次执行耗时(us)
+     </th>
+     <th>
+      第三次执行耗时(us)
+     </th>
+     <th>
+      第四次执行耗时(us)
+     </th>
+     <th>
+      第五次执行耗时(us)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ./main_Og
+     </td>
+     <td>
+      <li>
+       simple_rgb2bgr:4303
+      </li>
+      <li>
+       rgb2bgr_with_neon:1021
+      </li>
+     </td>
+     <td>
+      <li>
+       simple_rgb2bgr:4469
+      </li>
+      <li>
+       rgb2bgr_with_neon:1162
+      </li>
+     </td>
+     <td>
+      <li>
+       simple_rgb2bgr:3920
+      </li>
+      <li>
+       rgb2bgr_with_neon:1017
+      </li>
+     </td>
+     <td>
+      <li>
+       simple_rgb2bgr:4248
+      </li>
+      <li>
+       rgb2bgr_with_neon:1019
+      </li>
+     </td>
+     <td>
+      <li>
+       simple_rgb2bgr:3966
+      </li>
+      <li>
+       rgb2bgr_with_neon:1018
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   从统计结果中可以看出，
+   <code>
+    rgb2bgr_with_neon()
+   </code>
+   函数的执行速度比
+   <code>
+    simple_rgb2bgr()
+   </code>
+   函数快 3 到 4 倍。
+  </p>
+  <p>
+   <strong>
+    那么 NEON 版的实现为什么能达到这样一个加速呢？
+   </strong>
+   下面从 cache 的角度进行分析。
+  </p>
+  <p>
+   统计 cache 性能数据：
+  </p>
+  <pre><code>--------------------------------------------------------------------------------
+I1 cache:         16384 B, 64 B, 4-way associative
+D1 cache:         16384 B, 64 B, 4-way associative
+LL cache:         262144 B, 64 B, 8-way associative
+Command:          ./main_Og
+Data file:        cachegrind.out.22890
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Events shown:     Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Event sort order: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Thresholds:       0.1 100 100 100 100 100 100 100 100
+Include dirs:     
+User annotated:   main.cpp
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+         Ir  I1mr  ILmr         Dr    D1mr    DLmr         Dw    D1mw    DLmw 
+--------------------------------------------------------------------------------
+139,881,731 1,705 1,509 17,482,366 405,359 398,173 17,179,116 196,982 195,984  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+        Ir I1mr ILmr         Dr    D1mr    DLmr         Dw    D1mw    DLmw  file:function
+--------------------------------------------------------------------------------
+66,355,214    3    3 12,441,600 194,402 194,402          0       0       0  /home/test/main.cpp:check(unsigned char const*, int, int)
+49,766,412    1    1          0       0       0 12,441,600 194,401 194,401  /home/test/main.cpp:init(unsigned char*, int, int)
+20,736,006    2    2  4,147,200  97,201  97,201  4,147,200       0       0  /home/test/main.cpp:simple_rgb2bgr(unsigned char*, int, int)
+   648,017    3    3          0       0       0          0       0       0  /home/test/main.cpp:rgb2bgr_with_neon(unsigned char*, int, int)
+   648,000    0    0    388,800  97,201  97,201    388,800       0       0  /usr/lib/gcc/aarch64-linux-gnu/5/include/arm_neon.h:rgb2bgr_with_neon(unsigned char*, int, int)
+   548,801   12   11    149,830   2,085   1,743     50,617      36      24  /build/glibc-BinVK7/glibc-2.23/elf/dl-lookup.c:_dl_lookup_symbol_x
+   541,307   42   41    192,949   5,227   1,153     94,348      53      33  /build/glibc-BinVK7/glibc-2.23/elf/dl-lookup.c:do_lookup_x
+   211,533   28   28     48,140   3,391   2,964     20,629   1,748     887  /build/glibc-BinVK7/glibc-2.23/elf/../sysdeps/aarch64/dl-machine.h:_dl_relocate_object
+
+--------------------------------------------------------------------------------
+-- User-annotated source: main.cpp
+--------------------------------------------------------------------------------
+  No information has been collected for main.cpp
+
+--------------------------------------------------------------------------------
+-- Auto-annotated source: /home/test/main.cpp
+--------------------------------------------------------------------------------
+        Ir I1mr ILmr        Dr    D1mr    DLmr        Dw   D1mw   DLmw 
+
+-- line 20 ----------------------------------------
+         .    .    .         .       .       .         .      .      .  }                                               \
+         .    .    .         .       .       .         .      .      .  else                                            \
+         .    .    .         .       .       .         .      .      .  {                                               \
+         .    .    .         .       .       .         .      .      .      std::cout &lt;&lt; "Error:img.\n";                \
+         .    .    .         .       .       .         .      .      .  }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  void init(uint8_t *img, int height, int width)
+         .    .    .         .       .       .         .      .      .  {
+         4    0    0         0       0       0         0      0      0      const int total_bytes = height * width * CHANNELS;
+12,441,608    1    1         0       0       0         0      0      0      for (int i = 0; i &lt; total_bytes; )
+         .    .    .         .       .       .         .      .      .      {
+12,441,600    0    0         0       0       0 4,147,200 64,801 64,801          *(img + i++) = RED;
+12,441,600    0    0         0       0       0 4,147,200 64,800 64,800          *(img + i++) = GREEN;
+12,441,600    0    0         0       0       0 4,147,200 64,800 64,800          *(img + i++) = BLUE;
+         .    .    .         .       .       .         .      .      .      }
+         .    .    .         .       .       .         .      .      .  }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  bool check(const uint8_t *img, int height, int width)
+         .    .    .         .       .       .         .      .      .  {
+         4    0    0         0       0       0         0      0      0      const int total_bytes = height * width * CHANNELS;
+16,588,806    3    3         0       0       0         0      0      0      for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+         .    .    .         .       .       .         .      .      .      {
+41,472,000    0    0 8,294,400 129,602 129,602         0      0      0          if (*(img + i) != BLUE || *(img + i + 1) != GREEN || 
+ 8,294,400    0    0 4,147,200  64,800  64,800         0      0      0                  *(img + i + 2) != RED)
+         .    .    .         .       .       .         .      .      .          {
+         .    .    .         .       .       .         .      .      .              return false;
+         .    .    .         .       .       .         .      .      .          }
+         .    .    .         .       .       .         .      .      .      }
+         4    0    0         0       0       0         0      0      0      return true;
+         .    .    .         .       .       .         .      .      .  }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  void simple_rgb2bgr(uint8_t *img, int height, int width)
+         .    .    .         .       .       .         .      .      .  {
+         2    1    1         0       0       0         0      0      0      const int total_bytes = height * width * CHANNELS;
+ 8,294,404    0    0         0       0       0         0      0      0      for (int i = 0; i &lt; total_bytes; i += CHANNELS)
+         .    .    .         .       .       .         .      .      .      {
+         .    .    .         .       .       .         .      .      .          // swap R and B channel
+ 4,147,200    0    0 2,073,600  32,401  32,401         0      0      0          const auto r_channel = *(img + i);
+ 6,220,800    1    1 2,073,600  64,800  64,800 2,073,600      0      0          *(img + i) = *(img + i + 2);
+ 2,073,600    0    0         0       0       0 2,073,600      0      0          *(img + i + 2) = r_channel;
+         .    .    .         .       .       .         .      .      .      }
+         .    .    .         .       .       .         .      .      .  }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  void rgb2bgr_with_neon(uint8_t *img, int height, int width)
+         .    .    .         .       .       .         .      .      .  {
+         2    1    1         0       0       0         0      0      0      const int total_bytes = height * width * CHANNELS;
+         .    .    .         .       .       .         .      .      .      const int stride_bytes = 48;
+         7    0    0         0       0       0         0      0      0      const int left_bytes = total_bytes % stride_bytes;
+         1    1    1         0       0       0         0      0      0      const int multiply_bytes = total_bytes - left_bytes;
+         .    .    .         .       .       .         .      .      .  
+   518,404    0    0         0       0       0         0      0      0      for (int i = 0; i &lt; multiply_bytes; i += stride_bytes)
+         .    .    .         .       .       .         .      .      .      {
+   129,600    0    0         0       0       0         0      0      0          uint8_t *target = img + i;
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .          // swap R and B channel with NEON
+         .    .    .         .       .       .         .      .      .          uint8x16x3_t a = vld3q_u8(target);
+         .    .    .         .       .       .         .      .      .          uint8x16x3_t b;
+         .    .    .         .       .       .         .      .      .          b.val[0] = a.val[2];
+         .    .    .         .       .       .         .      .      .          b.val[1] = a.val[1];
+         .    .    .         .       .       .         .      .      .          b.val[2] = a.val[0];
+         .    .    .         .       .       .         .      .      .          vst3q_u8(target, b);
+         .    .    .         .       .       .         .      .      .      }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .      // handling non-multiply array lengths
+         3    1    1         0       0       0         0      0      0      for (int i = multiply_bytes; i &lt; total_bytes; i += CHANNELS)
+         .    .    .         .       .       .         .      .      .      {
+         .    .    .         .       .       .         .      .      .          const auto r_channel = *(img + i);
+         .    .    .         .       .       .         .      .      .          *(img + i) = *(img + i + 2);
+         .    .    .         .       .       .         .      .      .          *(img + i + 2) = r_channel;
+         .    .    .         .       .       .         .      .      .      }
+         .    .    .         .       .       .         .      .      .  }
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  uint8_t *rgb_img1 = nullptr;
+         .    .    .         .       .       .         .      .      .  uint8_t *rgb_img2 = nullptr;
+         .    .    .         .       .       .         .      .      .  
+         .    .    .         .       .       .         .      .      .  int main()
+         7    1    1         1       0       0         5      0      0  {
+         7    1    1         0       0       0         1      1      1      rgb_img1 = new uint8_t[HEIGHT * WIDTH * CHANNELS];
+         3    0    0         0       0       0         1      0      0      rgb_img2 = new uint8_t[HEIGHT * WIDTH * CHANNELS];
+         .    .    .         .       .       .         .      .      .  
+         4    0    0         1       0       0         0      0      0      init(rgb_img1, HEIGHT, WIDTH);
+         4    1    1         1       1       1         0      0      0      init(rgb_img2, HEIGHT, WIDTH);
+         .    .    .         .       .       .         .      .      .  
+         6    1    1         1       1       1         0      0      0      simple_rgb2bgr(rgb_img1, HEIGHT, WIDTH);
+         6    0    0         1       1       1         0      0      0      rgb2bgr_with_neon(rgb_img2, HEIGHT, WIDTH);
+         .    .    .         .       .       .         .      .      .  
+        12    1    1         1       1       1         0      0      0      CHECK(rgb_img1, HEIGHT, WIDTH);
+        14    1    1         1       1       1         0      0      0      CHECK(rgb_img2, HEIGHT, WIDTH);
+         .    .    .         .       .       .         .      .      .      
+         5    1    1         1       1       1         0      0      0      delete [] rgb_img2;
+         5    0    0         1       0       0         0      0      0      delete [] rgb_img1;
+         .    .    .         .       .       .         .      .      .      return 0;
+        27    4    3        11       3       1         5      0      0  }
+
+--------------------------------------------------------------------------------
+-- Auto-annotated source: /usr/lib/gcc/aarch64-linux-gnu/5/include/arm_neon.h
+--------------------------------------------------------------------------------
+     Ir I1mr ILmr      Dr   D1mr   DLmr      Dw D1mw DLmw 
+
+-- line 16243 ----------------------------------------
+      .    .    .       .      .      .       .    .    .    return ret;
+      .    .    .       .      .      .       .    .    .  }
+      .    .    .       .      .      .       .    .    .  
+      .    .    .       .      .      .       .    .    .  __extension__ static __inline uint8x16x3_t __attribute__ ((__always_inline__))
+      .    .    .       .      .      .       .    .    .  vld3q_u8 (const uint8_t * __a)
+      .    .    .       .      .      .       .    .    .  {
+      .    .    .       .      .      .       .    .    .    uint8x16x3_t ret;
+      .    .    .       .      .      .       .    .    .    __builtin_aarch64_simd_ci __o;
+129,600    0    0 388,800 97,201 97,201       0    0    0    __o = __builtin_aarch64_ld3v16qi ((const __builtin_aarch64_simd_qi *) __a);
+      .    .    .       .      .      .       .    .    .    ret.val[0] = (uint8x16_t) __builtin_aarch64_get_qregciv16qi (__o, 0);
+      .    .    .       .      .      .       .    .    .    ret.val[1] = (uint8x16_t) __builtin_aarch64_get_qregciv16qi (__o, 1);
+      .    .    .       .      .      .       .    .    .    ret.val[2] = (uint8x16_t) __builtin_aarch64_get_qregciv16qi (__o, 2);
+      .    .    .       .      .      .       .    .    .    return ret;
+      .    .    .       .      .      .       .    .    .  }
+      .    .    .       .      .      .       .    .    .  
+      .    .    .       .      .      .       .    .    .  __extension__ static __inline uint16x8x3_t __attribute__ ((__always_inline__))
+      .    .    .       .      .      .       .    .    .  vld3q_u16 (const uint16_t * __a)
+-- line 16259 ----------------------------------------
+-- line 23620 ----------------------------------------
+      .    .    .       .      .      .       .    .    .    __o = __builtin_aarch64_set_qregciv2di (__o, (int64x2_t) val.val[2], 2);
+      .    .    .       .      .      .       .    .    .    __builtin_aarch64_st3v2di ((__builtin_aarch64_simd_di *) __a, __o);
+      .    .    .       .      .      .       .    .    .  }
+      .    .    .       .      .      .       .    .    .  
+      .    .    .       .      .      .       .    .    .  __extension__ static __inline void __attribute__ ((__always_inline__))
+      .    .    .       .      .      .       .    .    .  vst3q_u8 (uint8_t * __a, uint8x16x3_t val)
+      .    .    .       .      .      .       .    .    .  {
+      .    .    .       .      .      .       .    .    .    __builtin_aarch64_simd_ci __o;
+129,600    0    0       0      0      0       0    0    0    __o = __builtin_aarch64_set_qregciv16qi (__o, (int8x16_t) val.val[0], 0);
+129,600    0    0       0      0      0       0    0    0    __o = __builtin_aarch64_set_qregciv16qi (__o, (int8x16_t) val.val[1], 1);
+129,600    0    0       0      0      0       0    0    0    __o = __builtin_aarch64_set_qregciv16qi (__o, (int8x16_t) val.val[2], 2);
+129,600    0    0       0      0      0 388,800    0    0    __builtin_aarch64_st3v16qi ((__builtin_aarch64_simd_qi *) __a, __o);
+      .    .    .       .      .      .       .    .    .  }
+      .    .    .       .      .      .       .    .    .  
+      .    .    .       .      .      .       .    .    .  __extension__ static __inline void __attribute__ ((__always_inline__))
+      .    .    .       .      .      .       .    .    .  vst3q_u16 (uint16_t * __a, uint16x8x3_t val)
+      .    .    .       .      .      .       .    .    .  {
+      .    .    .       .      .      .       .    .    .    __builtin_aarch64_simd_ci __o;
+      .    .    .       .      .      .       .    .    .    __o = __builtin_aarch64_set_qregciv8hi (__o, (int16x8_t) val.val[0], 0);
+      .    .    .       .      .      .       .    .    .    __o = __builtin_aarch64_set_qregciv8hi (__o, (int16x8_t) val.val[1], 1);
+-- line 23639 ----------------------------------------
+
+--------------------------------------------------------------------------------
+The following files chosen for auto-annotation could not be found:
+--------------------------------------------------------------------------------
+  /build/glibc-BinVK7/glibc-2.23/elf/dl-lookup.c
+  /build/glibc-BinVK7/glibc-2.23/elf/../sysdeps/aarch64/dl-machine.h
+
+--------------------------------------------------------------------------------
+Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw 
+--------------------------------------------------------------------------------
+99    1    1 97   96   98 99   99   99  percentage of events annotated
+</code></pre>
+  <p>
+   分析统计结果：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      函数名称
+     </th>
+     <th>
+      内存读操作数量(Dr列)
+     </th>
+     <th>
+      一级数据缓存读不命中次数(D1mr列)
+     </th>
+     <th>
+      最后一级数据缓存读不命中次数(DLmr列)
+     </th>
+     <th>
+      内存写操作数量(Dw列)
+     </th>
+     <th>
+      一级数据缓存写不命中次数(D1mw列)
+     </th>
+     <th>
+      最后一级数据缓存写不命中次数(DLmw列)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      simple_rgb2bgr
+     </td>
+     <td>
+      4,147,200
+     </td>
+     <td>
+      97,201
+     </td>
+     <td>
+      97,201
+     </td>
+     <td>
+      4,147,200
+     </td>
+     <td>
+      0
+     </td>
+     <td>
+      0
+     </td>
+    </tr>
+    <tr>
+     <td>
+      rgb2bgr_with_neon
+     </td>
+     <td>
+      388,800
+     </td>
+     <td>
+      97,201
+     </td>
+     <td>
+      97,201
+     </td>
+     <td>
+      388,800
+     </td>
+     <td>
+      0
+     </td>
+     <td>
+      0
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   可以看出，
+   <code>
+    rgb2bgr_with_neon
+   </code>
+   函数的内存读操作数量和内存写操作数量分别为
+   <code>
+    simple_rgb2bgr
+   </code>
+   函数的 0.09375 倍，其他的都是相同的。因此，从 cache 的角度来看，NEON 大大减少了内存读写操作数量，从而改善程序性能。
+  </p>
+  <p>
+   <strong>
+    … 即时查看更多分享见微信公众号StormQ
+   </strong>
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

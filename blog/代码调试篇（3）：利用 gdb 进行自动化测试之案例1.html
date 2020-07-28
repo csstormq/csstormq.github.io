@@ -1,0 +1,864 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="3-gdb-1">
+  </h1>
+  <p align="center">
+   代码调试篇（3）：利用 gdb 进行自动化测试之案例1
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Monday, 25. February 2019 10:31PM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump问题描述">
+       问题描述
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump解决方案">
+       解决方案
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump问题描述">
+    问题描述
+   </span>
+  </h3>
+  <p>
+   业务场景描述：业务中有一些复杂条件分支嵌套的业务处理，即执行这些业务处理函数前需要先满足调用该业务处理函数的所有条件。现在需要能够全覆盖测试这些业务处理是否可以正常工作。也就是说，期望结果是满足调用某个业务处理函数的所有条件时，就调用该业务处理函数。为了提高效率和保证质量，要求做到自动化测试。
+  </p>
+  <p>
+   业务场景抽象：
+  </p>
+  <pre><code>Sequence 1：Condition1 - &gt; Condition2 - &gt; Condition3 - &gt; Condition4 - &gt; Handler1
+Sequence 2：Condition1 - &gt; Condition2 - &gt; Condition3 - &gt; Condition5 - &gt; Handler2
+Sequence 3：Condition1 - &gt; Condition6 - &gt; Condition7 - &gt; Handler3
+...
+</code></pre>
+  <p>
+   注：每个 ConditionX 被封装到一个独立的函数中，这些执行分支每次只会执行其中一个。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump解决方案">
+    解决方案
+   </span>
+  </h3>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   探究解决方案的实现思路
+  </p>
+  <p>
+   除了能够实现自动化测试以外，解决方案应该尽量不修改原有的业务代码。这样，可以避免引入新问题的可能性和降低代码的可读性和可维护性。为了达到这样的效果，我们需要在运行期自动地构造满足执行各个业务处理函数所需的条件。比如，为了让业务处理函数
+   <code>
+    Handler1
+   </code>
+   被“正常地”调用，需要将其所有的前置条件的判断结果都修改为真。利用 gdb，可以做到这一点。
+  </p>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   利用 gdb 在运行期修改函数的返回值
+  </p>
+  <p>
+   先写一个手动版的示例。
+  </p>
+  <p>
+   示例源码，main.cpp：
+  </p>
+  <pre><code>// main.cpp
+
+#include &lt;iostream&gt;
+
+int g_cond1 = 1;
+int g_cond2 = 2;
+bool g_cond3 = true;
+bool g_cond4 = false;
+
+int conditon1()
+{
+    return g_cond1;
+}
+
+int conditon2()
+{
+    return g_cond2;
+}
+
+bool conditon3()
+{
+    return g_cond3;
+}
+
+bool conditon4()
+{
+    return g_cond4;
+}
+
+//  precondition: conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp;
+// conditon3() == false &amp;&amp; conditon4() == true
+void handler1()
+{
+    std::cout &lt;&lt; "handler1() is called." &lt;&lt; std::endl;
+}
+
+int main()
+{
+    if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+    {
+        handler1();
+    }
+    return 0;
+}
+</code></pre>
+  <p>
+   注：示例代码中展示了某个业务处理函数要被调用需要满足的前置条件。
+  </p>
+  <p>
+   如何编译：
+  </p>
+  <pre><code>$ g++ -o main main.cpp -g
+</code></pre>
+  <p>
+   如何调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) start
+Temporary breakpoint 1 at 0x40089f: file main.cpp, line 39.
+Starting program: /home/xuxiaoqiang/Desktop/test/at/main 
+
+Temporary breakpoint 1, main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+(gdb) b conditon1
+Breakpoint 2 at 0x40084a: file main.cpp, line 12.
+(gdb) b conditon2
+Breakpoint 3 at 0x400856: file main.cpp, line 17.
+(gdb) b conditon3
+Breakpoint 4 at 0x400862: file main.cpp, line 22.
+(gdb) b conditon4
+Breakpoint 5 at 0x40086f: file main.cpp, line 27.
+(gdb) c
+Continuing.
+
+Breakpoint 2, conditon1 () at main.cpp:12
+12      return g_cond1;
+(gdb) return 2
+Make conditon1() return now? (y or n) y
+#0  0x00000000004008a4 in main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+(gdb) c
+Continuing.
+
+Breakpoint 3, conditon2 () at main.cpp:17
+17      return g_cond2;
+(gdb) return 3
+Make conditon2() return now? (y or n) y
+#0  0x00000000004008ae in main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+(gdb) c
+Continuing.
+
+Breakpoint 4, conditon3 () at main.cpp:22
+22      return g_cond3;
+(gdb) return false
+Make conditon3() return now? (y or n) y
+#0  0x00000000004008b8 in main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+(gdb) c
+Continuing.
+
+Breakpoint 5, conditon4 () at main.cpp:27
+27      return g_cond4;
+(gdb) return true
+Make conditon4() return now? (y or n) y
+#0  0x00000000004008c4 in main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+(gdb) c
+Continuing.
+handler1() is called.
+[Inferior 1 (process 27928) exited normally]
+(gdb) 
+</code></pre>
+  <p>
+   上述调试过程，是通过手动方式在运行期修改函数返回值的。这一点，不满足自动化测试的要求。
+  </p>
+  <p>
+   我们可以把手动执行的命令放到一个文件
+   <code>
+    cmd_test.gdb
+   </code>
+   中，让 gdb 自动地逐条执行这些命令。
+  </p>
+  <p>
+   cmd_test.gdb 文件的完整内容：
+  </p>
+  <pre><code>file ./main
+start
+
+b conditon1
+b conditon2
+b conditon3
+b conditon4
+
+c
+return 2
+
+c
+return 3
+
+c
+return false
+
+c
+return true
+
+c
+</code></pre>
+  <p>
+   如何执行 cmd_test.gdb 文件：
+  </p>
+  <pre><code>$ gdb -q -x cmd_test.gdb
+</code></pre>
+  <p>
+   运行结果为：
+  </p>
+  <pre><code>$ gdb -q -x cmd_test.gdb
+Temporary breakpoint 1 at 0x40089f: file main.cpp, line 39.
+
+Temporary breakpoint 1, main () at main.cpp:39
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+Breakpoint 2 at 0x40084a: file main.cpp, line 12.
+Breakpoint 3 at 0x400856: file main.cpp, line 17.
+Breakpoint 4 at 0x400862: file main.cpp, line 22.
+Breakpoint 5 at 0x40086f: file main.cpp, line 27.
+
+Breakpoint 2, conditon1 () at main.cpp:12
+12      return g_cond1;
+
+Breakpoint 3, conditon2 () at main.cpp:17
+17      return g_cond2;
+
+Breakpoint 4, conditon3 () at main.cpp:22
+22      return g_cond3;
+
+Breakpoint 5, conditon4 () at main.cpp:27
+27      return g_cond4;
+handler1() is called.
+[Inferior 1 (process 15348) exited normally]
+(gdb) 
+</code></pre>
+  <p>
+   从上面可以看出，现在仅需要执行一条命令就可以完成一条测试用例的测试工作了，满足自动化测试的要求。
+  </p>
+  <p>
+   实际上，测试用例会有很多。我们可以把每条测试用例相关的 gdb 命令封装到一个独立的函数中，最后让 gdb 依次调用这些函数。
+  </p>
+  <p>
+   修改后的 cmd_test.gdb 文件的内容：
+  </p>
+  <pre><code>file ./main
+start
+
+define test_handler1
+    b conditon1
+    b conditon2
+    b conditon3
+    b conditon4
+
+    c
+    return 2
+
+    c
+    return 3
+
+    c
+    return false
+
+    c
+    return true
+
+    c
+end
+
+test_handler1
+</code></pre>
+  <p>
+   运行修改后的 cmd_test.gdb 文件：
+  </p>
+  <pre><code>$ gdb -q -x cmd_test.gdb
+Temporary breakpoint 1 at 0x40089f: file main.cpp, line 39.
+
+Temporary breakpoint 1, main () at main.cpp:39
+warning: Source file is more recent than executable.
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+Breakpoint 2 at 0x40084a: file main.cpp, line 12.
+Breakpoint 3 at 0x400856: file main.cpp, line 17.
+Breakpoint 4 at 0x400862: file main.cpp, line 22.
+Breakpoint 5 at 0x40086f: file main.cpp, line 27.
+
+Breakpoint 2, conditon1 () at main.cpp:12
+12      return g_cond1;
+
+Breakpoint 3, conditon2 () at main.cpp:17
+17      return g_cond2;
+
+Breakpoint 4, conditon3 () at main.cpp:22
+22      return g_cond3;
+
+Breakpoint 5, conditon4 () at main.cpp:27
+27      return g_cond4;
+handler1() is called.
+[Inferior 1 (process 29848) exited normally]
+(gdb) 
+</code></pre>
+  <p>
+   现在还需要解决一个关键问题：当断点执行到某个函数时，如何判断该函数是否是我们所预期的业务处理函数。如果是，测试结果为成功；否则，测试结果为失败，此时需要排查失败的原因。
+  </p>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   如何判断预期的业务处理函数是否被调用了
+  </p>
+  <p>
+   一种实现思路为：判断下一条指令是否位于预期的业务处理函数中。为了便于比较，可以在函数的第一条指令处设置断点，如果继续执行后的下一条指令为预期的业务处理函数的第一条指令，那么说明预期的业务处理函数被调用了，测试结果为成功；否则，没有被调用，测试结果为失败。
+  </p>
+  <p>
+   这里需要注意一点，用
+   <code>
+    b *函数名
+   </code>
+   而不是
+   <code>
+    b 函数名
+   </code>
+   在函数的第一条指令处设置断点。后者设置的不是函数第一条指令处的断点。
+  </p>
+  <p>
+   修改后的 cmd_test.gdb 文件的内容：
+  </p>
+  <pre><code>file ./main
+start
+
+define test_handler1
+    b conditon1
+    b conditon2
+    b conditon3
+    b conditon4
+    b *handler1
+
+    c
+    return 2
+
+    c
+    return 3
+
+    c
+    return false
+
+    c
+    return true
+
+    c
+    # 获取下一条要执行的指令
+    set $next_actual = $pc
+    # 设置预期执行的下一条指令
+    set $next_expected = &amp;handler1
+    if $next_actual == $next_expected
+        echo test_handler1[SUCCESS]\n
+    else
+        echo test_handler1[FAILED]\n
+    end
+
+    c
+end
+
+test_handler1
+</code></pre>
+  <p>
+   运行修改后的 cmd_test.gdb 文件：
+  </p>
+  <pre><code>$ gdb -q -x cmd_test.gdb
+Temporary breakpoint 1 at 0x40089f: file main.cpp, line 39.
+
+Temporary breakpoint 1, main () at main.cpp:39
+warning: Source file is more recent than executable.
+39      if (conditon1() == 2 &amp;&amp; conditon2() == 3 &amp;&amp; !conditon3() &amp;&amp; conditon4())
+Breakpoint 2 at 0x40084a: file main.cpp, line 12.
+Breakpoint 3 at 0x400856: file main.cpp, line 17.
+Breakpoint 4 at 0x400862: file main.cpp, line 22.
+Breakpoint 5 at 0x40086f: file main.cpp, line 27.
+Breakpoint 6 at 0x400878: file main.cpp, line 33.
+
+Breakpoint 2, conditon1 () at main.cpp:12
+12      return g_cond1;
+
+Breakpoint 3, conditon2 () at main.cpp:17
+17      return g_cond2;
+
+Breakpoint 4, conditon3 () at main.cpp:22
+22      return g_cond3;
+
+Breakpoint 5, conditon4 () at main.cpp:27
+27      return g_cond4;
+
+Breakpoint 6, handler1 () at main.cpp:33
+33  {
+test_handler1[SUCCESS]
+handler1() is called.
+[Inferior 1 (process 24450) exited normally]
+(gdb) 
+</code></pre>
+  <p>
+   从上面可以看出，输出了
+   <code>
+    test_handler1[SUCCESS]
+   </code>
+   ，表示该测试用例通过了。
+  </p>
+  <p>
+   <strong>
+    注：
+   </strong>
+   如果要获取某个类成员函数的第一条指令，gdb 命令示例为
+   <code>
+    set $expected =(int)'test.cpp'::Test::Handler1
+   </code>
+   （
+   <code>
+    test.cpp
+   </code>
+   为类成员函数实现所在的文件名称，
+   <code>
+    Test
+   </code>
+   为类名，
+   <code>
+    Handler1
+   </code>
+   为成员函数名称）。
+  </p>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   其他问题要考虑的
+  </p>
+  <ul>
+   <li>
+    <p>
+     测试用例之间的断点清理
+    </p>
+    <p>
+     为了避免受到其他测试用例的影响，可以在每个测试用例函数的开始处先删除所有的断点。
+    </p>
+   </li>
+   <li>
+    <p>
+     测试用例结果统计
+    </p>
+    <ul>
+     <li>
+      <p>
+       开启 gdb 记录日志功能
+      </p>
+     </li>
+     <li>
+      <p>
+       编写脚本，分析 gdb 的输出日志，统计哪些测试用例通过了，哪些测试用例失败了。
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    step 5：
+   </strong>
+   附
+  </p>
+  <pre><code>file /apollo/bazel-bin/modules/guardian/guardian
+set args --flagfile=/apollo/modules/guardian/conf/guardian.conf --log_dir=/apollo/data/log
+set logging overwrite on
+set logging on test_result.log
+set pagination off
+start
+
+define break_all_functions
+    delete breakpoints
+    b FirstAgent::GetState
+    b FirstAgent::GetMotionState
+    b FirstAgent::GetManualMotionIntent
+    b FirstAgent::IsLimited
+    b *FirstAgent::DoAction1
+
+    b FirstAgent::IsAllOffOverTime
+    b *FirstAgent::DoAction2
+    b *FirstAgent::DoAction3
+    b *FirstAgent::DoAction4
+
+    b FirstAgent::IsWaitResponseOverTime
+    b *FirstAgent::DoAction6
+    b FirstAgent::IsResponse
+    b *FirstAgent::DoAction7
+    b *FirstAgent::DoAction8
+    b *FirstAgent::DoAction9
+    b *FirstAgent::DoAction10
+    b *FirstAgent::DoAction12
+    b *FirstAgent::DoAction13
+    b *FirstAgent::DoAction14
+    b *FirstAgent::DoAction15
+
+    b FirstAgent::GetManualMovingState
+    b *FirstAgent::DoAction16
+    b *FirstAgent::DoAction17
+    b *FirstAgent::DoAction18
+    b *FirstAgent::DoAction19
+    b *FirstAgent::DoAction20
+    b *FirstAgent::DoAction21
+    b *FirstAgent::DoAction22
+    b *FirstAgent::DoAction23
+    b *FirstAgent::DoAction24
+
+    b FirstAgent::GetAutoMotionIntent
+    b *FirstAgent::DoAction25
+    b *FirstAgent::DoAction27
+    b *FirstAgent::DoAction28
+    b *FirstAgent::DoAction29
+    b *FirstAgent::DoAction30
+
+    b FirstAgent::GetAutolMovingState
+    b *FirstAgent::DoAction31
+    b *FirstAgent::DoAction32
+    b *FirstAgent::DoAction33
+    b *FirstAgent::DoAction34
+    b *FirstAgent::DoAction35
+    b *FirstAgent::DoAction36
+    b *FirstAgent::DoAction37
+
+    b *FirstAgent::DoAction38
+end
+
+define log_result
+    if $arg1
+        printf "%s[SUCCESS]\n", $arg0
+    else
+        printf "%s[FAILED]\n", $arg0
+    end
+end
+
+define continue_and_return_2
+    c
+    return $arg0
+    c
+    return $arg1
+    c
+end
+
+define continue_and_return_3
+    continue_and_return_2 $arg0 $arg1
+    return $arg2
+    c
+end
+
+define continue_and_return_4
+    continue_and_return_3 $arg0 $arg1 $arg2
+    return $arg3
+    c
+end
+
+define continue_and_return_5
+    continue_and_return_4 $arg0 $arg1 $arg2 $arg3
+    return $arg4
+    c
+end
+
+define continue_and_return_6
+    continue_and_return_5 $arg0 $arg1 $arg2 $arg3 $arg4
+    return $arg5
+    c
+end
+
+define continue_and_return_7
+    continue_and_return_6 $arg0 $arg1 $arg2 $arg3 $arg4 $arg5
+    return $arg6
+    c
+end
+
+define continue_and_return_8
+    continue_and_return_7 $arg0 $arg1 $arg2 $arg3 $arg4 $arg5 $arg6
+    return $arg7
+    c
+end
+
+define continue_and_return_9
+    continue_and_return_8 $arg0 $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
+    return $arg8
+    c
+end
+
+define test_DoAction1
+    continue_and_return_4 0 0 0 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction1
+    log_result "test_DoAction1" $is_expected
+end
+
+define test_DoAction2
+    continue_and_return_5 0 0 0 false false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction2
+    log_result "test_DoAction2" $is_expected
+end
+
+define test_DoAction3
+    continue_and_return_5 0 0 0 false true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction3
+    log_result "test_DoAction3" $is_expected
+end
+
+define test_DoAction4
+    continue_and_return_5 0 0 1 1 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction4
+    log_result "test_DoAction4" $is_expected
+end
+
+define test_DoAction6
+    continue_and_return_6 0 0 1 1 true true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction6
+    log_result "test_DoAction5" true
+    log_result "test_DoAction6" $is_expected
+end
+
+define test_DoAction7
+    continue_and_return_8 0 0 1 1 true false true false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction7
+    log_result "test_DoAction7" $is_expected
+end
+
+define test_DoAction8
+    continue_and_return_8 0 0 1 1 true false true true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction8
+    log_result "test_DoAction8" $is_expected
+end
+
+define test_DoAction9
+    continue_and_return_7 0 0 1 1 true false false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction9
+    log_result "test_DoAction9" $is_expected
+end
+
+define test_DoAction10
+    continue_and_return_6 0 0 2 2 2 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction10
+    log_result "test_DoAction10" $is_expected
+end
+
+define test_DoAction12
+    continue_and_return_7 0 0 2 2 2 true true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction12
+    log_result "test_DoAction11" true
+    log_result "test_DoAction12" $is_expected
+end
+
+define test_DoAction13
+    continue_and_return_9 0 0 2 2 2 true false true false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction13
+    log_result "test_DoAction13" $is_expected
+end
+
+define test_DoAction14
+    continue_and_return_9 0 0 2 2 2 true false true true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction14
+    log_result "test_DoAction14" $is_expected
+end
+
+define test_DoAction15
+    continue_and_return_8 0 0 2 2 2 true false false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction15
+    log_result "test_DoAction15" $is_expected
+end
+
+define test_DoAction16
+    continue_and_return_5 0 1 1 0 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction16
+    log_result "test_DoAction16" $is_expected
+end
+
+define test_DoAction17
+    continue_and_return_5 0 1 1 0 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction17
+    log_result "test_DoAction17" $is_expected
+end
+
+define test_DoAction18
+    continue_and_return_6 0 1 1 1 1 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction18
+    log_result "test_DoAction18" $is_expected
+end
+
+define test_DoAction19
+    continue_and_return_6 0 1 1 1 1 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction19
+    log_result "test_DoAction19" $is_expected
+end
+
+define test_DoAction20
+    continue_and_return_7 0 1 1 2 2 2 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction20
+    log_result "test_DoAction20" $is_expected
+end
+
+define test_DoAction21
+    continue_and_return_7 0 1 1 2 2 2 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction21
+    log_result "test_DoAction21" $is_expected
+end
+
+define test_DoAction22
+    continue_and_return_8 0 1 1 3 3 3 3 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction22
+    log_result "test_DoAction22" $is_expected
+end
+
+define test_DoAction23
+    continue_and_return_8 0 1 1 3 3 3 3 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction23
+    log_result "test_DoAction23" $is_expected
+end
+
+define test_DoAction24
+    continue_and_return_8 0 1 1 4 4 4 4 4
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction24
+    log_result "test_DoAction24" $is_expected
+end
+
+define test_DoAction25
+    continue_and_return_4 1 1 0 0
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction25
+    log_result "test_DoAction25" $is_expected
+end
+
+define test_DoAction27
+    continue_and_return_6 1 1 0 1 1 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction27
+    log_result "test_DoAction26" true
+    log_result "test_DoAction27" $is_expected
+end
+
+define test_DoAction28
+    continue_and_return_8 1 1 0 1 1 false true false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction28
+    log_result "test_DoAction28" $is_expected
+end
+
+define test_DoAction29
+    continue_and_return_8 1 1 0 1 1 false true true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction29
+    log_result "test_DoAction29" $is_expected
+end
+
+define test_DoAction30
+    continue_and_return_7 1 1 0 1 1 false false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction30
+    log_result "test_DoAction30" $is_expected
+end
+
+define test_DoAction31
+    continue_and_return_6 1 1 1 1 0 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction31
+    log_result "test_DoAction31" $is_expected
+end
+
+define test_DoAction32
+    continue_and_return_6 1 1 1 1 0 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction32
+    log_result "test_DoAction32" $is_expected
+end
+
+define test_DoAction33
+    continue_and_return_7 1 1 1 1 1 1 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction33
+    log_result "test_DoAction33" $is_expected
+end
+
+define test_DoAction34
+    continue_and_return_7 1 1 1 1 1 1 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction34
+    log_result "test_DoAction34" $is_expected
+end
+
+define test_DoAction35
+    continue_and_return_8 1 1 1 1 2 2 2 true
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction35
+    log_result "test_DoAction35" $is_expected
+end
+
+define test_DoAction36
+    continue_and_return_8 1 1 1 1 2 2 2 false
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction36
+    log_result "test_DoAction36" $is_expected
+end
+
+define test_DoAction37
+    continue_and_return_8 1 1 1 1 4 4 4 4
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction37
+    log_result "test_DoAction37" $is_expected
+end
+
+define test_DoAction38
+    continue_and_return_2 2 2
+    set $is_expected = $pc == (int)'FirstAgent.cpp'::FirstAgent::DoAction38
+    log_result "test_DoAction38" $is_expected
+end
+
+define test_all
+    set $i = 1
+    while $i &lt;= $arg0
+        eval "test_DoAction%d", $i
+        set $i = $i + 1
+    end
+end
+
+break_all_functions
+test_all 38
+</code></pre>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

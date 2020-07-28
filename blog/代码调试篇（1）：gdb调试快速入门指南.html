@@ -1,0 +1,1514 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="1gdb">
+   代码调试篇（1）：gdb调试快速入门指南
+  </h1>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Monday, 25. February 2019 10:31PM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul>
+     <li>
+      <p>
+       <a href="#jump启动gdb">
+        启动 gdb
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump调试进程">
+        调试进程
+       </a>
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h2 id="gdb">
+   <span id="jump启动gdb">
+    启动 gdb
+   </span>
+  </h2>
+  <ul>
+   <li>
+    <p>
+     <a href="#jump启动一个不带参数的进程">
+      启动一个不带参数的进程
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump启动一个带参数的进程">
+      启动一个带参数的进程
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump调试一个正在运行的进程">
+      调试一个正在运行的进程
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump使用命令文件调试进程">
+      使用命令文件调试进程
+     </a>
+    </p>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump启动一个不带参数的进程">
+    启动一个不带参数的进程
+   </span>
+  </h3>
+  <p>
+   命令：
+  </p>
+  <pre><code># executable-file 为可执行文件的路径
+$ gdb &lt;executable-file&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code># 启动一个不带参数的可执行程序 main，位于./samples目录下
+$ gdb ./samples/main
+</code></pre>
+  <p>
+   <a href="#jump启动gdb">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump启动一个带参数的进程">
+    启动一个带参数的进程
+   </span>
+  </h3>
+  <p>
+   命令：
+  </p>
+  <pre><code># executable-file 为可执行文件的路径
+# arg1 为可执行文件的第一个参数
+# argn 为可执行文件的第n个参数
+$ gdb --args &lt;executable-file&gt; &lt;arg1&gt; &lt;argn&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code># 启动一个带参数的可执行程序 main，位于./samples目录下
+# 假设程序参数只有一个，为配置文件 ./config.txt
+$ gdb --args ./samples/main ./config.txt
+</code></pre>
+  <p>
+   <a href="#jump启动gdb">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_3">
+   <span id="jump调试一个正在运行的进程">
+    调试一个正在运行的进程
+   </span>
+  </h3>
+  <p>
+   命令：
+  </p>
+  <pre><code>$ gdb
+# process-id为要调试进程的进程ID
+(gdb) attach &lt;process-id&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>$ gdb
+# 假设要调试进程的进程ID为8888
+(gdb) attach 8888
+</code></pre>
+  <p>
+   <a href="#jump启动gdb">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_4">
+   <span id="jump使用命令文件调试进程">
+    使用命令文件调试进程
+   </span>
+  </h3>
+  <p>
+   命令：
+  </p>
+  <pre><code># command-file为存放gdb命令的文件
+# 为了便于区分，该文件使用.gdb结尾（当然也可以使用其他格式结尾，比如：.txt）
+$ gdb -x &lt;command-file&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>$ gdb -x main.gdb
+</code></pre>
+  <p>
+   假设 main.gdb 文件的内容为：
+  </p>
+  <pre><code># 指定可执行文件的路径
+file ./samples/main
+# 设置可执行文件的参数（如果有的话）
+set args ./config.txt
+# 启动进程
+start
+# 继续执行
+c
+</code></pre>
+  <p>
+   <a href="#jump启动gdb">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h2 id="_5">
+   <span id="jump调试进程">
+    调试进程
+   </span>
+  </h2>
+  <ul>
+   <li>
+    <p>
+     <a href="#jump查看进程信息">
+      查看进程信息
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看堆栈信息">
+      查看堆栈信息
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看/设置源码的搜索路径">
+      查看/设置源码的搜索路径
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看源码/汇编">
+      查看源码/汇编
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看/设置/调试断点">
+      查看/设置/调试断点
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump打印/更改变量的值">
+      打印/更改变量的值
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump打印函数参数/局部变量的值">
+      打印函数参数/局部变量的值
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看/更改寄存器的值">
+      查看/更改寄存器的值
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump查看内存的值">
+      查看内存的值
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump调用C/C++函数">
+      调用C/C++函数
+     </a>
+    </p>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_6">
+   <span id="jump查看进程信息">
+    查看进程信息
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     查看进程ID、可执行文件路径、当前目录
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># info命名可缩写为i
+(gdb) info proc
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i proc 
+process 11356
+cmdline = '/home/tmp/b_Og'
+cwd = '/home/tmp'
+exe = '/home/tmp/b_Og'
+</code></pre>
+  <p>
+   从输出结果中可以看出，进程ID为 11356，进程启动项为 /home/tmp/b_Og，当前目录（即启动gdb时所在的目录）为 /home/tmp，可执行程序为 /home/tmp/b_Og。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     查看所有线程
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i threads
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i threads 
+  Id   Target Id         Frame 
+* 1    Thread 0x7ffff7fce740 (LWP 1549) "main" 0x00007ffff7626c1d in nanosleep ()
+    at ../sysdeps/unix/syscall-template.S:84
+  2    Thread 0x7ffff6f42700 (LWP 1553) "main" 0x00007ffff7626c1d in nanosleep ()
+    at ../sysdeps/unix/syscall-template.S:84
+</code></pre>
+  <p>
+   打印结果中
+   <code>
+    Id
+   </code>
+   列左侧带*的为当前线程，
+   <code>
+    ID
+   </code>
+   列为 gdb 自定义的线程ID，
+   <code>
+    Target Id
+   </code>
+   为真实的线程ID（这里有两个线程，线程ID分别为：1549、1553），
+   <code>
+    Frame
+   </code>
+   为线程的当前帧（包含：线程运行到什么位置了等信息）。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     查看断点当前所在的线程
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) p $_thread
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) p $_thread
+$1 = 1
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   打印结果所显示的线程ID（这里是1）是 gdb 内部自定义的（即
+   <code>
+    i threads
+   </code>
+   命令输出结果中最左侧的
+   <code>
+    Id
+   </code>
+   列的值），而不是真实的线程ID。
+  </p>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_7">
+   <span id="jump查看堆栈信息">
+    查看堆栈信息
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     查看当前线程的堆栈信息
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># 只打印堆栈信息的调用层次
+(gdb) bt
+# 打印堆栈信息的调用层次，并打印函数参数和局部变量的值
+(gdb) bt full
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) bt
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004010ad in main () at main.cpp:11
+</code></pre>
+  <pre><code>(gdb) bt full
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+No locals.
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+        __s = {__r = 0}
+        __ns = {__r = 10000000}
+        __ts = {tv_sec = 0, tv_nsec = 7543688}
+#2  0x00000000004010ad in main () at main.cpp:11
+No locals.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看所有线程的堆栈信息
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># 只打印堆栈信息的调用层次
+(gdb) thread apply all bt
+</code></pre>
+  <p>
+   或
+  </p>
+  <pre><code># 只打印堆栈信息的调用层次
+(gdb) thread apply all where
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) thread apply all bt
+
+Thread 2 (Thread 0x7ffff6f42700 (LWP 1553)):
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004019d7 in ShmManager::threadFunc (this=0x61fc20) at shm_manager_sim.cpp:49
+#3  0x0000000000401841 in ShmManager::&lt;lambda()&gt;::operator()(void) const (
+    __closure=0x61fc68) at shm_manager_sim.cpp:28
+#4  0x0000000000401e74 in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::_M_invoke&lt;&gt;(std::_Index_tuple&lt;&gt;) (this=0x61fc68) at /usr/include/c++/6/functional:1391
+#5  0x0000000000401dfe in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::operator()(void) (this=0x61fc68) at /usr/include/c++/6/functional:1380
+#6  0x0000000000401dce in std::thread::_State_impl&lt;std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt; &gt;::_M_run(void) (this=0x61fc60) at /usr/include/c++/6/thread:197
+#7  0x00007ffff7b0857f in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#8  0x00007ffff761d6ba in start_thread (arg=0x7ffff6f42700) at pthread_create.c:333
+#9  0x00007ffff735341d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+Thread 1 (Thread 0x7ffff7fce740 (LWP 1549)):
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004010ad in main () at main.cpp:11
+</code></pre>
+  <pre><code>(gdb) thread apply all where
+
+Thread 2 (Thread 0x7ffff6f42700 (LWP 1553)):
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004019d7 in ShmManager::threadFunc (this=0x61fc20) at shm_manager_sim.cpp:49
+#3  0x0000000000401841 in ShmManager::&lt;lambda()&gt;::operator()(void) const (
+    __closure=0x61fc68) at shm_manager_sim.cpp:28
+#4  0x0000000000401e74 in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::_M_invoke&lt;&gt;(std::_Index_tuple&lt;&gt;) (this=0x61fc68) at /usr/include/c++/6/functional:1391
+#5  0x0000000000401dfe in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::operator()(void) (this=0x61fc68) at /usr/include/c++/6/functional:1380
+#6  0x0000000000401dce in std::thread::_State_impl&lt;std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt; &gt;::_M_run(void) (this=0x61fc60) at /usr/include/c++/6/thread:197
+#7  0x00007ffff7b0857f in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#8  0x00007ffff761d6ba in start_thread (arg=0x7ffff6f42700) at pthread_create.c:333
+#9  0x00007ffff735341d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+Thread 1 (Thread 0x7ffff7fce740 (LWP 1549)):
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004010ad in main () at main.cpp:11
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定线程的堆栈信息
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># 先切换到指定线程，线程ID为gdb自定义的
+(gdb) thread &lt;thread-id-by-gdb&gt;
+# 只打印堆栈信息的调用层次
+(gdb) bt
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) thread 2
+[Switching to thread 2 (Thread 0x7ffff6f42700 (LWP 1553))]
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+84  in ../sysdeps/unix/syscall-template.S
+(gdb) bt
+#0  0x00007ffff7626c1d in nanosleep () at ../sysdeps/unix/syscall-template.S:84
+#1  0x0000000000401633 in std::this_thread::sleep_for&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; (
+    __rtime=...) at /usr/include/c++/6/thread:323
+#2  0x00000000004019d7 in ShmManager::threadFunc (this=0x61fc20) at shm_manager_sim.cpp:49
+#3  0x0000000000401841 in ShmManager::&lt;lambda()&gt;::operator()(void) const (
+    __closure=0x61fc68) at shm_manager_sim.cpp:28
+#4  0x0000000000401e74 in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::_M_invoke&lt;&gt;(std::_Index_tuple&lt;&gt;) (this=0x61fc68) at /usr/include/c++/6/functional:1391
+#5  0x0000000000401dfe in std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt;::operator()(void) (this=0x61fc68) at /usr/include/c++/6/functional:1380
+#6  0x0000000000401dce in std::thread::_State_impl&lt;std::_Bind_simple&lt;ShmManager::start()::&lt;lambda()&gt;()&gt; &gt;::_M_run(void) (this=0x61fc60) at /usr/include/c++/6/thread:197
+#7  0x00007ffff7b0857f in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#8  0x00007ffff761d6ba in start_thread (arg=0x7ffff6f42700) at pthread_create.c:333
+#9  0x00007ffff735341d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_8">
+   <span id="jump查看/设置源码的搜索路径">
+    查看/设置源码的搜索路径
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     查看源码搜索路径
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) show directories
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) show directories 
+Source directories searched: $cdir:$cwd
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     添加源码搜索路径
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># source-code-path 为要添加的源码搜索路径
+(gdb) directory &lt;source-code-path&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code># 添加源码搜索路径为 /usr/include/boost/
+(gdb) directory /usr/include/boost/
+Source directories searched: /usr/include/boost:$cdir:$cwd
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     重置为默认的源码搜索路径
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) directory
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) directory
+Reinitialize source path to empty? (y or n) y
+Source directories searched: $cdir:$cwd
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_9">
+   <span id="jump查看源码/汇编">
+    查看源码/汇编
+   </span>
+  </h3>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   要查看源码，需要在编译时带
+   <code>
+    -g
+   </code>
+   选项。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     查看当前文件的源码
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) list &lt;line-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) list 1
+warning: Source file is more recent than executable.
+1   #include "shm_manager_sim.h"
+2   #include "topic_manager_sim.h"
+3   
+4   int main()
+5   {
+6       TopicManager::instance();
+7   
+8       ShmManager::instance()-&gt;start();
+9   
+10      while(true)
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定文件的源码
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) list &lt;file-name&gt;:&lt;line-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) list shm_manager_sim.h:10
+5   #include &lt;thread&gt;
+6   
+7   class ShmManager;
+8   typedef std::shared_ptr&lt;ShmManager&gt; ShmManagerPtr;
+9   
+10  class ShmManager
+11  {
+12  public:
+13      static const ShmManagerPtr&amp; instance();
+14      void start();
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     上翻/下翻源码
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># 上翻源码
+(gdb) list -
+# 下翻源码
+(gdb) list
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) list shm_manager_sim.h:10
+5   #include &lt;thread&gt;
+6   
+7   class ShmManager;
+8   typedef std::shared_ptr&lt;ShmManager&gt; ShmManagerPtr;
+9   
+10  class ShmManager
+11  {
+12  public:
+13      static const ShmManagerPtr&amp; instance();
+14      void start();
+(gdb) list -
+1   #ifndef ROS_SHM_MANAGER_H
+2   #define ROS_SHM_MANAGER_H
+3   
+4   #include &lt;memory&gt;
+(gdb) list
+5   #include &lt;thread&gt;
+6   
+7   class ShmManager;
+8   typedef std::shared_ptr&lt;ShmManager&gt; ShmManagerPtr;
+9   
+10  class ShmManager
+11  {
+12  public:
+13      static const ShmManagerPtr&amp; instance();
+14      void start();
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定函数的汇编代码
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># 只打印汇编代码
+(gdb) disas &lt;function-name&gt;
+# 打印汇编代码和对应的源码
+(gdb) disas /m &lt;function-name&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) disas main
+Dump of assembler code for function main():
+   0x0000000000401046 &lt;+0&gt;: push   %rbp
+   0x0000000000401047 &lt;+1&gt;: mov    %rsp,%rbp
+   0x000000000040104a &lt;+4&gt;: sub    $0x20,%rsp
+   0x000000000040104e &lt;+8&gt;: mov    %fs:0x28,%rax
+   0x0000000000401057 &lt;+17&gt;:    mov    %rax,-0x8(%rbp)
+   0x000000000040105b &lt;+21&gt;:    xor    %eax,%eax
+   0x000000000040105d &lt;+23&gt;:    callq  0x405248 &lt;TopicManager::instance()&gt;
+   0x0000000000401062 &lt;+28&gt;:    callq  0x401776 &lt;ShmManager::instance()&gt;
+   0x0000000000401067 &lt;+33&gt;:    mov    %rax,%rdi
+   0x000000000040106a &lt;+36&gt;:    callq  0x401172 &lt;std::__shared_ptr&lt;ShmManager, (__gnu_cxx::_Lock_policy)2&gt;::operator-&gt;()
+   const&gt;
+   0x000000000040106f &lt;+41&gt;:    mov    %rax,%rdi
+   0x0000000000401072 &lt;+44&gt;:    callq  0x40184a &lt;ShmManager::start()&gt;
+...
+</code></pre>
+  <pre><code>(gdb) disas /m main
+Dump of assembler code for function main():
+5   {
+   0x0000000000401046 &lt;+0&gt;: push   %rbp
+   0x0000000000401047 &lt;+1&gt;: mov    %rsp,%rbp
+   0x000000000040104a &lt;+4&gt;: sub    $0x20,%rsp
+   0x000000000040104e &lt;+8&gt;: mov    %fs:0x28,%rax
+   0x0000000000401057 &lt;+17&gt;:    mov    %rax,-0x8(%rbp)
+   0x000000000040105b &lt;+21&gt;:    xor    %eax,%eax
+
+6       TopicManager::instance();
+   0x000000000040105d &lt;+23&gt;:    callq  0x405248 &lt;TopicManager::instance()&gt;
+
+7   
+8       ShmManager::instance()-&gt;start();
+   0x0000000000401062 &lt;+28&gt;:    callq  0x401776 &lt;ShmManager::instance()&gt;
+   0x0000000000401067 &lt;+33&gt;:    mov    %rax,%rdi
+   0x000000000040106a &lt;+36&gt;:    callq  0x401172 &lt;std::__shared_ptr&lt;ShmManager, (__gnu_cxx::_Lock_policy)2&gt;::operator-&gt;() const&gt;
+   0x000000000040106f &lt;+41&gt;:    mov    %rax,%rdi
+   0x0000000000401072 &lt;+44&gt;:    callq  0x40184a &lt;ShmManager::start()&gt;
+...
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_10">
+   <span id="jump查看/设置/调试断点">
+    查看/设置/调试断点
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     添加断点（所有线程）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) b &lt;file-name&gt;:&lt;line-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) b main.cpp:13
+Breakpoint 2 at 0x40108c: file main.cpp, line 13.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     添加断点（指定线程）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) b &lt;file-name&gt;:&lt;line-number&gt; thread &lt;thread-id-by-gdb&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) b main.cpp:13 thread 1
+Breakpoint 5 at 0x40108c: file main.cpp, line 13.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     在指定的内存地址添加断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) b *&lt;address&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) b *0x00000000004010a1
+Breakpoint 7 at 0x4010a1: file main.cpp, line 13.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     添加条件断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) b &lt;file-name&gt;:&lt;line-number&gt; if &lt;expresion&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) b main.cpp:14 if TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000
+Breakpoint 6 at 0x4010b2: file main.cpp, line 14.
+(gdb) i breakpoints 
+Num     Type           Disp Enb Address            What
+5       breakpoint     keep y   0x000000000040108c in main() at main.cpp:13 thread 1
+    stop only in thread 1
+6       breakpoint     keep y   0x00000000004010b2 in main() at main.cpp:14
+    stop only if TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看所有断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i breakpoints
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i breakpoints 
+Num     Type           Disp Enb Address            What
+2       breakpoint     keep y   0x000000000040108c in main() at main.cpp:13
+3       breakpoint     keep y   0x000000000040105d in main() at main.cpp:6
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i breakpoints &lt;breakpoint-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i breakpoints 2
+Num     Type           Disp Enb Address            What
+2       breakpoint     keep y   0x000000000040108c in main() at main.cpp:13
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定范围的断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i breakpoints &lt;breakpoint-number&gt;-&lt;breakpoint-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i breakpoints 2-3
+Num     Type           Disp Enb Address            What
+2       breakpoint     keep y   0x000000000040108c in main() at main.cpp:13
+3       breakpoint     keep y   0x000000000040105d in main() at main.cpp:6
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     删除所有断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) d
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) d
+Delete all breakpoints? (y or n) y
+(gdb) i breakpoints 
+No breakpoints or watchpoints.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     删除指定断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) d breakpoints &lt;breakpoint-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i breakpoints 
+Num     Type           Disp Enb Address            What
+4       breakpoint     keep y   0x000000000040108c in main() at main.cpp:16
+5       breakpoint     keep y   0x000000000040105d in main() at main.cpp:8
+(gdb) d breakpoints 4
+(gdb) i breakpoints 
+Num     Type           Disp Enb Address            What
+5       breakpoint     keep y   0x000000000040105d in main() at main.cpp:8
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     删除指定范围的断点
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) d breakpoints &lt;breakpoint-number&gt;-&lt;breakpoint-number&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i breakpoints 
+Num     Type           Disp Enb Address            What
+5       breakpoint     keep y   0x000000000040108c in main() at main.cpp:13 thread 1
+    stop only in thread 1
+6       breakpoint     keep y   0x00000000004010b2 in main() at main.cpp:14
+    stop only if TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000
+(gdb) d 5-6
+(gdb) i breakpoints 
+No breakpoints or watchpoints.
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     单步调试（语句级别）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># next命令可缩写为n
+(gdb) next
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) l
+4   L_Subscription getAllSubscription();
+5   
+6   TopicManagerPtr g_topic_manager;
+7   std::mutex g_topic_manager_mutex;
+8   const TopicManagerPtr&amp; TopicManager::instance()
+9   {
+10      if (!g_topic_manager)
+11      {
+12          std::lock_guard&lt;std::mutex&gt; lock(g_topic_manager_mutex);
+13          if (!g_topic_manager)
+(gdb) n
+10      if (!g_topic_manager)
+(gdb) n
+19      return g_topic_manager;
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     单步调试（指令级别）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># nexti命令可缩写为ni
+(gdb) nexti
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) ni
+0x0000000000405265  10      if (!g_topic_manager)
+(gdb) ni
+0x000000000040526a  10      if (!g_topic_manager)
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     跳入函数（语句级别）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># step命令可缩写为s
+(gdb) step
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) c
+Continuing.
+
+Thread 1 "main" hit Breakpoint 6, main () at main.cpp:14
+14          if (TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000)
+(gdb) s
+TopicManager::instance () at topic_manager_sim.cpp:9
+9   {
+(gdb) l
+4   L_Subscription getAllSubscription();
+5   
+6   TopicManagerPtr g_topic_manager;
+7   std::mutex g_topic_manager_mutex;
+8   const TopicManagerPtr&amp; TopicManager::instance()
+9   {
+10      if (!g_topic_manager)
+11      {
+12          std::lock_guard&lt;std::mutex&gt; lock(g_topic_manager_mutex);
+13          if (!g_topic_manager)
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     跳入函数（指令级别）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># stepi命令可缩写为si
+(gdb) stepi
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) si
+TopicManager::instance () at topic_manager_sim.cpp:9
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     跳出函数
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) finish
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) s
+TopicManager::instance () at topic_manager_sim.cpp:9
+9   {
+(gdb) finish 
+Run till exit from #0  TopicManager::instance () at topic_manager_sim.cpp:9
+0x00000000004010b7 in main () at main.cpp:14
+14          if (TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000)
+Value returned is $2 = 
+  std::shared_ptr&lt;TopicManager&gt; (use count 1, weak count 0) = {get() = 0x620c30}
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     继续执行
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># continue命令可缩写为c
+(gdb) continue
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) c
+Continuing.
+
+Thread 1 "main" hit Breakpoint 6, main () at main.cpp:14
+14          if (TopicManager::instance()-&gt;getNumSubscriptions() &gt; 1000)
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_11">
+   <span id="jump打印/更改变量的值">
+    打印/更改变量的值
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     打印变量的值（只打印一次）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code># print命令可缩写为p
+(gdb) print &lt;variable-name&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) p g_shm_manager
+$3 = std::shared_ptr&lt;ShmManager&gt; (use count 1, weak count 0) = {get() = 0x620c80}
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     打印变量的值（自动打印）
+    </strong>
+   </li>
+  </ul>
+  <p>
+   自动打印变量的值，命令：
+  </p>
+  <pre><code>(gdb) display &lt;variable-name&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) display g_shm_manager
+1: g_shm_manager = std::shared_ptr&lt;ShmManager&gt; (use count 1, weak count 0) = {get() = 0x620c80}
+(gdb) n
+13          std::this_thread::sleep_for(std::chrono::duration&lt;double, std::milli&gt;(10));
+1: g_shm_manager = std::shared_ptr&lt;ShmManager&gt; (use count 1, weak count 0) = {get() = 0x620c80}
+</code></pre>
+  <p>
+   取消自动打印变量的值，命令：
+  </p>
+  <pre><code>(gdb) undisplay &lt;display-number&gt;
+</code></pre>
+  <p>
+   查看自动打印的变量有哪些，命令：
+  </p>
+  <pre><code>(gdb) i display
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     更改变量的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) p &lt;variable-name&gt;=&lt;new-value&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) p g_shm_manager._M_ptr
+$5 = (ShmManager *) 0x620c80
+(gdb) p g_shm_manager._M_ptr=0
+$6 = (ShmManager *) 0x0
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_12">
+   <span id="jump打印函数参数/局部变量的值">
+    打印函数参数/局部变量的值
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     打印函数参数的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i args
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     打印局部变量的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i locals
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_13">
+   <span id="jump查看/更改寄存器的值">
+    查看/更改寄存器的值
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     查看常见寄存器的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i registers
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) i registers 
+rax            0x0  0
+rbx            0x0  0
+rcx            0x7ffff7626c1d   140737343810589
+rdx            0x0  0
+rsi            0x7fffffffd8e0   140737488345312
+rdi            0x0  0
+rbp            0x7fffffffd930   0x7fffffffd930
+rsp            0x7fffffffd910   0x7fffffffd910
+r8             0x0  0
+r9             0x7ffff6f42700   140737336583936
+r10            0x1381   4993
+r11            0x0  0
+r12            0x400f50 4198224
+r13            0x7fffffffda10   140737488345616
+r14            0x0  0
+r15            0x0  0
+rip            0x4010b2 0x4010b2 &lt;main()+108&gt;
+eflags         0x246    [ PF ZF IF ]
+cs             0x33 51
+ss             0x2b 43
+ds             0x0  0
+es             0x0  0
+fs             0x0  0
+gs             0x0  0
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看所有寄存器的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) i registers all
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看指定寄存器的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) p $&lt;register-name&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) p $rcx
+$9 = 140737343810589
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     更改指定寄存器的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) p $&lt;register-name&gt;=&lt;new-value&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) p $rcx
+$9 = 140737343810589
+(gdb) p $rcx=1
+$10 = 1
+(gdb) p $rcx
+$11 = 1
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_14">
+   <span id="jump查看内存的值">
+    查看内存的值
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     查看内存的值
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) x/&lt;n&gt;&lt;f&gt;&lt;u&gt; &lt;address&gt;
+</code></pre>
+  <p>
+   注：
+  </p>
+  <ul>
+   <li>
+    <p>
+     n 表示要打印多少个单元（1个单元是指即参数u所指定的字节数），默认值为1。如果为正数，那么打印从地址addr后面的；否则打印从地址addr前面的。
+    </p>
+   </li>
+   <li>
+    <p>
+     f 表示输出格式，默认值为
+     <code>
+      x
+     </code>
+     （十六进制）。其他可选值：
+     <code>
+      i
+     </code>
+     ，机器指令，忽略输出单元的大小；
+     <code>
+      d
+     </code>
+     ，（有符号的）十进制；
+     <code>
+      u
+     </code>
+     ，（无符号的）十进制；
+     <code>
+      o
+     </code>
+     ，八进制；
+     <code>
+      t
+     </code>
+     ，二进制；
+     <code>
+      a
+     </code>
+     ，十六进制，省略最前面的0；
+     <code>
+      s
+     </code>
+     ，字符串，且默认输出单元大小为
+     <code>
+      b
+     </code>
+     （bytes）。
+    </p>
+   </li>
+   <li>
+    <p>
+     u 表示输出单元大小，默认值为
+     <code>
+      w
+     </code>
+     （Words，4 bytes）。其他可选值：
+     <code>
+      b
+     </code>
+     ，bytes；
+     <code>
+      h
+     </code>
+     ，Halfwords，2 bytes；
+     <code>
+      g
+     </code>
+     ，Giant words，8 bytes。
+     <strong>
+      注意：
+     </strong>
+     执行命令
+     <code>
+      x
+     </code>
+     时，如果没有显示指定输出单元大小，会默认使用上次所指定的值。
+    </p>
+   </li>
+  </ul>
+  <p>
+   示例：
+  </p>
+  <pre><code># 查看起始地址为0x7fb00008f0后面的4字节的内容，并以十六进制的格式输出
+(gdb) x/wx 0x7fb00008f0
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="cc">
+   <span id="jump调用C/C++函数">
+    调用C/C++函数
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     调用C/C++函数
+    </strong>
+   </li>
+  </ul>
+  <p>
+   命令：
+  </p>
+  <pre><code>(gdb) call &lt;function-name&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) call TopicManager::instance()-&gt;subscribe()
+$13 = true
+</code></pre>
+  <p>
+   <a href="#jump调试进程">
+    返回上一级
+   </a>
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

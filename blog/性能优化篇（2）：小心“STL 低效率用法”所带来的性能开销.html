@@ -1,0 +1,1317 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="2stl">
+   性能优化篇（2）：小心“STL 低效率用法”所带来的性能开销
+  </h1>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Sunday, 17. November 2019 1 03:53PM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul>
+     <li>
+      <p>
+       <a href="#jump善用reserve预分配内存">
+        善用 reserve 预分配内存
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump善用emplace_back避免不必要的开销">
+        善用 emplace_back 避免不必要的开销
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump善用std::move避免不必要的拷贝开销">
+        善用 std::move 避免不必要的拷贝开销
+       </a>
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="reserve">
+   <span id="jump善用reserve预分配内存">
+    善用 reserve 预分配内存
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <p>
+     <strong>
+      reserve 函数的作用
+     </strong>
+    </p>
+    <p>
+     将容器的容量（即可以容纳的最大元素数量）调整为指定的大小
+     <code>
+      n
+     </code>
+     ，如果
+     <code>
+      n
+     </code>
+     小于容器的当前容量，那么直接忽略此操作。
+    </p>
+   </li>
+   <li>
+    <p>
+     <strong>
+      适用场景
+     </strong>
+    </p>
+    <ul>
+     <li>
+      如果
+      <code>
+       std::vector
+      </code>
+      中要添加的元素数量已知，那么在添加元素前（通常是在循环中添加元素前）使用
+      <code>
+       reserve
+      </code>
+      函数预分配
+      <code>
+       std::vector
+      </code>
+      需要的内存。这样，可以避免由于
+      <code>
+       std::vector
+      </code>
+      内部发生数据迁移而带来的不必要的元素拷贝开销、创建新内存开销和释放旧内存开销，从而改善程序性能。
+     </li>
+    </ul>
+   </li>
+   <li>
+    <p>
+     <strong>
+      代码示例
+     </strong>
+    </p>
+   </li>
+  </ul>
+  <p>
+   源码：
+  </p>
+  <pre><code>// main.cc
+
+
+#include &lt;vector&gt;
+
+#define N 1980*1024
+
+class TestObject
+{
+public:
+    TestObject(int a, int b, int c) : a_(a), b_(b), c_(c) {}
+
+    int a_;
+    int b_;
+    int c_;
+};
+
+std::vector&lt;TestObject&gt; test_data_1;
+std::vector&lt;TestObject&gt; test_data_2;
+
+void poor(std::vector&lt;TestObject&gt; &amp;data)
+{
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.push_back(TestObject(i, i+1, i+2));
+    }
+}
+
+void better(std::vector&lt;TestObject&gt; &amp;data)
+{
+    data.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.push_back(TestObject(i, i+1, i+2));
+    }
+}
+
+int main()
+{
+    poor(test_data_1);
+    better(test_data_2);
+    return 0;
+}
+</code></pre>
+  <p>
+   编译：
+  </p>
+  <pre><code>$ g++ -std=c++11 -g -Og -o main_Og main.cpp
+</code></pre>
+  <p>
+   函数耗时统计：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      启动程序方式
+     </th>
+     <th>
+      第一次执行耗时(us)
+     </th>
+     <th>
+      第二次执行耗时(us)
+     </th>
+     <th>
+      第三次执行耗时(us)
+     </th>
+     <th>
+      第四次执行耗时(us)
+     </th>
+     <th>
+      第五次执行耗时(us)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ./main_Og
+     </td>
+     <td>
+      <li>
+       poor:43301
+      </li>
+      <li>
+       better:16609
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:41402
+      </li>
+      <li>
+       better:15822
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:60415
+      </li>
+      <li>
+       better:15650
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:62450
+      </li>
+      <li>
+       better:14970
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:41866
+      </li>
+      <li>
+       better:16222
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   从统计结果中可以看出，示例中
+   <code>
+    better()
+   </code>
+   函数的执行速度比
+   <code>
+    poor()
+   </code>
+   函数至少快
+   <code>
+    2
+   </code>
+   倍。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     代码调试
+    </strong>
+   </li>
+  </ul>
+  <p>
+   分析
+   <code>
+    poor()
+   </code>
+   函数添加前 9 个元素时，
+   <code>
+    std::vector
+   </code>
+   内部数据迁移情况。具体调试过程如下：
+  </p>
+  <pre><code>(gdb) l 25
+20  
+21  void poor(std::vector&lt;TestObject&gt; &amp;data)
+22  {
+23      for (int i = 0; i &lt; N; i++)
+24      {
+25          data.push_back(TestObject(i, i+1, i+2));
+26      }
+27  }
+28  
+29  void better(std::vector&lt;TestObject&gt; &amp;data)
+(gdb) b 25
+Breakpoint 3 at 0x401065: file m.cpp, line 25.
+(gdb) c
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 0, capacity 0) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+(gdb) c
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 1, capacity 1 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+(gdb) display data.size()
+1: data.size() = 1
+(gdb) display &amp;data[0]
+2: &amp;data[0] = (TestObject *) 0x614c20
+(gdb) c
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 2, capacity 2 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 2
+2: &amp;data[0] = (TestObject *) 0x614c40
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 3, capacity 4 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 3
+2: &amp;data[0] = (TestObject *) 0x614c60
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 4, capacity 4 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 4
+2: &amp;data[0] = (TestObject *) 0x614c60
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 5, capacity 8 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 5
+2: &amp;data[0] = (TestObject *) 0x614ca0
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 6, capacity 8 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 6
+2: &amp;data[0] = (TestObject *) 0x614ca0
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 7, capacity 8 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 7
+2: &amp;data[0] = (TestObject *) 0x614ca0
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 8, capacity 8 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 8
+2: &amp;data[0] = (TestObject *) 0x614ca0
+(gdb) 
+Continuing.
+
+Breakpoint 3, poor (data=std::vector of length 9, capacity 16 = {...}) at m.cpp:25
+25          data.push_back(TestObject(i, i+1, i+2));
+1: data.size() = 9
+2: &amp;data[0] = (TestObject *) 0x614d10
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    poor()
+   </code>
+   函数在添加第 2、3、5、9 个元素时，第一个元素的地址——
+   <code>
+    &amp;data[0]
+   </code>
+   发生了变化。即在这添加这些元素时，
+   <code>
+    std::vector
+   </code>
+   内部发生了数据迁移。在添加后面的某些元素时，也会导致
+   <code>
+    std::vector
+   </code>
+   内部数据迁移，这里不再赘述。
+  </p>
+  <p>
+   分析
+   <code>
+    better()
+   </code>
+   函数添加前 9 个元素时，
+   <code>
+    std::vector
+   </code>
+   内部是否有数据迁移情况。具体调试过程如下：
+  </p>
+  <pre><code>(gdb) l 34
+29  void better(std::vector&lt;TestObject&gt; &amp;data)
+30  {
+31      data.reserve(N);
+32      for (int i = 0; i &lt; N; i++)
+33      {
+34          data.push_back(TestObject(i, i+1, i+2));
+35      }
+36  }
+37  
+38  int main()
+(gdb) b 34
+Breakpoint 4 at 0x400ffe: file m.cpp, line 34.
+(gdb) c
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 0, capacity 2027520) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+(gdb) c
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 1, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+(gdb) display data.size()
+3: data.size() = 1
+(gdb) display &amp;data[0]
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) c
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 2, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 2
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 3, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 3
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 4, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 4
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 5, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 5
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 6, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 6
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 7, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 7
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 8, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 8
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+(gdb) 
+Continuing.
+
+Breakpoint 4, better (data=std::vector of length 9, capacity 2027520 = {...}) at m.cpp:34
+34          data.push_back(TestObject(i, i+1, i+2));
+3: data.size() = 9
+4: &amp;data[0] = (TestObject *) 0x7ffff2ba6010
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    better()
+   </code>
+   函数在添加前 9 个元素时，第一个元素的地址——
+   <code>
+    &amp;data[0]
+   </code>
+   都一直不变。即在这添加这些元素时，
+   <code>
+    std::vector
+   </code>
+   内部未发生数据迁移。在添加后面的其他元素时，也不会导致
+   <code>
+    std::vector
+   </code>
+   内部数据迁移，有兴趣的可以使用条件断点——
+   <code>
+    b 34 if &amp;data[0]!=0x7ffff2ba6010
+   </code>
+   （0x7ffff2ba6010 为此处调试时 &amp;data[0] 的值）验证这一点。这正是
+   <code>
+    使用 reserve 预分配内存
+   </code>
+   带来的效果。
+  </p>
+  <p>
+   上面示例中还有一处可以优化的地方，下文会详细说明。
+  </p>
+  <hr/>
+  <h3 id="emplace_back">
+   <span id="jump善用emplace_back避免不必要的开销">
+    善用 emplace_back 避免不必要的开销
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <p>
+     <strong>
+      emplace_back 函数的作用
+     </strong>
+    </p>
+    <p>
+     相比与
+     <code>
+      push_back
+     </code>
+     函数，
+     <code>
+      emplace_back
+     </code>
+     函数可以直接构造元素，从而避免不必要的临时对象构造/析构开销。
+    </p>
+   </li>
+   <li>
+    <p>
+     <strong>
+      适用场景
+     </strong>
+    </p>
+    <ul>
+     <li>
+      如果
+      <code>
+       std::vector
+      </code>
+      中要添加的元素需要传入参数构造时，用
+      <code>
+       emplace_back
+      </code>
+      而不是
+      <code>
+       push_back
+      </code>
+      函数来直接构造元素以避免不必要的开销，从而改善程序性能。
+     </li>
+    </ul>
+   </li>
+   <li>
+    <p>
+     <strong>
+      代码示例
+     </strong>
+    </p>
+   </li>
+  </ul>
+  <p>
+   源码：
+  </p>
+  <pre><code>// main.cc
+
+
+#include &lt;vector&gt;
+
+#define N 1980*1024
+
+class TestObject
+{
+public:
+    TestObject(int a, int b, int c) : a_(a), b_(b), c_(c) {}
+
+    int a_;
+    int b_;
+    int c_;
+};
+
+std::vector&lt;TestObject&gt; test_data_1;
+std::vector&lt;TestObject&gt; test_data_2;
+
+void poor(std::vector&lt;TestObject&gt; &amp;data)
+{
+    data.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.push_back(TestObject(i, i+1, i+2));
+    }
+}
+
+void better(std::vector&lt;TestObject&gt; &amp;data)
+{
+    data.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.emplace_back(i, i+1, i+2);
+    }
+}
+
+int main()
+{
+    poor(test_data_1);
+    better(test_data_2);
+    return 0;
+}
+</code></pre>
+  <p>
+   编译：
+  </p>
+  <pre><code>$ g++ -std=c++11 -g -Og -o main_Og main.cpp
+</code></pre>
+  <p>
+   函数耗时统计：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      启动程序方式
+     </th>
+     <th>
+      第一次执行耗时(us)
+     </th>
+     <th>
+      第二次执行耗时(us)
+     </th>
+     <th>
+      第三次执行耗时(us)
+     </th>
+     <th>
+      第四次执行耗时(us)
+     </th>
+     <th>
+      第五次执行耗时(us)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ./main_Og
+     </td>
+     <td>
+      <li>
+       poor:27588
+      </li>
+      <li>
+       better:16733
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:26789
+      </li>
+      <li>
+       better:17094
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:30049
+      </li>
+      <li>
+       better:16380
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:28057
+      </li>
+      <li>
+       better:16301
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:26616
+      </li>
+      <li>
+       better:17038
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   从统计结果中可以看出，示例中
+   <code>
+    better()
+   </code>
+   函数的执行速度比
+   <code>
+    poor()
+   </code>
+   函数至少快
+   <code>
+    1.5
+   </code>
+   倍。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     代码调试
+    </strong>
+   </li>
+  </ul>
+  <p>
+   为了验证
+   <code>
+    emplace_back
+   </code>
+   函数的作用，引入三个全局变量
+   <code>
+    g_count_1
+   </code>
+   、
+   <code>
+    g_count_2
+   </code>
+   和
+   <code>
+    g_count_3
+   </code>
+   用于统计构造函数、拷贝构造函数、析构函数被调用的次数。修改后的源码为：
+  </p>
+  <pre><code>// main.cc
+
+
+#include &lt;vector&gt;
+
+#define N 1980*1024
+
+int g_count_1 = 0;
+int g_count_2 = 0;
+int g_count_3 = 0;
+
+class TestObject
+{
+public:
+    TestObject(int a, int b, int c) : a_(a), b_(b), c_(c)
+    {
+        g_count_1++;
+    }
+
+    TestObject(const TestObject &amp;other)
+    {
+        if (this != &amp;other)
+        {
+            this-&gt;a_ = other.a_;
+            this-&gt;b_ = other.b_;
+            this-&gt;c_ = other.c_;
+        }
+        g_count_2++;
+    }
+
+    ~TestObject()
+    {
+        g_count_3++;
+    }
+
+    int a_;
+    int b_;
+    int c_;
+};
+
+std::vector&lt;TestObject&gt; test_data_1;
+std::vector&lt;TestObject&gt; test_data_2;
+
+void poor(std::vector&lt;TestObject&gt; &amp;data)
+{
+    data.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.push_back(TestObject(i, i+1, i+2));
+    }
+}
+
+void better(std::vector&lt;TestObject&gt; &amp;data)
+{
+    data.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        data.emplace_back(i, i+1, i+2);
+    }
+}
+
+int main()
+{
+    g_count_1 = 0;
+    g_count_2 = 0;
+    g_count_3 = 0;
+    poor(test_data_1);
+
+    g_count_1 = 0;
+    g_count_2 = 0;
+    g_count_3 = 0;
+    better(test_data_2);
+    g_count_1 = 0;
+
+    return 0;
+}
+</code></pre>
+  <p>
+   具体调试过程如下：
+  </p>
+  <pre><code>(gdb) l
+61  
+62  int main()
+63  {
+64      g_count_1 = 0;
+65      g_count_2 = 0;
+66      g_count_3 = 0;
+67      poor(test_data_1);
+68  
+69      g_count_1 = 0;
+70      g_count_2 = 0;
+71      g_count_3 = 0;
+72      better(test_data_2);
+73      g_count_1 = 0;
+74  
+75      return 0;
+76  }
+(gdb) b 69
+Breakpoint 2 at 0x400b3e: file main.cpp, line 69.
+(gdb) b 73
+Breakpoint 3 at 0x400b66: file main.cpp, line 73.
+(gdb) display g_count_1
+1: g_count_1 = 0
+(gdb) display g_count_2
+2: g_count_2 = 0
+(gdb) display g_count_3
+3: g_count_3 = 0
+(gdb) c
+Continuing.
+
+Breakpoint 2, main () at main.cpp:69
+69      g_count_1 = 0;
+1: g_count_1 = 2027520
+2: g_count_2 = 2027520
+3: g_count_3 = 2027520
+(gdb) n
+70      g_count_2 = 0;
+1: g_count_1 = 0
+2: g_count_2 = 2027520
+3: g_count_3 = 2027520
+(gdb) 
+71      g_count_3 = 0;
+1: g_count_1 = 0
+2: g_count_2 = 0
+3: g_count_3 = 2027520
+(gdb) 
+72      better(test_data_2);
+1: g_count_1 = 0
+2: g_count_2 = 0
+3: g_count_3 = 0
+(gdb) n
+
+Breakpoint 3, main () at main.cpp:73
+73      g_count_1 = 0;
+1: g_count_1 = 2027520
+2: g_count_2 = 0
+3: g_count_3 = 0
+(gdb) n
+76  }
+1: g_count_1 = 0
+2: g_count_2 = 0
+3: g_count_3 = 0
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    poor
+   </code>
+   函数在执行过程中调用容器元素构造函数、析构函数和拷贝构造函数的次数都是 2027520（2027520 = 1980 x 1024），验证了
+   <code>
+    push_back
+   </code>
+   函数的三种开销：临时对象的构造/析构开销和拷贝开销。
+   <code>
+    better
+   </code>
+   函数在执行过程中调用容器元素构造函数、析构函数和拷贝构造函数的次数分别是 2027520、0、0，验证了
+   <code>
+    emplace_back
+   </code>
+   函数只有必要的构造元素开销，不会引入临时对象，避免了不必要的临时对象构造/析构开销，从而改善程序性能。
+  </p>
+  <hr/>
+  <h3 id="stdmove">
+   <span id="jump善用std::move避免不必要的拷贝开销">
+    善用 std::move 避免不必要的拷贝开销
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <p>
+     <strong>
+      std::move 函数的作用
+     </strong>
+    </p>
+    <p>
+     移动而非拷贝数据以避免不必要的拷贝开销，从而改善程序性能。
+    </p>
+   </li>
+   <li>
+    <p>
+     <strong>
+      适用场景
+     </strong>
+    </p>
+    <ul>
+     <li>
+      构造函数的参数列表中有类型为
+      <code>
+       std::vector
+      </code>
+      的参数，并且该参数只在构造过程中使用。
+     </li>
+    </ul>
+   </li>
+   <li>
+    <p>
+     <strong>
+      代码示例
+     </strong>
+    </p>
+   </li>
+  </ul>
+  <p>
+   源码：
+  </p>
+  <pre><code>// main.cpp
+
+
+#include &lt;list&gt;
+#include &lt;vector&gt;
+
+#define N 1980*1024
+
+class TestObject
+{
+public:
+    TestObject(int a, int b, int c) : a_(a), b_(b), c_(c) {}
+
+    int a_;
+    int b_;
+    int c_;
+};
+
+class Element
+{
+public:
+    explicit Element(const std::vector&lt;TestObject&gt; &amp;data)
+        : data_(data)
+    {
+    }
+
+    explicit Element(std::vector&lt;TestObject&gt; &amp;&amp;data)
+        : data_(std::move(data))
+    {
+    }
+
+private:
+    std::vector&lt;TestObject&gt; data_;
+};
+
+std::list&lt;Element&gt; test_data_1;
+std::list&lt;Element&gt; test_data_2;
+Element *g_ele = nullptr;
+
+void poor(std::list&lt;Element&gt; &amp;data)
+{
+    std::vector&lt;TestObject&gt; vec;
+    vec.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        vec.push_back(TestObject(i, i+1, i+2));
+    }
+
+    data.emplace_back(vec);
+    g_ele = &amp;data.front();
+}
+
+void better(std::list&lt;Element&gt; &amp;data)
+{
+    std::vector&lt;TestObject&gt; vec;
+    vec.reserve(N);
+    for (int i = 0; i &lt; N; i++)
+    {
+        vec.emplace_back(i, i+1, i+2);
+    }
+
+    data.emplace_back(std::move(vec));
+    g_ele = &amp;data.front();
+}
+
+int main()
+{
+    poor(test_data_1);
+    better(test_data_2);
+    return 0;
+}
+</code></pre>
+  <p>
+   编译：
+  </p>
+  <pre><code>$ g++ -std=c++11 -g -Og -o main_Og main.cpp
+</code></pre>
+  <p>
+   函数耗时统计：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      启动程序方式
+     </th>
+     <th>
+      第一次执行耗时(us)
+     </th>
+     <th>
+      第二次执行耗时(us)
+     </th>
+     <th>
+      第三次执行耗时(us)
+     </th>
+     <th>
+      第四次执行耗时(us)
+     </th>
+     <th>
+      第五次执行耗时(us)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ./main_Og
+     </td>
+     <td>
+      <li>
+       poor:37272
+      </li>
+      <li>
+       better:13913
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:39693
+      </li>
+      <li>
+       better:14832
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:37982
+      </li>
+      <li>
+       better:14439
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:38427
+      </li>
+      <li>
+       better:14590
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:38391
+      </li>
+      <li>
+       better:14502
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   从统计结果中可以看出，示例中
+   <code>
+    better()
+   </code>
+   函数的执行速度比
+   <code>
+    poor()
+   </code>
+   函数至少快
+   <code>
+    2
+   </code>
+   倍。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     代码调试
+    </strong>
+   </li>
+  </ul>
+  <p>
+   验证
+   <code>
+    data.emplace_back(vec); 会引发拷贝开销
+   </code>
+   ，具体调试过程如下：
+  </p>
+  <pre><code>(gdb) l 50
+35  
+36  std::list&lt;Element&gt; test_data_1;
+37  std::list&lt;Element&gt; test_data_2;
+38  Element *g_ele = nullptr;
+39  
+40  void poor(std::list&lt;Element&gt; &amp;data)
+41  {
+42      std::vector&lt;TestObject&gt; vec;
+43      vec.reserve(N);
+44      for (int i = 0; i &lt; N; i++)
+45      {
+46          vec.push_back(TestObject(i, i+1, i+2));
+47      }
+48  
+49      data.emplace_back(vec);
+50      g_ele = &amp;data.front();
+51  }
+52  
+53  void better(std::list&lt;Element&gt; &amp;data)
+54  {
+55      std::vector&lt;TestObject&gt; vec;
+56      vec.reserve(N);
+57      for (int i = 0; i &lt; N; i++)
+58      {
+59          vec.emplace_back(i, i+1, i+2);
+60      }
+61  
+62      data.emplace_back(std::move(vec));
+63      g_ele = &amp;data.front();
+64  }
+(gdb) b 50
+Breakpoint 3 at 0x40131c: file p.cpp, line 50.
+(gdb) c
+Continuing.
+
+Breakpoint 3, poor (data=std::__cxx11::list = {...}) at p.cpp:50
+50      g_ele = &amp;data.front();
+(gdb) display vec._M_impl
+1: vec._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x7ffff5a2b010, 
+  _M_finish = 0x7ffff715f010, _M_end_of_storage = 0x7ffff715f010}
+(gdb) n
+42      std::vector&lt;TestObject&gt; vec;
+1: vec._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x7ffff5a2b010, 
+  _M_finish = 0x7ffff715f010, _M_end_of_storage = 0x7ffff715f010}
+(gdb) display g_ele-&gt;data_._M_impl
+2: g_ele-&gt;data_._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x7ffff42f6010, 
+  _M_finish = 0x7ffff5a2a010, _M_end_of_storage = 0x7ffff5a2a010}
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    poor
+   </code>
+   函数中的临时对象
+   <code>
+    vec
+   </code>
+   的内存地址范围为
+   <code>
+    0x7ffff5a2b010~0x7ffff715f010
+   </code>
+   （vec.
+   <em>
+    M_impl._M_start 的值为 0x7ffff5a2b010，vec._M_impl._M_end_of_storage 的值为 0x7ffff715f010）。全局变量
+    <code>
+     test_data_1
+    </code>
+    首元素的数据成员
+    <code>
+     data_
+    </code>
+    的内存地址范围为
+    <code>
+     0x7ffff42f6010~0x7ffff5a2a010
+    </code>
+    （g_ele-&gt;data
+   </em>
+   .
+   <em>
+    M_impl._M_start 的值为 0x7ffff42f6010，g_ele-&gt;data
+   </em>
+   ._M_impl._M_end_of_storage 的值为 0x7ffff5a2a010）。两者的内存地址范围不相同。因此，全局变量
+   <code>
+    test_data_1
+   </code>
+   首元素的数据成员
+   <code>
+    data_
+   </code>
+   是从临时对象
+   <code>
+    vec
+   </code>
+   拷贝而来的，从而验证了
+   <code>
+    data.emplace_back(vec); 会引发拷贝开销
+   </code>
+   。
+  </p>
+  <p>
+   验证
+   <code>
+    data.emplace_back(std::move(vec)); 不会引发拷贝开销
+   </code>
+   ，具体调试过程如下：
+  </p>
+  <pre><code>(gdb) b 59
+Breakpoint 4 at 0x4010ba: file p.cpp, line 59.
+(gdb) b 63
+Breakpoint 5 at 0x401147: file p.cpp, line 63.
+(gdb) c
+Continuing.
+poor_function elapsed_time: 59091892 us
+
+Breakpoint 4, better (data=empty std::__cxx11::list) at p.cpp:59
+59          vec.emplace_back(i, i+1, i+2);
+2: g_ele-&gt;data_._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x7ffff42f6010, 
+  _M_finish = 0x7ffff5a2a010, _M_end_of_storage = 0x7ffff5a2a010}
+(gdb) display vec._M_impl
+3: vec._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x616060, _M_finish = 0x616060, 
+  _M_end_of_storage = 0x1d4a060}
+(gdb) d 4
+(gdb) c
+Continuing.
+
+Breakpoint 5, better (data=std::__cxx11::list = {...}) at p.cpp:63
+63      g_ele = &amp;data.front();
+2: g_ele-&gt;data_._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x7ffff42f6010, 
+  _M_finish = 0x7ffff5a2a010, _M_end_of_storage = 0x7ffff5a2a010}
+3: vec._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x0, _M_finish = 0x0, 
+  _M_end_of_storage = 0x0}
+(gdb) n
+55      std::vector&lt;TestObject&gt; vec;
+2: g_ele-&gt;data_._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x616060, _M_finish = 0x1d4a060, 
+  _M_end_of_storage = 0x1d4a060}
+3: vec._M_impl = {&lt;std::allocator&lt;TestObject&gt;&gt; = {&lt;__gnu_cxx::new_allocator&lt;TestObject&gt;&gt; = {&lt;No data fields&gt;}, &lt;No data fields&gt;}, _M_start = 0x0, _M_finish = 0x0, 
+  _M_end_of_storage = 0x0}
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    better
+   </code>
+   函数中的临时对象
+   <code>
+    vec
+   </code>
+   的内存地址范围为
+   <code>
+    0x616060~0x1d4a060
+   </code>
+   （vec.
+   <em>
+    M_impl._M_start 的值为 0x616060，vec._M_impl._M_end_of_storage 的值为 0x1d4a060）。全局变量
+    <code>
+     test_data_2
+    </code>
+    首元素的数据成员
+    <code>
+     data_
+    </code>
+    的内存地址范围为
+    <code>
+     0x616060~0x1d4a060
+    </code>
+    （g_ele-&gt;data
+   </em>
+   .
+   <em>
+    M_impl._M_start 的值为 0x616060，g_ele-&gt;data
+   </em>
+   ._M_impl._M_end_of_storage 的值为 0x1d4a060）。两者的内存地址范围相同。因此，全局变量
+   <code>
+    test_data_2
+   </code>
+   首元素的数据成员
+   <code>
+    data_
+   </code>
+   是直接将临时对象
+   <code>
+    vec
+   </code>
+   移动而来的，从而验证了
+   <code>
+    data.emplace_back(std::move(vec)); 不会引发拷贝开销
+   </code>
+   。另外，需要注意的是，临时对象
+   <code>
+    vec
+   </code>
+   在被移动之后将不再有效。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="2-gdb">
+  </h1>
+  <p align="center">
+   代码调试篇（2）：如何编写 gdb 自定义命令
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Monday, 25. February 2019 10:31PM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何自定义一个gdb命令">
+       如何自定义一个 gdb 命令
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何查看自定义的gdb命令">
+       如何查看自定义的 gdb 命令
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何获取自定义gdb命令的参数">
+       如何获取自定义 gdb 命令的参数
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何在自定义gdb命令中使用条件分支">
+       如何在自定义 gdb 命令中使用条件分支
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何在自定义gdb命令中使用循环">
+       如何在自定义 gdb 命令中使用循环
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何执行文件中的自定义gdb命令">
+       如何执行文件中的自定义 gdb 命令
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jumpReference">
+       Reference
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="gdb">
+   <span id="jump如何自定义一个gdb命令">
+    如何自定义一个 gdb 命令
+   </span>
+  </h3>
+  <p>
+   <code>
+    定义 gdb 命令
+   </code>
+   的语法格式：
+  </p>
+  <pre><code># 自定义一个 gdb 命令
+define &lt;command-name&gt;
+    &lt;body&gt;
+end
+</code></pre>
+  <p>
+   和
+  </p>
+  <pre><code># 为已定义的 gdb 命令（gdb 预定义的或用户自定义的）定义一个子命令
+define &lt;defined-command-name&gt; &lt;sub-command-name&gt;
+    &lt;body&gt;
+end
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>define ptitle
+    echo hello, world\n
+end
+</code></pre>
+  <p>
+   上述示例，定义了一个输出常量字符串
+   <code>
+    hello, world
+   </code>
+   并换行的命令
+   <code>
+    ptitle
+   </code>
+   。
+  </p>
+  <p>
+   调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) define ptitle
+Type commands for definition of "ptitle".
+End with a line saying just "end".
+&gt;echo hello, world\n
+&gt;end
+(gdb) ptitle 
+hello, world
+(gdb)
+</code></pre>
+  <hr/>
+  <h3 id="gdb_1">
+   <span id="jump如何查看自定义的gdb命令">
+    如何查看自定义的 gdb 命令
+   </span>
+  </h3>
+  <p>
+   查看所有的自定义 gdb 命令：
+  </p>
+  <pre><code>(gdb) show user
+User command "ptitle":
+  echo hello, world\n
+
+User command "ptitle1":
+  echo a\n
+</code></pre>
+  <p>
+   查看指定的自定义 gdb 命令：
+  </p>
+  <pre><code>(gdb) show user ptitle1
+User command "ptitle1":
+  echo a\n
+</code></pre>
+  <hr/>
+  <h3 id="gdb_2">
+   <span id="jump如何获取自定义gdb命令的参数">
+    如何获取自定义 gdb 命令的参数
+   </span>
+  </h3>
+  <p>
+   打印自定义 gdb 命令的实参个数，在其函数体中：
+  </p>
+  <pre><code>echo $argc
+</code></pre>
+  <p>
+   打印自定义 gdb 命令的参数，在其函数体中：
+  </p>
+  <pre><code># 打印第 1 个参数（从左到右）
+echo $arg0
+# 打印第 2 个参数（从左到右）
+echo $arg1
+# 打印第 n 个参数（从左到右）
+echo $arg&lt;n-1&gt;
+</code></pre>
+  <p>
+   示例：
+  </p>
+  <pre><code>define log_info
+    echo argc = $argc\n
+    echo 1th arg: = $arg0\n
+    echo 2th arg: = $arg1\n
+end
+</code></pre>
+  <p>
+   调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) define log_info
+Type commands for definition of "log_info".
+End with a line saying just "end".
+&gt;echo argc = $argc\n
+&gt;echo 1th arg: = $arg0\n
+&gt;echo 2th arg: = $arg1\n
+&gt;end
+(gdb) log_info hello world
+argc = 2
+1th arg: = hello
+2th arg: = world
+(gdb)
+</code></pre>
+  <hr/>
+  <h3 id="gdb_3">
+   <span id="jump如何在自定义gdb命令中使用条件分支">
+    如何在自定义 gdb 命令中使用条件分支
+   </span>
+  </h3>
+  <p>
+   示例：
+  </p>
+  <pre><code>define log_info
+    if $argc == 2
+        echo 1th arg: = $arg0\n
+        echo 2th arg: = $arg1\n
+    else
+        echo args error\n
+    end
+end
+</code></pre>
+  <p>
+   调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) define log_info
+Type commands for definition of "log_info".
+End with a line saying just "end".
+&gt;if $argc == 2
+ &gt;echo 1th arg: = $arg0\n
+ &gt;echo 2th arg: = $arg1\n
+ &gt;else
+ &gt;echo args error\n
+ &gt;end
+&gt;end
+(gdb) log_info 1
+args error
+(gdb) log_info 1 2 3
+args error
+(gdb) log_info 1 2 
+1th arg: = 1
+2th arg: = 2
+(gdb)
+</code></pre>
+  <hr/>
+  <h3 id="gdb_4">
+   <span id="jump如何在自定义gdb命令中使用循环">
+    如何在自定义 gdb 命令中使用循环
+   </span>
+  </h3>
+  <p>
+   示例：
+  </p>
+  <pre><code>define log_info
+    if $argc &lt; 1
+        echo args error\n
+        return
+    end
+
+    set $i = 0
+    while $i &lt; $argc
+        printf "%dth arg\n", $i
+        set $i = $i + 1
+    end
+end
+</code></pre>
+  <p>
+   调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) define log_info
+Type commands for definition of "log_info".
+End with a line saying just "end".
+&gt;if $argc &lt; 1
+ &gt;echo args error\n
+ &gt;return
+ &gt;end
+&gt;set $i = 0
+&gt;while $i &lt; $argc
+ &gt;printf "%dth arg\n", $i
+ &gt;set $i = $i + 1
+ &gt;end
+&gt;end
+(gdb) log_info
+args error
+No selected frame.
+(gdb) log_info a b c d
+0th arg
+1th arg
+2th arg
+3th arg
+(gdb)
+</code></pre>
+  <hr/>
+  <h3 id="gdb_5">
+   <span id="jump如何执行文件中的自定义gdb命令">
+    如何执行文件中的自定义 gdb 命令
+   </span>
+  </h3>
+  <p>
+   示例：
+  </p>
+  <pre><code>(gdb) source cmd.gdb
+</code></pre>
+  <p>
+   注：
+   <code>
+    cmd.gdb
+   </code>
+   为存放自定义 gdb 命令的文件路径
+  </p>
+  <p>
+   调试：
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) source cmd.gdb 
+(gdb) show user
+User command "log_info":
+  if $argc &lt; 1
+    echo args error\n
+    return
+  end
+  set $i = 0
+  while $i &lt; $argc
+    printf "%dth arg\n", $i
+    set $i = $i + 1
+  end
+
+(gdb) 
+</code></pre>
+  <p>
+   <a href="#jump基础">
+    返回上一级
+   </a>
+  </p>
+  <hr/>
+  <h3 id="reference">
+   <span id="jumpReference">
+    Reference
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <a href="https://sourceware.org/gdb/download/onlinedocs/gdb/Sequences.html#Sequences">
+     23.1 Canned Sequences of Commands
+    </a>
+   </li>
+  </ul>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>
