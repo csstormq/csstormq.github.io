@@ -7,14 +7,14 @@
   </title>
   <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
   <style type="text/css">
-   @import url(http://fonts.googleapis.com/css?family=Vollkorn:400,400italic,700,700italic&subset=latin);ol,ul{padding-left:1.2em}body,code,html{background:#fff}body,h1 a,h1 a:hover{color:#333}a,h1 a,h1 a:hover{text-decoration:none}hr,video{margin:2em 0}h1,h2,p#heart{text-align:center}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}h1,p,table tr td :first-child,table tr th :first-child{margin-top:0}pre code,table,table tr{padding:0}body,html{padding:1em;margin:auto}body{font:1.3em Vollkorn,Palatino,Times;line-height:1;text-align:justify}h1,h2,h3{font-weight:400}h3,nav{font-style:italic}code,nav{font-size:.9em}article,footer,header,nav{margin:0 auto}article{margin-top:4em;margin-bottom:4em;min-height:400px}footer{margin-bottom:50px}video{border:1px solid #ddd}nav{border-bottom:1px solid #ddd;padding:1em 0}nav p{margin:0}p{-webkit-hypens:auto;-moz-hypens:auto;hyphens:auto}ul{list-style:square}blockquote{margin-left:1em;padding-left:1em;border-left:1px solid #ddd}code{font-family:Consolas,Menlo,Monaco,monospace,serif}a{color:#2484c1}a:hover{text-decoration:underline}a img{border:0}hr{color:#ddd;height:1px;border-top:solid 1px #ddd;border-bottom:0;border-left:0;border-right:0}p#heart{font-size:2em;line-height:1;color:#ccc}.red{color:#b50000}body#index li{margin-bottom:1em}@media only screen and (max-device-width:1024px){body{font-size:120%;line-height:1.4}}@media only screen and (max-device-width:480px){body{text-align:left}article,footer{width:auto}article{padding:0 10px}}table tr{border-top:1px solid #ccc;background-color:#fff;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr th{font-weight:700}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none;background:0 0}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
   </style>
  </head>
  <body>
-  <h1 id="_1">
+  <h1 id="stormqs-blog">
   </h1>
   <p align="center">
-   计算机系统基础
+   StormQ’s Blog
   </p>
   <ul>
    <li>
@@ -24,8 +24,22 @@
     <ul>
      <li>
       <p>
-       <a href="#jump计算机系统篇之链接">
-        计算机系统篇之链接
+       <a href="#jump代码调试">
+        代码调试
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump性能优化">
+        性能优化
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="#jump计算机系统基础">
+        计算机系统基础
        </a>
       </p>
      </li>
@@ -40,7 +54,99 @@
    </li>
   </ul>
   <hr/>
-  <h3 id="_2">
+  <h2 id="_1">
+   <span id="jump代码调试">
+    代码调试
+   </span>
+  </h2>
+  <ul>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E7%AF%87%EF%BC%883%EF%BC%89%EF%BC%9A%E5%88%A9%E7%94%A8%20gdb%20%E8%BF%9B%E8%A1%8C%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E4%B9%8B%E6%A1%88%E4%BE%8B1">
+      代码调试篇（3）：利用 gdb 进行自动化测试之案例1
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E7%AF%87%EF%BC%882%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E7%BC%96%E5%86%99gdb%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4">
+      代码调试篇（2）：如何编写gdb自定义命令
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E7%AF%87%EF%BC%881%EF%BC%89%EF%BC%9Agdb%E8%B0%83%E8%AF%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97">
+      代码调试篇（1）：gdb调试快速入门指南
+     </a>
+    </p>
+   </li>
+  </ul>
+  <hr/>
+  <h2 id="_2">
+   <span id="jump性能优化">
+    性能优化
+   </span>
+  </h2>
+  <ul>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%886%EF%BC%89%EF%BC%9ANEON%E4%BC%98%E5%8C%96%E6%A1%88%E4%BE%8B%E2%80%94%E2%80%94%E4%BD%8E%E9%98%B6%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%EF%BC%88aarch64%E7%89%88%EF%BC%89">
+      性能优化篇（6）：NEON优化案例——低阶矩阵乘法（aarch64版）
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%885%EF%BC%89%EF%BC%9ANEON%E4%BC%98%E5%8C%96%E6%A1%88%E4%BE%8B%E2%80%94%E2%80%94%E5%9B%BE%E5%83%8F%E8%BD%AC%E6%8D%A2%E4%B9%8BRGBA%E5%88%B0RGB%EF%BC%88aarch64%E7%89%88%EF%BC%89">
+      性能优化篇（5）：NEON优化案例——图像转换之RGBA到RGB（aarch64版）
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%884%EF%BC%89%EF%BC%9ANEON%E4%BC%98%E5%8C%96%E6%A1%88%E4%BE%8B%E2%80%94%E2%80%94%E5%9B%BE%E5%83%8F%E8%BD%AC%E6%8D%A2%E4%B9%8BRGB%E5%88%B0BGR%EF%BC%88aarch64%E7%89%88%EF%BC%89">
+      性能优化篇（4）：NEON优化案例——图像转换之RGB到BGR（aarch64版）
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%883%EF%BC%89%EF%BC%9ANEON%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97">
+      性能优化篇（3）：NEON快速入门指南
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%882%EF%BC%89%EF%BC%9A%E5%B0%8F%E5%BF%83%E2%80%9CSTL%20%E4%BD%8E%E6%95%88%E7%8E%87%E7%94%A8%E6%B3%95%E2%80%9D%E6%89%80%E5%B8%A6%E6%9D%A5%E7%9A%84%E6%80%A7%E8%83%BD%E5%BC%80%E9%94%80">
+      性能优化篇（2）：小心“STL 低效率用法”所带来的性能开销
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%881%EF%BC%89%EF%BC%9A%E5%87%A0%E7%A7%8D%E7%AE%80%E5%8D%95%E7%9A%84%E8%AE%BF%E5%AD%98%E4%BC%98%E5%8C%96%E6%89%8B%E6%AE%B5">
+      性能优化篇（1）：几种简单的访存优化手段
+     </a>
+    </p>
+   </li>
+  </ul>
+  <hr/>
+  <h2 id="_3">
+   <span id="jump计算机系统篇之链接">
+    计算机系统基础
+   </span>
+  </h2>
+  <ul>
+   <li>
+    <a href="#jump计算机系统篇之链接">
+     计算机系统篇之链接
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_4">
    <span id="jump计算机系统篇之链接">
     计算机系统篇之链接
    </span>
@@ -160,7 +266,7 @@
    </li>
   </ul>
   <hr/>
-  <h3 id="_3">
+  <h3 id="_5">
    <span id="jump联系作者">
     联系作者
    </span>
