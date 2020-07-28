@@ -1,0 +1,840 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="8pic-linux-x86-64">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（8）：PIC 数据引用在 Linux 上的 X86-64 示例
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Wednesday, 15. April 2020 04:35PM
+  </p>
+  <hr/>
+  <p>
+   <strong>
+    step 1:
+   </strong>
+   <span id="jumpstep_1_生成共享库">
+    生成共享库
+   </span>
+  </p>
+  <p>
+   1）第一个共享库的源文件——add.cpp:
+  </p>
+  <pre><code>int g_sum = 0;
+
+int add(int a, int b)
+{
+    g_sum = a + b;
+    return g_sum;
+}
+</code></pre>
+  <p>
+   生成第一个共享库——libadd_debug.so
+  </p>
+  <pre><code>$ g++ -fpic -shared -g -o libadd_debug.so add.cpp
+</code></pre>
+  <p>
+   2）第二个共享库的源文件——sub.cpp:
+  </p>
+  <pre><code>int g_sub = 0;
+
+int sub(int a, int b)
+{
+    g_sub = a - b;
+    return g_sub;
+}
+</code></pre>
+  <p>
+   生成第二个共享库——libsub_debug.so
+  </p>
+  <pre><code>$ g++ -fpic -shared -g -o libsub_debug.so sub.cpp
+</code></pre>
+  <p>
+   <strong>
+    step 2:
+   </strong>
+   <span id="jumpstep_2_生成测试程序">
+    生成测试程序（用于调用以上两个共享库）——main_mix
+   </span>
+  </p>
+  <p>
+   测试程序的源文件——main_mix.cpp:
+  </p>
+  <pre><code>extern int add(int, int);
+extern int sub(int, int);
+
+int main()
+{
+    add(0xb, 0xc);
+    add(0xb, 0xc);
+    sub(0xf, 0xd);
+    sub(0xf, 0xd);
+    return 0;
+}
+</code></pre>
+  <p>
+   生成测试程序——main_mix
+  </p>
+  <pre><code>$ g++ -o main_mix main_mix.cpp ./libadd_debug.so ./libsub_debug.so -g
+</code></pre>
+  <p>
+   <strong>
+    step 3:
+   </strong>
+   查看共享库的代码段
+  </p>
+  <p>
+   1）查看共享库libadd_debug.so的代码段
+  </p>
+  <pre><code># 查看共享库中可执行的sections（包含了.text section）
+$ objdump -d libadd_debug.so
+</code></pre>
+  <p>
+   输出结果为（只保留add()函数的汇编代码）：
+  </p>
+  <pre><code>; ...... Skip
+
+Disassembly of section .text:
+; ...... Skip
+
+0000000000000640 &lt;_Z3addii&gt;:
+ 640:   55                      push   %rbp
+ 641:   48 89 e5                mov    %rsp,%rbp
+ 644:   89 7d fc                mov    %edi,-0x4(%rbp)
+ 647:   89 75 f8                mov    %esi,-0x8(%rbp)
+ 64a:   8b 55 fc                mov    -0x4(%rbp),%edx
+ 64d:   8b 45 f8                mov    -0x8(%rbp),%eax
+ 650:   01 c2                   add    %eax,%edx
+ 652:   48 8b 05 7f 09 20 00    mov    0x20097f(%rip),%rax        # 200fd8 &lt;_DYNAMIC+0x158&gt;
+ 659:   89 10                   mov    %edx,(%rax)
+ 65b:   48 8b 05 76 09 20 00    mov    0x200976(%rip),%rax        # 200fd8 &lt;_DYNAMIC+0x158&gt;
+ 662:   8b 00                   mov    (%rax),%eax
+ 664:   5d                      pop    %rbp
+ 665:   c3                      retq
+
+; ...... Skip
+</code></pre>
+  <p>
+   输出结果分析：
+  </p>
+  <ul>
+   <li>
+    <p>
+     <code>
+      mov    0x20097f(%rip),%rax
+     </code>
+     的作用：将共享库libadd_debug.so的GOT[1]的内容——即全局变量 g_sum 的地址传送到 %rax 寄存器中。
+    </p>
+   </li>
+   <li>
+    <p>
+     <code>
+      mov    %edx,(%rax)
+     </code>
+     的作用：将%edx寄存器的值（存放着a+b的计算结果）赋值给全局变量g_sum。
+    </p>
+   </li>
+  </ul>
+  <p>
+   推导过程：
+  </p>
+  <p>
+   a）首先查看共享库中.got section的位置
+  </p>
+  <pre><code>$ readelf -S libadd_debug.so
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+; ......
+  [17] .got              PROGBITS         0000000000200fd0  00000fd0
+       0000000000000030  0000000000000008  WA       0     0     8
+; ......
+</code></pre>
+  <p>
+   从输出结果中可以看出，共享库中存放.got section的起始地址为0x200fd0——即共享库中.got section的起始位置相对于共享库加载地址的偏移量为0x200fd0，.got section的大小为0x30——即.got中的条目个数为6（.got的每个条目占8字节）。
+  </p>
+  <p>
+   b）接下来查看共享库中的重定位信息
+  </p>
+  <pre><code>readelf -r libadd_debug.so
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>Relocation section '.rela.dyn' at offset 0x420 contains 9 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000200e68  000000000008 R_X86_64_RELATIVE                    610
+000000200e70  000000000008 R_X86_64_RELATIVE                    5d0
+000000201018  000000000008 R_X86_64_RELATIVE                    201018
+000000200fd0  000200000006 R_X86_64_GLOB_DAT 0000000000000000 __cxa_finalize + 0
+000000200fd8  000700000006 R_X86_64_GLOB_DAT 0000000000201024 g_sum + 0
+000000200fe0  000300000006 R_X86_64_GLOB_DAT 0000000000000000 _ITM_registerTMCloneTa + 0
+000000200fe8  000400000006 R_X86_64_GLOB_DAT 0000000000000000 _ITM_deregisterTMClone + 0
+000000200ff0  000500000006 R_X86_64_GLOB_DAT 0000000000000000 _Jv_RegisterClasses + 0
+000000200ff8  000600000006 R_X86_64_GLOB_DAT 0000000000000000 __gmon_start__ + 0
+</code></pre>
+  <p>
+   从输出结果中可以看出，共享库中全局变量g_sum相对于共享库加载地址的偏移量为0x200fd8，并且重定位方式为
+   <code>
+    R_X86_64_GLOB_DAT
+   </code>
+   。
+   <code>
+    R_X86_64_GLOB_DAT
+   </code>
+   的含义：一旦知道g_sum的运行时地址，就把它放入0x200fd8处（
+   <code>
+    R_X86_64_GLOB_DAT
+   </code>
+   ：The relocation type is used to set a global offset table entry to the address of the specified symbol. The special relocation type allows one to determine the correspondence between symbols and global offset table entries.）。
+  </p>
+  <p>
+   c）所以可以得出，
+   <strong>
+    结论1：共享库libadd_debug.so中的GOT[1]条目（位于进程虚拟地址空间中的
+    <code>
+     共享库的内存映射区域
+    </code>
+    ）是用于保存全局变量g_sum的运行时地址的
+   </strong>
+   。
+  </p>
+  <p>
+   d）
+   <code>
+    mov    0x20097f(%rip),%rax
+   </code>
+   指令中
+   <code>
+    0x20097f
+   </code>
+   的计算过程：共享库中GOT[1]条目的地址（0x200fd8）减去共享模块中下一条指令（即
+   <code>
+    mov    %edx,(%rax)
+   </code>
+   ）的地址（0x659），计算结果为0x20097f（这种寻址方式被称为“PC相对寻址”）——意味着共享库中GOT[1]条目与共享库中下一条指令之间的距离或偏移量为0x20097f，该偏移量在生成共享库时就可以确定，并且在加载共享库时不会发生变化。编译器这是利用了这一事实，来实现“PIC 数据引用”的。
+  </p>
+  <p>
+   e）
+   <code>
+    mov    0x20097f(%rip),%rax
+   </code>
+   指令中
+   <code>
+    0x20097f(%rip)
+   </code>
+   的作用：运行时%rip寄存器（即PC寄存器）中存放着下一条指令在内存中的运行时地址，
+   <code>
+    0x20097f(%rip)
+   </code>
+   表示以%rip寄存器的值加上0x20097f作为起始地址，并取该地址后面的8字节——即GOT[1]条目的运行时地址。接下来通过GOT[1]条目的内容——&amp;g_sum来访问全局变量g_sum，也就是
+   <code>
+    mov    %edx,(%rax)
+   </code>
+   （将%edx寄存器的值（存放着a+b的计算结果）赋值给全局变量g_sum）的作用。
+  </p>
+  <p>
+   2）同理，分析共享库libsub_debug.so后，可以得出，
+   <strong>
+    结论2：共享库libsub_debug.so中的GOT[1]条目（位于进程虚拟地址空间中的
+    <code>
+     共享库的内存映射区域
+    </code>
+    ）是用于保存全局变量g_sub的运行时地址的
+   </strong>
+   。
+  </p>
+  <p>
+   <strong>
+    step 4:
+   </strong>
+   分析共享库是如何访问全局变量的
+  </p>
+  <p>
+   1）使用 gdb（使用了GEF插件）运行测试程序——main_mix
+  </p>
+  <pre><code>$ gdb -q main_mix
+gef➤ start
+</code></pre>
+  <p>
+   2）反汇编
+   <code>
+    add
+   </code>
+   函数
+  </p>
+  <p>
+   反汇编
+   <code>
+    add
+   </code>
+   函数，并在
+   <code>
+    0x00007ffff7bd5652
+   </code>
+   和
+   <code>
+    0x00007ffff7bd5659
+   </code>
+   处设置断点。
+  </p>
+  <pre><code>gef➤  disas add
+Dump of assembler code for function add(int, int):
+   0x00007ffff7bd5640 &lt;+0&gt;: push   rbp
+   0x00007ffff7bd5641 &lt;+1&gt;: mov    rbp,rsp
+   0x00007ffff7bd5644 &lt;+4&gt;: mov    DWORD PTR [rbp-0x4],edi
+   0x00007ffff7bd5647 &lt;+7&gt;: mov    DWORD PTR [rbp-0x8],esi
+   0x00007ffff7bd564a &lt;+10&gt;:    mov    edx,DWORD PTR [rbp-0x4]
+   0x00007ffff7bd564d &lt;+13&gt;:    mov    eax,DWORD PTR [rbp-0x8]
+   0x00007ffff7bd5650 &lt;+16&gt;:    add    edx,eax
+   0x00007ffff7bd5652 &lt;+18&gt;:    mov    rax,QWORD PTR [rip+0x20097f]        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5659 &lt;+25&gt;:    mov    DWORD PTR [rax],edx
+   0x00007ffff7bd565b &lt;+27&gt;:    mov    rax,QWORD PTR [rip+0x200976]        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5662 &lt;+34&gt;:    mov    eax,DWORD PTR [rax]
+   0x00007ffff7bd5664 &lt;+36&gt;:    pop    rbp
+   0x00007ffff7bd5665 &lt;+37&gt;:    ret
+End of assembler dump.
+gef➤  b *0x00007ffff7bd5652
+gef➤  b *0x00007ffff7bd5659
+</code></pre>
+  <p>
+   3）反汇编
+   <code>
+    sub
+   </code>
+   函数
+  </p>
+  <p>
+   反汇编
+   <code>
+    sub
+   </code>
+   函数，并在
+   <code>
+    0x00007ffff79d3652
+   </code>
+   和
+   <code>
+    0x00007ffff79d3659
+   </code>
+   处设置断点。
+  </p>
+  <pre><code>gef➤  disas sub
+Dump of assembler code for function sub(int, int):
+   0x00007ffff79d3640 &lt;+0&gt;: push   rbp
+   0x00007ffff79d3641 &lt;+1&gt;: mov    rbp,rsp
+   0x00007ffff79d3644 &lt;+4&gt;: mov    DWORD PTR [rbp-0x4],edi
+   0x00007ffff79d3647 &lt;+7&gt;: mov    DWORD PTR [rbp-0x8],esi
+   0x00007ffff79d364a &lt;+10&gt;:    mov    eax,DWORD PTR [rbp-0x4]
+   0x00007ffff79d364d &lt;+13&gt;:    sub    eax,DWORD PTR [rbp-0x8]
+   0x00007ffff79d3650 &lt;+16&gt;:    mov    edx,eax
+   0x00007ffff79d3652 &lt;+18&gt;:    mov    rax,QWORD PTR [rip+0x20097f]        # 0x7ffff7bd3fd8
+   0x00007ffff79d3659 &lt;+25&gt;:    mov    DWORD PTR [rax],edx
+   0x00007ffff79d365b &lt;+27&gt;:    mov    rax,QWORD PTR [rip+0x200976]        # 0x7ffff7bd3fd8
+   0x00007ffff79d3662 &lt;+34&gt;:    mov    eax,DWORD PTR [rax]
+   0x00007ffff79d3664 &lt;+36&gt;:    pop    rbp
+   0x00007ffff79d3665 &lt;+37&gt;:    ret
+End of assembler dump.
+gef➤  b *0x00007ffff79d3652
+gef➤  b *0x00007ffff79d3659
+</code></pre>
+  <p>
+   4）分析共享库libadd_debug.so是如何访问全局变量g_sum的
+  </p>
+  <p>
+   a）继续执行程序（断点1会被击中），查看当前运行的汇编代码
+  </p>
+  <pre><code>gef➤  c
+gef➤  disas
+Dump of assembler code for function add(int, int):
+   0x00007ffff7bd5640 &lt;+0&gt;: push   rbp
+   0x00007ffff7bd5641 &lt;+1&gt;: mov    rbp,rsp
+   0x00007ffff7bd5644 &lt;+4&gt;: mov    DWORD PTR [rbp-0x4],edi
+   0x00007ffff7bd5647 &lt;+7&gt;: mov    DWORD PTR [rbp-0x8],esi
+   0x00007ffff7bd564a &lt;+10&gt;:    mov    edx,DWORD PTR [rbp-0x4]
+   0x00007ffff7bd564d &lt;+13&gt;:    mov    eax,DWORD PTR [rbp-0x8]
+   0x00007ffff7bd5650 &lt;+16&gt;:    add    edx,eax
+=&gt; 0x00007ffff7bd5652 &lt;+18&gt;:    mov    rax,QWORD PTR [rip+0x20097f]        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5659 &lt;+25&gt;:    mov    DWORD PTR [rax],edx
+   0x00007ffff7bd565b &lt;+27&gt;:    mov    rax,QWORD PTR [rip+0x200976]        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5662 &lt;+34&gt;:    mov    eax,DWORD PTR [rax]
+   0x00007ffff7bd5664 &lt;+36&gt;:    pop    rbp
+   0x00007ffff7bd5665 &lt;+37&gt;:    ret
+End of assembler dump.
+</code></pre>
+  <p>
+   b）计算用于保存全局变量g_sum运行时地址的GOT条目的地址
+  </p>
+  <pre><code>; 执行 mov    rax,QWORD PTR [rip+0x20097f] 时，%rip寄存器（即PC寄存器）中存放着下一条指令（mov    DWORD PTR [rax],edx）的运行时地址（0x00007ffff7bd5659）。此时，打印%rip寄存器的值，会发现其值为0x00007ffff7bd5652，这是因为当前指令（最左侧带=&gt;的）还未执行。
+
+gef➤  p /x 0x00007ffff7bd5659+0x20097f  ; 1）计算 mov    rax,QWORD PTR [rip+0x20097f]  的下一条指令的地址（0x00007ffff7bd5659）与偏移量0x20097f相加的结果
+$2 = 0x7ffff7dd5fd8                     ; 计算结果为0x7ffff7dd5fd8，即共享库libadd_debug.so中GOT[1]条目的地址为0x7ffff7dd5fd8
+</code></pre>
+  <p>
+   <strong>
+    为什么0x7ffff7dd5fd8是共享库libadd_debug.so中GOT[1]条目的地址
+   </strong>
+   ，这一点可以通过查看可执行文件的虚拟内存映射得到验证。
+  </p>
+  <pre><code>gef➤  vmmap                     ; 1）查看可执行文件的虚拟内存映射
+Start              End                Offset             Perm Path
+0x0000000000400000 0x0000000000401000 0x0000000000000000 r-x /home/test/Desktop/localization_sim/main_mix
+0x0000000000600000 0x0000000000601000 0x0000000000000000 r-- /home/test/Desktop/localization_sim/main_mix
+0x0000000000601000 0x0000000000602000 0x0000000000001000 rw- /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7609000 0x00007ffff77c9000 0x0000000000000000 r-x /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff77c9000 0x00007ffff79c9000 0x00000000001c0000 --- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff79c9000 0x00007ffff79cd000 0x00000000001c0000 r-- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff79cd000 0x00007ffff79cf000 0x00000000001c4000 rw- /lib/x86_64-linux-gnu/libc-2.23.so
+0x00007ffff79cf000 0x00007ffff79d3000 0x0000000000000000 rw- 
+0x00007ffff79d3000 0x00007ffff79d4000 0x0000000000000000 r-x /home/test/Desktop/localization_sim/libsub_debug.so
+0x00007ffff79d4000 0x00007ffff7bd3000 0x0000000000001000 --- /home/test/Desktop/localization_sim/libsub_debug.so
+0x00007ffff7bd3000 0x00007ffff7bd4000 0x0000000000000000 r-- /home/test/Desktop/localization_sim/libsub_debug.so
+0x00007ffff7bd4000 0x00007ffff7bd5000 0x0000000000001000 rw- /home/test/Desktop/localization_sim/libsub_debug.so
+0x00007ffff7bd5000 0x00007ffff7bd6000 0x0000000000000000 r-x /home/test/Desktop/localization_sim/libadd_debug.so
+0x00007ffff7bd6000 0x00007ffff7dd5000 0x0000000000001000 --- /home/test/Desktop/localization_sim/libadd_debug.so
+0x00007ffff7dd5000 0x00007ffff7dd6000 0x0000000000000000 r-- /home/test/Desktop/localization_sim/libadd_debug.so
+0x00007ffff7dd6000 0x00007ffff7dd7000 0x0000000000001000 rw- /home/test/Desktop/localization_sim/libadd_debug.so
+0x00007ffff7dd7000 0x00007ffff7dfd000 0x0000000000000000 r-x /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7fd1000 0x00007ffff7fd4000 0x0000000000000000 rw- 
+0x00007ffff7ff6000 0x00007ffff7ff7000 0x0000000000000000 rw- 
+0x00007ffff7ff7000 0x00007ffff7ffa000 0x0000000000000000 r-- [vvar]
+0x00007ffff7ffa000 0x00007ffff7ffc000 0x0000000000000000 r-x [vdso]
+0x00007ffff7ffc000 0x00007ffff7ffd000 0x0000000000025000 r-- /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7ffd000 0x00007ffff7ffe000 0x0000000000026000 rw- /lib/x86_64-linux-gnu/ld-2.23.so
+0x00007ffff7ffe000 0x00007ffff7fff000 0x0000000000000000 rw- 
+0x00007ffffffdd000 0x00007ffffffff000 0x0000000000000000 rw- [stack]
+0xffffffffff600000 0xffffffffff601000 0x0000000000000000 r-x [vsyscall]
+gef➤  xinfo 0x7ffff7dd5fd8      ; 2）查看地址0x7ffff7dd5fd8的信息
+───────────────────────────────────────────────────────────────────────────────── xinfo: 0x7ffff7dd5fd8 ─────────────────────────────────────────────────────────────────────────────────
+Page: 0x00007ffff7dd5000  →  0x00007ffff7dd6000 (size=0x1000)
+Permissions: r--
+Pathname: /home/test/Desktop/localization_sim/libadd_debug.so
+Offset (from page): 0xfd8
+Inode: 4132975
+Segment: .got (0x00007ffff7dd5fd0-0x00007ffff7dd6000)
+</code></pre>
+  <p>
+   从输出结果中可以看出，在可执行程序的虚拟内存映射中，共享库libadd_debug.so的.got section的虚拟内存地址范围为0x00007ffff7dd5fd0-0x00007ffff7dd6000。另外，GOT的每个条目占8字节。所以，0x7ffff7dd5fd8是共享库libadd_debug.so的GOT[1]条目的地址。
+  </p>
+  <p>
+   c）查看全局变量g_sum的值
+  </p>
+  <pre><code>gef➤  x/gx 0x7ffff7dd5fd8               ; 2）查看该GOT[1]条目的内容，即&amp;g_sum
+0x7ffff7dd5fd8: 0x00007ffff7dd6024      ; GOT[1]条目的值为0x00007ffff7dd6024，即全局变量g_sum的运行时地址为0x00007ffff7dd6024
+gef➤  p /x &amp;g_sum                       ; 3）查看全局变量g_sum的运行时地址
+$3 = 0x7ffff7dd6024                     ; 打印结果也为0x7ffff7dd6024，验证了“GOT[1] = &amp;g_sum”
+gef➤  x/wx 0x00007ffff7dd6024           ; 4）查看全局变量g_sum的值
+0x7ffff7dd6024 &lt;g_sum&gt;: 0x00000000      ; 全局变量g_sum的值为0x0（g_sum的初始值）
+</code></pre>
+  <p>
+   d）至此，验证了“结论1：共享库libadd_debug.so中的GOT[1]条目（位于进程虚拟地址空间中的
+   <code>
+    共享库的内存映射区域
+   </code>
+   ）是用于保存全局变量g_sum的运行时地址的”
+  </p>
+  <p>
+   5）同理，可以分析共享库libsub_debug.so是如何访问全局变量g_sub的
+  </p>
+  <p>
+   6）查看可执行文件运行期的sections
+  </p>
+  <pre><code>gef➤  xfiles 
+Start              End                Name                  File
+0x0000000000400238 0x0000000000400254 .interp               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400254 0x0000000000400274 .note.ABI-tag         /home/test/Desktop/localization_sim/main_mix
+0x0000000000400274 0x0000000000400298 .note.gnu.build-id    /home/test/Desktop/localization_sim/main_mix
+0x0000000000400298 0x00000000004002d0 .gnu.hash             /home/test/Desktop/localization_sim/main_mix
+0x00000000004002d0 0x0000000000400408 .dynsym               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400408 0x00000000004004e4 .dynstr               /home/test/Desktop/localization_sim/main_mix
+0x00000000004004e4 0x00000000004004fe .gnu.version          /home/test/Desktop/localization_sim/main_mix
+0x0000000000400500 0x0000000000400520 .gnu.version_r        /home/test/Desktop/localization_sim/main_mix
+0x0000000000400520 0x0000000000400538 .rela.dyn             /home/test/Desktop/localization_sim/main_mix
+0x0000000000400538 0x0000000000400580 .rela.plt             /home/test/Desktop/localization_sim/main_mix
+0x0000000000400580 0x000000000040059a .init                 /home/test/Desktop/localization_sim/main_mix
+0x00000000004005a0 0x00000000004005e0 .plt                  /home/test/Desktop/localization_sim/main_mix
+0x00000000004005e0 0x00000000004005e8 .plt.got              /home/test/Desktop/localization_sim/main_mix
+0x00000000004005f0 0x0000000000400782 .text                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000400784 0x000000000040078d .fini                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000400790 0x0000000000400794 .rodata               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400794 0x00000000004007c8 .eh_frame_hdr         /home/test/Desktop/localization_sim/main_mix
+0x00000000004007c8 0x00000000004008bc .eh_frame             /home/test/Desktop/localization_sim/main_mix
+0x0000000000600df0 0x0000000000600df8 .init_array           /home/test/Desktop/localization_sim/main_mix
+0x0000000000600df8 0x0000000000600e00 .fini_array           /home/test/Desktop/localization_sim/main_mix
+0x0000000000600e00 0x0000000000600e08 .jcr                  /home/test/Desktop/localization_sim/main_mix
+0x0000000000600e08 0x0000000000600ff8 .dynamic              /home/test/Desktop/localization_sim/main_mix
+0x0000000000600ff8 0x0000000000601000 .got                  /home/test/Desktop/localization_sim/main_mix
+0x0000000000601000 0x0000000000601030 .got.plt              /home/test/Desktop/localization_sim/main_mix
+0x0000000000601030 0x0000000000601040 .data                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000601040 0x0000000000601048 .bss                  /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7dd71c8 0x00007ffff7dd71ec .note.gnu.build-id    /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd71f0 0x00007ffff7dd72b0 .hash                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd72b0 0x00007ffff7dd7390 .gnu.hash             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7390 0x00007ffff7dd7648 .dynsym               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7648 0x00007ffff7dd77ef .dynstr               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd77f0 0x00007ffff7dd782a .gnu.version          /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7830 0x00007ffff7dd78d4 .gnu.version_d        /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd78d8 0x00007ffff7dd79f8 .rela.dyn             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd79f8 0x00007ffff7dd7a58 .rela.plt             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7a60 0x00007ffff7dd7ab0 .plt                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7ab0 0x00007ffff7dd7ab8 .plt.got              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7ac0 0x00007ffff7df5850 .text                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df5860 0x00007ffff7df9920 .rodata               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9920 0x00007ffff7df9921 .stapsdt.base         /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9924 0x00007ffff7df9f60 .eh_frame_hdr         /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9f60 0x00007ffff7dfc3f8 .eh_frame             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffcbc0 0x00007ffff7ffce6c .data.rel.ro          /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffce70 0x00007ffff7ffcfe0 .dynamic              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffcfe0 0x00007ffff7ffcff0 .got                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffd000 0x00007ffff7ffd038 .got.plt              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffd040 0x00007ffff7ffdfc0 .data                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffdfc0 0x00007ffff7ffe168 .bss                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffa120 0x00007ffff7ffa160 .hash                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa160 0x00007ffff7ffa1a8 .gnu.hash             /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa1a8 0x00007ffff7ffa2b0 .dynsym               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa2b0 0x00007ffff7ffa30e .dynstr               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa30e 0x00007ffff7ffa324 .gnu.version          /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa328 0x00007ffff7ffa360 .gnu.version_d        /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa360 0x00007ffff7ffa470 .dynamic              /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa470 0x00007ffff7ffa7b0 .rodata               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa7b0 0x00007ffff7ffa7ec .note                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa7ec 0x00007ffff7ffa828 .eh_frame_hdr         /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa828 0x00007ffff7ffa968 .eh_frame             /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa970 0x00007ffff7ffaf6a .text                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffaf6a 0x00007ffff7ffaff9 .altinstructions      /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffaff9 0x00007ffff7ffb01b .altinstr_replacement /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7bd51c8 0x00007ffff7bd51ec .note.gnu.build-id    ./libadd_debug.so
+0x00007ffff7bd51f0 0x00007ffff7bd5230 .gnu.hash             ./libadd_debug.so
+0x00007ffff7bd5230 0x00007ffff7bd5380 .dynsym               ./libadd_debug.so
+0x00007ffff7bd5380 0x00007ffff7bd541c .dynstr               ./libadd_debug.so
+0x00007ffff7bd5420 0x00007ffff7bd54f8 .rela.dyn             ./libadd_debug.so
+0x00007ffff7bd54f8 0x00007ffff7bd5512 .init                 ./libadd_debug.so
+0x00007ffff7bd5520 0x00007ffff7bd5530 .plt                  ./libadd_debug.so
+0x00007ffff7bd5530 0x00007ffff7bd5540 .plt.got              ./libadd_debug.so
+0x00007ffff7bd5540 0x00007ffff7bd5666 .text                 ./libadd_debug.so
+0x00007ffff7bd5668 0x00007ffff7bd5671 .fini                 ./libadd_debug.so
+0x00007ffff7bd5674 0x00007ffff7bd5690 .eh_frame_hdr         ./libadd_debug.so
+0x00007ffff7bd5690 0x00007ffff7bd56f4 .eh_frame             ./libadd_debug.so
+0x00007ffff7dd5e68 0x00007ffff7dd5e70 .init_array           ./libadd_debug.so
+0x00007ffff7dd5e70 0x00007ffff7dd5e78 .fini_array           ./libadd_debug.so
+0x00007ffff7dd5e78 0x00007ffff7dd5e80 .jcr                  ./libadd_debug.so
+0x00007ffff7dd5e80 0x00007ffff7dd5fd0 .dynamic              ./libadd_debug.so
+0x00007ffff7dd5fd0 0x00007ffff7dd6000 .got                  ./libadd_debug.so
+0x00007ffff7dd6000 0x00007ffff7dd6018 .got.plt              ./libadd_debug.so
+0x00007ffff7dd6018 0x00007ffff7dd6020 .data                 ./libadd_debug.so
+0x00007ffff7dd6020 0x00007ffff7dd6028 .bss                  ./libadd_debug.so
+0x00007ffff79d31c8 0x00007ffff79d31ec .note.gnu.build-id    ./libsub_debug.so
+0x00007ffff79d31f0 0x00007ffff79d3230 .gnu.hash             ./libsub_debug.so
+0x00007ffff79d3230 0x00007ffff79d3380 .dynsym               ./libsub_debug.so
+0x00007ffff79d3380 0x00007ffff79d341c .dynstr               ./libsub_debug.so
+0x00007ffff79d3420 0x00007ffff79d34f8 .rela.dyn             ./libsub_debug.so
+0x00007ffff79d34f8 0x00007ffff79d3512 .init                 ./libsub_debug.so
+0x00007ffff79d3520 0x00007ffff79d3530 .plt                  ./libsub_debug.so
+0x00007ffff79d3530 0x00007ffff79d3540 .plt.got              ./libsub_debug.so
+0x00007ffff79d3540 0x00007ffff79d3666 .text                 ./libsub_debug.so
+0x00007ffff79d3668 0x00007ffff79d3671 .fini                 ./libsub_debug.so
+0x00007ffff79d3674 0x00007ffff79d3690 .eh_frame_hdr         ./libsub_debug.so
+0x00007ffff79d3690 0x00007ffff79d36f4 .eh_frame             ./libsub_debug.so
+0x00007ffff7bd3e68 0x00007ffff7bd3e70 .init_array           ./libsub_debug.so
+0x00007ffff7bd3e70 0x00007ffff7bd3e78 .fini_array           ./libsub_debug.so
+0x00007ffff7bd3e78 0x00007ffff7bd3e80 .jcr                  ./libsub_debug.so
+0x00007ffff7bd3e80 0x00007ffff7bd3fd0 .dynamic              ./libsub_debug.so
+0x00007ffff7bd3fd0 0x00007ffff7bd4000 .got                  ./libsub_debug.so
+0x00007ffff7bd4000 0x00007ffff7bd4018 .got.plt              ./libsub_debug.so
+0x00007ffff7bd4018 0x00007ffff7bd4020 .data                 ./libsub_debug.so
+0x00007ffff7bd4020 0x00007ffff7bd4028 .bss                  ./libsub_debug.so
+0x00007ffff7609270 0x00007ffff7609294 .note.gnu.build-id    /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7609294 0x00007ffff76092b4 .note.ABI-tag         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76092b8 0x00007ffff760cd80 .gnu.hash             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff760cd80 0x00007ffff7619ff8 .dynsym               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7619ff8 0x00007ffff761f9d7 .dynstr               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff761f9d8 0x00007ffff7620b62 .gnu.version          /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620b68 0x00007ffff7620edc .gnu.version_d        /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620ee0 0x00007ffff7620f10 .gnu.version_r        /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620f10 0x00007ffff7628680 .rela.dyn             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7628680 0x00007ffff76287b8 .rela.plt             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76287c0 0x00007ffff76288a0 .plt                  /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76288a0 0x00007ffff76288b0 .plt.got              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76288b0 0x00007ffff777bb04 .text                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777bb10 0x00007ffff777e02d __libc_freeres_fn     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777e030 0x00007ffff777e2f2 __libc_thread_freeres_fn /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777e300 0x00007ffff779f650 .rodata               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f650 0x00007ffff779f651 .stapsdt.base         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f660 0x00007ffff779f67c .interp               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f67c 0x00007ffff77a4b38 .eh_frame_hdr         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77a4b38 0x00007ffff77c53cc .eh_frame             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77c53cc 0x00007ffff77c580d .gcc_except_table     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77c5810 0x00007ffff77c8b10 .hash                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97c0 0x00007ffff79c97d0 .tdata                /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97d0 0x00007ffff79c9838 .tbss                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97d0 0x00007ffff79c97e0 .init_array           /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97e0 0x00007ffff79c98d8 __libc_subfreeres     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c98d8 0x00007ffff79c98e0 __libc_atexit         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c98e0 0x00007ffff79c9900 __libc_thread_subfreeres /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c9900 0x00007ffff79ccba0 .data.rel.ro          /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ccba0 0x00007ffff79ccd80 .dynamic              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ccd80 0x00007ffff79ccff0 .got                  /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79cd000 0x00007ffff79cd080 .got.plt              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79cd080 0x00007ffff79ce720 .data                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ce720 0x00007ffff79d29a0 .bss                  /lib/x86_64-linux-gnu/libc.so.6
+0x0000000000400238 0x0000000000400254 .interp               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400254 0x0000000000400274 .note.ABI-tag         /home/test/Desktop/localization_sim/main_mix
+0x0000000000400274 0x0000000000400298 .note.gnu.build-id    /home/test/Desktop/localization_sim/main_mix
+0x0000000000400298 0x00000000004002d0 .gnu.hash             /home/test/Desktop/localization_sim/main_mix
+0x00000000004002d0 0x0000000000400408 .dynsym               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400408 0x00000000004004e4 .dynstr               /home/test/Desktop/localization_sim/main_mix
+0x00000000004004e4 0x00000000004004fe .gnu.version          /home/test/Desktop/localization_sim/main_mix
+0x0000000000400500 0x0000000000400520 .gnu.version_r        /home/test/Desktop/localization_sim/main_mix
+0x0000000000400520 0x0000000000400538 .rela.dyn             /home/test/Desktop/localization_sim/main_mix
+0x0000000000400538 0x0000000000400580 .rela.plt             /home/test/Desktop/localization_sim/main_mix
+0x0000000000400580 0x000000000040059a .init                 /home/test/Desktop/localization_sim/main_mix
+0x00000000004005a0 0x00000000004005e0 .plt                  /home/test/Desktop/localization_sim/main_mix
+0x00000000004005e0 0x00000000004005e8 .plt.got              /home/test/Desktop/localization_sim/main_mix
+0x00000000004005f0 0x0000000000400782 .text                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000400784 0x000000000040078d .fini                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000400790 0x0000000000400794 .rodata               /home/test/Desktop/localization_sim/main_mix
+0x0000000000400794 0x00000000004007c8 .eh_frame_hdr         /home/test/Desktop/localization_sim/main_mix
+0x00000000004007c8 0x00000000004008bc .eh_frame             /home/test/Desktop/localization_sim/main_mix
+0x0000000000600df0 0x0000000000600df8 .init_array           /home/test/Desktop/localization_sim/main_mix
+0x0000000000600df8 0x0000000000600e00 .fini_array           /home/test/Desktop/localization_sim/main_mix
+0x0000000000600e00 0x0000000000600e08 .jcr                  /home/test/Desktop/localization_sim/main_mix
+0x0000000000600e08 0x0000000000600ff8 .dynamic              /home/test/Desktop/localization_sim/main_mix
+0x0000000000600ff8 0x0000000000601000 .got                  /home/test/Desktop/localization_sim/main_mix
+0x0000000000601000 0x0000000000601030 .got.plt              /home/test/Desktop/localization_sim/main_mix
+0x0000000000601030 0x0000000000601040 .data                 /home/test/Desktop/localization_sim/main_mix
+0x0000000000601040 0x0000000000601048 .bss                  /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7dd71c8 0x00007ffff7dd71ec .note.gnu.build-id    /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd71f0 0x00007ffff7dd72b0 .hash                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd72b0 0x00007ffff7dd7390 .gnu.hash             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7390 0x00007ffff7dd7648 .dynsym               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7648 0x00007ffff7dd77ef .dynstr               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd77f0 0x00007ffff7dd782a .gnu.version          /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7830 0x00007ffff7dd78d4 .gnu.version_d        /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd78d8 0x00007ffff7dd79f8 .rela.dyn             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd79f8 0x00007ffff7dd7a58 .rela.plt             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7a60 0x00007ffff7dd7ab0 .plt                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7ab0 0x00007ffff7dd7ab8 .plt.got              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7dd7ac0 0x00007ffff7df5850 .text                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df5860 0x00007ffff7df9920 .rodata               /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9920 0x00007ffff7df9921 .stapsdt.base         /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9924 0x00007ffff7df9f60 .eh_frame_hdr         /lib64/ld-linux-x86-64.so.2
+0x00007ffff7df9f60 0x00007ffff7dfc3f8 .eh_frame             /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffcbc0 0x00007ffff7ffce6c .data.rel.ro          /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffce70 0x00007ffff7ffcfe0 .dynamic              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffcfe0 0x00007ffff7ffcff0 .got                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffd000 0x00007ffff7ffd038 .got.plt              /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffd040 0x00007ffff7ffdfc0 .data                 /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffdfc0 0x00007ffff7ffe168 .bss                  /lib64/ld-linux-x86-64.so.2
+0x00007ffff7ffa120 0x00007ffff7ffa160 .hash                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa160 0x00007ffff7ffa1a8 .gnu.hash             /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa1a8 0x00007ffff7ffa2b0 .dynsym               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa2b0 0x00007ffff7ffa30e .dynstr               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa30e 0x00007ffff7ffa324 .gnu.version          /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa328 0x00007ffff7ffa360 .gnu.version_d        /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa360 0x00007ffff7ffa470 .dynamic              /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa470 0x00007ffff7ffa7b0 .rodata               /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa7b0 0x00007ffff7ffa7ec .note                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa7ec 0x00007ffff7ffa828 .eh_frame_hdr         /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa828 0x00007ffff7ffa968 .eh_frame             /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffa970 0x00007ffff7ffaf6a .text                 /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffaf6a 0x00007ffff7ffaff9 .altinstructions      /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7ffaff9 0x00007ffff7ffb01b .altinstr_replacement /home/test/Desktop/localization_sim/main_mix
+0x00007ffff7bd51c8 0x00007ffff7bd51ec .note.gnu.build-id    ./libadd_debug.so
+0x00007ffff7bd51f0 0x00007ffff7bd5230 .gnu.hash             ./libadd_debug.so
+0x00007ffff7bd5230 0x00007ffff7bd5380 .dynsym               ./libadd_debug.so
+0x00007ffff7bd5380 0x00007ffff7bd541c .dynstr               ./libadd_debug.so
+0x00007ffff7bd5420 0x00007ffff7bd54f8 .rela.dyn             ./libadd_debug.so
+0x00007ffff7bd54f8 0x00007ffff7bd5512 .init                 ./libadd_debug.so
+0x00007ffff7bd5520 0x00007ffff7bd5530 .plt                  ./libadd_debug.so
+0x00007ffff7bd5530 0x00007ffff7bd5540 .plt.got              ./libadd_debug.so
+0x00007ffff7bd5540 0x00007ffff7bd5666 .text                 ./libadd_debug.so
+0x00007ffff7bd5668 0x00007ffff7bd5671 .fini                 ./libadd_debug.so
+0x00007ffff7bd5674 0x00007ffff7bd5690 .eh_frame_hdr         ./libadd_debug.so
+0x00007ffff7bd5690 0x00007ffff7bd56f4 .eh_frame             ./libadd_debug.so
+0x00007ffff7dd5e68 0x00007ffff7dd5e70 .init_array           ./libadd_debug.so
+0x00007ffff7dd5e70 0x00007ffff7dd5e78 .fini_array           ./libadd_debug.so
+0x00007ffff7dd5e78 0x00007ffff7dd5e80 .jcr                  ./libadd_debug.so
+0x00007ffff7dd5e80 0x00007ffff7dd5fd0 .dynamic              ./libadd_debug.so
+0x00007ffff7dd5fd0 0x00007ffff7dd6000 .got                  ./libadd_debug.so
+0x00007ffff7dd6000 0x00007ffff7dd6018 .got.plt              ./libadd_debug.so
+0x00007ffff7dd6018 0x00007ffff7dd6020 .data                 ./libadd_debug.so
+0x00007ffff7dd6020 0x00007ffff7dd6028 .bss                  ./libadd_debug.so
+0x00007ffff79d31c8 0x00007ffff79d31ec .note.gnu.build-id    ./libsub_debug.so
+0x00007ffff79d31f0 0x00007ffff79d3230 .gnu.hash             ./libsub_debug.so
+0x00007ffff79d3230 0x00007ffff79d3380 .dynsym               ./libsub_debug.so
+0x00007ffff79d3380 0x00007ffff79d341c .dynstr               ./libsub_debug.so
+0x00007ffff79d3420 0x00007ffff79d34f8 .rela.dyn             ./libsub_debug.so
+0x00007ffff79d34f8 0x00007ffff79d3512 .init                 ./libsub_debug.so
+0x00007ffff79d3520 0x00007ffff79d3530 .plt                  ./libsub_debug.so
+0x00007ffff79d3530 0x00007ffff79d3540 .plt.got              ./libsub_debug.so
+0x00007ffff79d3540 0x00007ffff79d3666 .text                 ./libsub_debug.so
+0x00007ffff79d3668 0x00007ffff79d3671 .fini                 ./libsub_debug.so
+0x00007ffff79d3674 0x00007ffff79d3690 .eh_frame_hdr         ./libsub_debug.so
+0x00007ffff79d3690 0x00007ffff79d36f4 .eh_frame             ./libsub_debug.so
+0x00007ffff7bd3e68 0x00007ffff7bd3e70 .init_array           ./libsub_debug.so
+0x00007ffff7bd3e70 0x00007ffff7bd3e78 .fini_array           ./libsub_debug.so
+0x00007ffff7bd3e78 0x00007ffff7bd3e80 .jcr                  ./libsub_debug.so
+0x00007ffff7bd3e80 0x00007ffff7bd3fd0 .dynamic              ./libsub_debug.so
+0x00007ffff7bd3fd0 0x00007ffff7bd4000 .got                  ./libsub_debug.so
+0x00007ffff7bd4000 0x00007ffff7bd4018 .got.plt              ./libsub_debug.so
+0x00007ffff7bd4018 0x00007ffff7bd4020 .data                 ./libsub_debug.so
+0x00007ffff7bd4020 0x00007ffff7bd4028 .bss                  ./libsub_debug.so
+0x00007ffff7609270 0x00007ffff7609294 .note.gnu.build-id    /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7609294 0x00007ffff76092b4 .note.ABI-tag         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76092b8 0x00007ffff760cd80 .gnu.hash             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff760cd80 0x00007ffff7619ff8 .dynsym               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7619ff8 0x00007ffff761f9d7 .dynstr               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff761f9d8 0x00007ffff7620b62 .gnu.version          /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620b68 0x00007ffff7620edc .gnu.version_d        /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620ee0 0x00007ffff7620f10 .gnu.version_r        /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7620f10 0x00007ffff7628680 .rela.dyn             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff7628680 0x00007ffff76287b8 .rela.plt             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76287c0 0x00007ffff76288a0 .plt                  /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76288a0 0x00007ffff76288b0 .plt.got              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff76288b0 0x00007ffff777bb04 .text                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777bb10 0x00007ffff777e02d __libc_freeres_fn     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777e030 0x00007ffff777e2f2 __libc_thread_freeres_fn /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff777e300 0x00007ffff779f650 .rodata               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f650 0x00007ffff779f651 .stapsdt.base         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f660 0x00007ffff779f67c .interp               /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff779f67c 0x00007ffff77a4b38 .eh_frame_hdr         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77a4b38 0x00007ffff77c53cc .eh_frame             /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77c53cc 0x00007ffff77c580d .gcc_except_table     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff77c5810 0x00007ffff77c8b10 .hash                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97c0 0x00007ffff79c97d0 .tdata                /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97d0 0x00007ffff79c9838 .tbss                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97d0 0x00007ffff79c97e0 .init_array           /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c97e0 0x00007ffff79c98d8 __libc_subfreeres     /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c98d8 0x00007ffff79c98e0 __libc_atexit         /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c98e0 0x00007ffff79c9900 __libc_thread_subfreeres /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79c9900 0x00007ffff79ccba0 .data.rel.ro          /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ccba0 0x00007ffff79ccd80 .dynamic              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ccd80 0x00007ffff79ccff0 .got                  /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79cd000 0x00007ffff79cd080 .got.plt              /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79cd080 0x00007ffff79ce720 .data                 /lib/x86_64-linux-gnu/libc.so.6
+0x00007ffff79ce720 0x00007ffff79d29a0 .bss                  /lib/x86_64-linux-gnu/libc.so.6
+</code></pre>
+  <p>
+   或者
+  </p>
+  <pre><code>(gdb) info files
+</code></pre>
+  <p>
+   注：
+   <code>
+    xfiles
+   </code>
+   命令GEF插件扩展的命令，
+   <code>
+    info files
+   </code>
+   是GDB原生的命令。
+  </p>
+  <p>
+   输出结果中：
+  </p>
+  <ul>
+   <li>
+    <p>
+     libadd_debug.so、libsub_debug.so等所有共享库中的sections位于进程（程序的一个运行实例）虚拟地址空间中的
+     <code>
+      共享库的内存映射区域
+     </code>
+     。
+    </p>
+   </li>
+   <li>
+    <p>
+     可执行文件main_mix中的.init、.text 和.rodata section位于进程虚拟地址空间中的
+     <code>
+      只读代码段
+     </code>
+     。
+    </p>
+   </li>
+   <li>
+    <p>
+     可执行文件main_mix中的.data和.bss section位于进程虚拟地址空间中的
+     <code>
+      读/写段
+     </code>
+     。
+    </p>
+   </li>
+   <li>
+    <p>
+     由共享库libadd_debug.so定义的全局变量g_sum位于进程虚拟地址空间中的
+     <code>
+      共享库的内存映射区域
+     </code>
+     ，前提是只有共享库libadd_debug.so会访问该全局变量。如果可执行文件也访问该全局变量，那么g_sum会位于进程虚拟地址空间中的
+     <code>
+      数据段
+     </code>
+     ，这一点可以通过调试得到验证。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    step 5:
+   </strong>
+   进一步研究
+  </p>
+  <p>
+   如果可执行文件和共享库都调用由共享库定义的全局变量时，那么：
+  </p>
+  <ul>
+   <li>
+    <p>
+     可执行文件是如何访问该全局变量的？
+    </p>
+   </li>
+   <li>
+    <p>
+     共享库是如何访问该全局变量的？与只有共享库访问该全局变量时有什么不同？
+    </p>
+   </li>
+   <li>
+    <p>
+     在“只有共享库访问该全局变量”、“可执行文件和共享库都调用由共享库定义的全局变量”这两种情况下，全局变量分别在进程虚拟地址空间中的位置？
+    </p>
+   </li>
+  </ul>
+  <p>
+   注：重定位方式
+   <code>
+    R_X86_64_COPY
+   </code>
+   的含义：The link editor creates this relocation type for dynamic linking. Its offset member refers to a location in a writable segment. The symbol table index specifies a symbol that should exist both in the current object file and in a shared object. During execution, the dynamic linker copies data associated with the shared object’s symbol to the specified by the offset.
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

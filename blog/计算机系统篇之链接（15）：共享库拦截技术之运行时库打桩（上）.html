@@ -1,0 +1,571 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="15">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（15）：共享库拦截技术之运行时库打桩（上）
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Saturday, 21. December 2019 11:58AM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump什么是运行时库打桩">
+       什么是运行时库打桩
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump运行时库打桩的实现原理">
+       运行时库打桩的实现原理
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何在加载程序时拦截标准库的API">
+       如何在加载程序时拦截标准库的 API
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump什么是运行时库打桩">
+    什么是运行时库打桩
+   </span>
+  </h3>
+  <p>
+   库打桩（Library Interpositioning）是一种允许截获对共享库函数的调用，取而代之执行自己代码的技术。
+  </p>
+  <p>
+   运行时库打桩是库打桩技术中的一种，另外两种是编译时库打桩和链接时库打桩。它可以在程序加载时或程序运行过程中对共享库进行打桩。
+  </p>
+  <p>
+   运行时库打桩的强大之处在于只要能够访问可执行目标文件，就可以应用该技术。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump运行时库打桩的实现原理">
+    运行时库打桩的实现原理
+   </span>
+  </h3>
+  <p>
+   运行时库打桩的实现原理是基于动态链接器的
+   <code>
+    LD_PRELOAD
+   </code>
+   环境变量。如果
+   <code>
+    LD_PRELOAD
+   </code>
+   变量被设置为一个共享库路径名的列表（以空格或分号分隔），那么当你加载和运行一个程序，需要解析未定义的符号引用时，动态链接器会先搜索
+   <code>
+    LD_PRELOAD
+   </code>
+   中的共享库，然后才搜索任何其他的库。有了这个机制，当你加载和执行任意可执行文件时，可以对任何共享库中的任何函数打桩，包括
+   <code>
+    libc.so
+   </code>
+   。
+  </p>
+  <hr/>
+  <h3 id="api">
+   <span id="jump如何在加载程序时拦截标准库的API">
+    如何在加载程序时拦截标准库的 API
+   </span>
+  </h3>
+  <p>
+   以“在加载程序时，拦截标准库的 malloc() 和 free() 函数”为例，具体过程如下。
+  </p>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   编写自定义的
+   <code>
+    malloc()
+   </code>
+   函数
+  </p>
+  <p>
+   1）由于要拦截标准库的
+   <code>
+    malloc()
+   </code>
+   函数，相当于要神不知鬼不觉地将程序中所有对标准库函数
+   <code>
+    malloc()
+   </code>
+   的调用换成调用我们自定义的
+   <code>
+    malloc()
+   </code>
+   函数。所以，我们自定义的
+   <code>
+    malloc()
+   </code>
+   的函数原型必须与标准库中的保持一致。
+  </p>
+  <p>
+   自定义的
+   <code>
+    malloc()
+   </code>
+   函数：
+  </p>
+  <pre><code>extern "C" {
+
+void* malloc(size_t size)
+{
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   由于采用 C++ 编写，为了避免 C++ 默认对函数名重编（name mangling）所引起的副作用。我们将自定义的
+   <code>
+    malloc()
+   </code>
+   函数用
+   <code>
+    extern "C"
+   </code>
+   包裹起来。
+  </p>
+  <p>
+   2）从标准库中获取符号名称为
+   <code>
+    malloc
+   </code>
+   的符号定义的地址，即
+   <code>
+    malloc()
+   </code>
+   的函数地址
+  </p>
+  <pre><code>auto symbol_addr = dlsym(RTLD_NEXT, "malloc");
+</code></pre>
+  <p>
+   注：
+   <code>
+    RTLD_NEXT
+   </code>
+   表示下一个加载的共享库的句柄。这里，下一个加载的共享库默认就是
+   <code>
+    libc.so
+   </code>
+   。当然，这样做是有一定风险的。
+  </p>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   为了让
+   <code>
+    RTLD_NEXT
+   </code>
+   可用，需要定义编译选项
+   <code>
+    _GNU_SOURCE
+   </code>
+   。我们可以在生成共享库时，将该选项传递给 g++，即
+   <code>
+    -D_GNU_SOURCE
+   </code>
+   。
+  </p>
+  <p>
+   3）由于
+   <code>
+    dlsym()
+   </code>
+   函数的返回类型为
+   <code>
+    void *
+   </code>
+   ，在使用前需要先进行类型转换
+  </p>
+  <pre><code>typedef void* (*__malloc)(size_t);
+auto libc_malloc = reinterpret_cast&lt;__malloc&gt;(symbol_addr);
+auto ptr = libc_malloc(size);
+</code></pre>
+  <p>
+   注：
+   <code>
+    ptr
+   </code>
+   指向所申请内存的首地址。
+  </p>
+  <p>
+   4）跟踪
+   <code>
+    malloc()
+   </code>
+   函数的调用情况
+  </p>
+  <pre><code>static thread_local bool called = false;
+if (!called)
+{
+    called = true;
+    LOG_INFO("malloc(%ld) = %p\n", size, ptr);
+    called = false;
+}
+</code></pre>
+  <p>
+   <strong>
+    这里，需要注意两点：
+   </strong>
+   1）引入静态局部变量
+   <code>
+    called
+   </code>
+   是为了防止死循环，因为
+   <code>
+    printf()
+   </code>
+   函数中会调用
+   <code>
+    malloc()
+   </code>
+   函数；2）修饰符
+   <code>
+    thread_local
+   </code>
+   表示变量
+   <code>
+    called
+   </code>
+   是线程局部对象，即每个线程都拥有一份私有的
+   <code>
+    called
+   </code>
+   变量，这样做是出于线程安全的考虑。
+  </p>
+  <p>
+   5）自定义
+   <code>
+    malloc()
+   </code>
+   函数的完整实现
+  </p>
+  <pre><code>extern "C" {
+
+void* malloc(size_t size)
+{
+    auto symbol_addr = dlsym(RTLD_NEXT, "malloc");
+    if (!symbol_addr)
+    {
+        throw std::runtime_error(dlerror());
+    }
+    typedef void* (*__malloc)(size_t);
+    auto libc_malloc = reinterpret_cast&lt;__malloc&gt;(symbol_addr);
+    auto ptr = libc_malloc(size);
+
+    static thread_local bool called = false;
+    if (!called)
+    {
+        called = true;
+        LOG_INFO("malloc(%ld) = %p\n", size, ptr);
+        called = false;
+    }
+
+    return ptr;
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   编写自定义的
+   <code>
+    free()
+   </code>
+   函数
+  </p>
+  <p>
+   自定义
+   <code>
+    free()
+   </code>
+   函数的完整实现：
+  </p>
+  <pre><code>extern "C" {
+
+void free(void *ptr)
+{
+    auto symbol_addr = dlsym(RTLD_NEXT, "free");
+    if (!symbol_addr)
+    {
+        throw std::runtime_error(dlerror());
+    }
+    typedef void (*__free)(void *);
+    auto libc_free = reinterpret_cast&lt;__free&gt;(symbol_addr);
+    libc_free(ptr);
+    LOG_INFO("free() = %p\n", ptr);
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   编写测试程序 main.cpp
+  </p>
+  <p>
+   main.cpp:
+  </p>
+  <pre><code>#include &lt;malloc.h&gt;
+
+int main()
+{
+    int *p1 = static_cast&lt;int *&gt;(malloc(16));
+    int *p2 = static_cast&lt;int *&gt;(malloc(32));
+    free(p2);
+    free(p1);
+    return 0;
+}
+</code></pre>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   生成共享库 mymalloc.so
+  </p>
+  <pre><code>$ g++ -o mymalloc.so mymalloc.cpp -shared -fpic -ldl -D_GNU_SOURCE -g
+</code></pre>
+  <p>
+   注：由于
+   <code>
+    dlsym()
+   </code>
+   函数定义在
+   <code>
+    libdl.so
+   </code>
+   中。所以，需要指定链接选项
+   <code>
+    -ldl
+   </code>
+   。
+  </p>
+  <p>
+   <strong>
+    step 5：
+   </strong>
+   生成并运行测试程序
+  </p>
+  <p>
+   1）生成可执行目标文件 main
+  </p>
+  <pre><code>$ g++ -o main main.cpp -g
+</code></pre>
+  <p>
+   2）运行可执行目标文件 main
+  </p>
+  <p>
+   方式1：
+  </p>
+  <pre><code>$ LD_PRELOAD="./mymalloc.so" ./main
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   一定要用引号将
+   <code>
+    ./mymalloc.so
+   </code>
+   括起来。否则，两者将都被认为是环境变量
+   <code>
+    LD_PRELOAD
+   </code>
+   的值。
+  </p>
+  <p>
+   方式2：
+  </p>
+  <pre><code>$ export LD_PRELOAD=./mymalloc.so
+$ ./main
+</code></pre>
+  <p>
+   错误的运行方式：
+  </p>
+  <pre><code>$ LD_PRELOAD=./mymalloc.so
+$ ./main
+</code></pre>
+  <p>
+   3）运行结果
+  </p>
+  <pre><code>$ LD_PRELOAD="./mymalloc.so" ./main
+malloc(72704) = 0x21d4010
+malloc(16) = 0x21e6030
+malloc(32) = 0x21e6050
+free() = 0x21e6050
+free() = 0x21e6030
+</code></pre>
+  <p>
+   输出结果中的
+   <code>
+    malloc(72704) = 0x21d4010
+   </code>
+   ，是在
+   <code>
+    main()
+   </code>
+   函数执行前打印的。
+  </p>
+  <p>
+   4）调试可执行目标文件 main
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) set environment LD_PRELOAD=./mymalloc.so
+(gdb) start
+Temporary breakpoint 1 at 0x40056e: file main.cpp, line 8.
+Starting program: /home/test/li_cpp/main
+malloc(72704) = 0x602010
+
+Temporary breakpoint 1, main () at main.cpp:8
+8       int *p1 = static_cast&lt;int *&gt;(malloc(16));
+(gdb) n
+malloc(16) = 0x614030
+9       int *p2 = static_cast&lt;int *&gt;(malloc(32));
+(gdb) 
+malloc(32) = 0x614050
+10      free(p2);
+(gdb) 
+free() = 0x614050
+11      free(p1);
+(gdb) c
+Continuing.
+free() = 0x614030
+[Inferior 1 (process 28282) exited normally]
+(gdb) 
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   设置可执行目标文件
+   <code>
+    main
+   </code>
+   的环境变量的操作必须在执行
+   <code>
+    start
+   </code>
+   前进行。
+  </p>
+  <p>
+   <strong>
+    step 6：
+   </strong>
+   完整程序
+  </p>
+  <p>
+   <strong>
+    mymalloc.cpp:
+   </strong>
+  </p>
+  <pre><code>// how to compile: g++ -o mymalloc.so mymalloc.cpp -shared -fpic -ldl -D_GNU_SOURCE -g
+
+#include &lt;dlfcn.h&gt;
+#include &lt;cstdio&gt;
+#include &lt;stdexcept&gt;
+
+#define LOG_INFO std::printf
+
+extern "C" {
+
+void* malloc(size_t size)
+{
+    auto symbol_addr = dlsym(RTLD_NEXT, "malloc");
+    if (!symbol_addr)
+    {
+        throw std::runtime_error(dlerror());
+    }
+    typedef void* (*__malloc)(size_t);
+    auto libc_malloc = reinterpret_cast&lt;__malloc&gt;(symbol_addr);
+    auto ptr = libc_malloc(size);
+
+    static thread_local bool called = false;
+    if (!called)
+    {
+        called = true;
+        LOG_INFO("malloc(%ld) = %p\n", size, ptr);
+        called = false;
+    }
+
+    return ptr;
+}
+
+void free(void *ptr)
+{
+    auto symbol_addr = dlsym(RTLD_NEXT, "free");
+    if (!symbol_addr)
+    {
+        throw std::runtime_error(dlerror());
+    }
+    typedef void (*__free)(void *);
+    auto libc_free = reinterpret_cast&lt;__free&gt;(symbol_addr);
+    libc_free(ptr);
+    LOG_INFO("free() = %p\n", ptr);
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   <strong>
+    main.cpp:
+   </strong>
+  </p>
+  <pre><code>// how to compile: g++ -o main main.cpp -g
+// how to run: LD_PRELOAD="./mymalloc.so" ./main
+
+#include &lt;malloc.h&gt;
+
+int main()
+{
+    int *p1 = static_cast&lt;int *&gt;(malloc(16));
+    int *p2 = static_cast&lt;int *&gt;(malloc(32));
+    free(p2);
+    free(p1);
+    return 0;
+}
+</code></pre>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

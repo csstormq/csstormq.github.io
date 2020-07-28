@@ -1,0 +1,1817 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="12chapter-7-linking">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（12）：Chapter 7 Linking 习题与解答
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Monday, 15. July 2019 11:18AM
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    目录
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump习题">
+       习题
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump解答">
+       解答
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump习题">
+    习题
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <span id="jump7_6题目">
+     7.6
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.6_1.png"/>
+   <br/>
+   <img alt="" src="image/7.6_2.png"/>
+  </p>
+  <p>
+   <a href="#jump7_6解答">
+    7.6 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_7题目">
+     7.7
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.7_1.png"/>
+   <br/>
+   <img alt="" src="image/7.7_2.png"/>
+  </p>
+  <p>
+   <a href="#jump7_7解答">
+    7.7 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_8题目">
+     7.8
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.8_1.png"/>
+  </p>
+  <p>
+   <a href="#jump7_8解答">
+    7.8 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_9题目">
+     7.9
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.9_1.png"/>
+  </p>
+  <p>
+   <a href="#jump7_9解答">
+    7.9 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_10题目">
+     7.10
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.10_1.png"/>
+   <br/>
+   <img alt="" src="image/7.10_2.png"/>
+  </p>
+  <p>
+   <a href="#jump7_10解答">
+    7.10 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_11题目">
+     7.11
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.11_1.png"/>
+   <br/>
+   <img alt="" src="image/7.11_2.png"/>
+  </p>
+  <p>
+   <a href="#jump7_11解答">
+    7.11 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_12题目">
+     7.12
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.12_1.png"/>
+  </p>
+  <p>
+   <a href="#jump7_12解答">
+    7.12 解答
+   </a>
+  </p>
+  <hr/>
+  <ul>
+   <li>
+    <span id="jump7_13题目">
+     7.13
+    </span>
+   </li>
+  </ul>
+  <p>
+   <img alt="" src="image/7.13_1.png"/>
+  </p>
+  <p>
+   <a href="#jump7_13解答">
+    7.13 解答
+   </a>
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump解答">
+    解答
+   </span>
+  </h3>
+  <h4 id="76">
+   <span id="jump7_6解答">
+    7.6 解答
+   </span>
+  </h4>
+  <p>
+   swap.c:
+  </p>
+  <pre><code>extern int buf[];
+
+int *bufp0 = &amp;buf[0];
+static int *bufp1;
+
+static void incr()
+{
+  static int count = 0;
+  count++;
+}
+
+void swap()
+{
+  int temp;
+
+  incr();
+  bufp1 = &amp;buf[1];
+  temp = *bufp0;
+  *bufp0 = *bufp1;
+  *bufp1 = temp;
+}
+</code></pre>
+  <p>
+   生成可重定位目标文件 swap.o：
+  </p>
+  <pre><code>$ gcc -c swap.c
+</code></pre>
+  <p>
+   查看 swap.o 的符号表：
+  </p>
+  <pre><code>$ readelf -s swap.o
+
+Symbol table '.symtab' contains 14 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS swap.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     5: 0000000000000000     8 OBJECT  LOCAL  DEFAULT    5 bufp1
+     6: 0000000000000000    22 FUNC    LOCAL  DEFAULT    1 incr
+     7: 0000000000000008     4 OBJECT  LOCAL  DEFAULT    5 count.1760
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     9: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+    10: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+    11: 0000000000000000     8 OBJECT  GLOBAL DEFAULT    3 bufp0
+    12: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND buf
+    13: 0000000000000016    74 FUNC    GLOBAL DEFAULT    1 swap
+</code></pre>
+  <p>
+   查看 swap.o 的表头：
+  </p>
+  <pre><code>$ readelf -S swap.o
+There are 13 section headers, starting at offset 0x420:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .text             PROGBITS         0000000000000000  00000040
+       0000000000000060  0000000000000000  AX       0     0     1
+  [ 2] .rela.text        RELA             0000000000000000  000002b8
+       00000000000000c0  0000000000000018   I      11     1     8
+  [ 3] .data             PROGBITS         0000000000000000  000000a0
+       0000000000000008  0000000000000000  WA       0     0     8
+  [ 4] .rela.data        RELA             0000000000000000  00000378
+       0000000000000018  0000000000000018   I      11     3     8
+  [ 5] .bss              NOBITS           0000000000000000  000000a8
+       000000000000000c  0000000000000000  WA       0     0     8
+  [ 6] .comment          PROGBITS         0000000000000000  000000a8
+       0000000000000033  0000000000000001  MS       0     0     1
+  [ 7] .note.GNU-stack   PROGBITS         0000000000000000  000000db
+       0000000000000000  0000000000000000           0     0     1
+  [ 8] .eh_frame         PROGBITS         0000000000000000  000000e0
+       0000000000000058  0000000000000000   A       0     0     8
+  [ 9] .rela.eh_frame    RELA             0000000000000000  00000390
+       0000000000000030  0000000000000018   I      11     8     8
+  [10] .shstrtab         STRTAB           0000000000000000  000003c0
+       000000000000005e  0000000000000000           0     0     1
+  [11] .symtab           SYMTAB           0000000000000000  00000138
+       0000000000000150  0000000000000018          12    11     8
+  [12] .strtab           STRTAB           0000000000000000  00000288
+       000000000000002d  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+</code></pre>
+  <p>
+   因此，该题的解答为：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      符号
+     </th>
+     <th>
+      swap.symtab 条目？
+     </th>
+     <th>
+      符号类型
+     </th>
+     <th>
+      定义符号的模块
+     </th>
+     <th>
+      节
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      buf
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      extern
+     </td>
+     <td>
+      m.o
+     </td>
+     <td>
+      .data
+     </td>
+    </tr>
+    <tr>
+     <td>
+      bufp0
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      global
+     </td>
+     <td>
+      swap.o
+     </td>
+     <td>
+      .data
+     </td>
+    </tr>
+    <tr>
+     <td>
+      bufp1
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      local
+     </td>
+     <td>
+      swap.o
+     </td>
+     <td>
+      .bss
+     </td>
+    </tr>
+    <tr>
+     <td>
+      swap
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      global
+     </td>
+     <td>
+      swap.o
+     </td>
+     <td>
+      .text
+     </td>
+    </tr>
+    <tr>
+     <td>
+      temp
+     </td>
+     <td>
+      no
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      -
+     </td>
+    </tr>
+    <tr>
+     <td>
+      incr
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      local
+     </td>
+     <td>
+      swap.o
+     </td>
+     <td>
+      .text
+     </td>
+    </tr>
+    <tr>
+     <td>
+      count
+     </td>
+     <td>
+      yes
+     </td>
+     <td>
+      local
+     </td>
+     <td>
+      swap.o
+     </td>
+     <td>
+      .bss
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   <a href="#jump7_6题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="77">
+   <span id="jump7_7解答">
+    7.7 解答
+   </span>
+  </h4>
+  <p>
+   a）先执行原来的代码
+  </p>
+  <p>
+   bar5.c:
+  </p>
+  <pre><code>double x;
+
+void f()
+{
+    x = -0.0;
+}
+</code></pre>
+  <p>
+   foo5.c:
+  </p>
+  <pre><code>#include &lt;stdio.h&gt;
+
+void f();
+
+int x = 15213;
+int y = 15212;
+
+int main()
+{
+    f();
+    printf("x = 0x%x(%d) y = 0x%x(%d)\n", x, x, y, y);
+    return 0;
+}
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   这里调整了书中变量
+   <code>
+    x
+   </code>
+   和
+   <code>
+    y
+   </code>
+   的定义顺序。因为在我们的系统中（X86-64 Linux, Little-endian）中，按照上述定义顺序时，
+   <code>
+    x
+   </code>
+   的地址是 0x601038，
+   <code>
+    y
+   </code>
+   的地址是 0x60103c。这一点可以通过下文查看可执行目标文件的符号表得到验证。
+  </p>
+  <p>
+   生成可执行目标文件——foo5：
+  </p>
+  <pre><code>$ gcc -o foo5 foo5.c bar5.c 
+/usr/bin/x86_64-linux-gnu-ld: Warning: alignment 4 of symbol `x' in /tmp/ccCUovlG.o is smaller than 8 in /tmp/ccNJpz7k.o
+</code></pre>
+  <p>
+   注：gcc 版本为 6.5。
+  </p>
+  <p>
+   运行 foo5：
+  </p>
+  <pre><code>$ ./foo5 
+x = 0x0(0) y = 0x80000000(-2147483648)
+</code></pre>
+  <p>
+   查看 foo5 的符号表：
+  </p>
+  <pre><code>$ readelf -s foo5
+
+Symbol table '.dynsym' contains 4 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.2.5 (2)
+     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.2.5 (2)
+     3: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+
+Symbol table '.symtab' contains 71 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000400238     0 SECTION LOCAL  DEFAULT    1 
+     2: 0000000000400254     0 SECTION LOCAL  DEFAULT    2 
+     3: 0000000000400274     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000400298     0 SECTION LOCAL  DEFAULT    4 
+     5: 00000000004002b8     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000400318     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000400358     0 SECTION LOCAL  DEFAULT    7 
+     8: 0000000000400360     0 SECTION LOCAL  DEFAULT    8 
+     9: 0000000000400380     0 SECTION LOCAL  DEFAULT    9 
+    10: 0000000000400398     0 SECTION LOCAL  DEFAULT   10 
+    11: 00000000004003c8     0 SECTION LOCAL  DEFAULT   11 
+    12: 00000000004003f0     0 SECTION LOCAL  DEFAULT   12 
+    13: 0000000000400420     0 SECTION LOCAL  DEFAULT   13 
+    14: 0000000000400430     0 SECTION LOCAL  DEFAULT   14 
+    15: 00000000004005f4     0 SECTION LOCAL  DEFAULT   15 
+    16: 0000000000400600     0 SECTION LOCAL  DEFAULT   16 
+    17: 0000000000400628     0 SECTION LOCAL  DEFAULT   17 
+    18: 0000000000400668     0 SECTION LOCAL  DEFAULT   18 
+    19: 0000000000600e10     0 SECTION LOCAL  DEFAULT   19 
+    20: 0000000000600e18     0 SECTION LOCAL  DEFAULT   20 
+    21: 0000000000600e20     0 SECTION LOCAL  DEFAULT   21 
+    22: 0000000000600e28     0 SECTION LOCAL  DEFAULT   22 
+    23: 0000000000600ff8     0 SECTION LOCAL  DEFAULT   23 
+    24: 0000000000601000     0 SECTION LOCAL  DEFAULT   24 
+    25: 0000000000601028     0 SECTION LOCAL  DEFAULT   25 
+    26: 0000000000601040     0 SECTION LOCAL  DEFAULT   26 
+    27: 0000000000000000     0 SECTION LOCAL  DEFAULT   27 
+    28: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    29: 0000000000600e20     0 OBJECT  LOCAL  DEFAULT   21 __JCR_LIST__
+    30: 0000000000400460     0 FUNC    LOCAL  DEFAULT   14 deregister_tm_clones
+    31: 00000000004004a0     0 FUNC    LOCAL  DEFAULT   14 register_tm_clones
+    32: 00000000004004e0     0 FUNC    LOCAL  DEFAULT   14 __do_global_dtors_aux
+    33: 0000000000601040     1 OBJECT  LOCAL  DEFAULT   26 completed.7593
+    34: 0000000000600e18     0 OBJECT  LOCAL  DEFAULT   20 __do_global_dtors_aux_fin
+    35: 0000000000400500     0 FUNC    LOCAL  DEFAULT   14 frame_dummy
+    36: 0000000000600e10     0 OBJECT  LOCAL  DEFAULT   19 __frame_dummy_init_array_
+    37: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS foo5.c
+    38: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS bar5.c
+    39: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    40: 0000000000400778     0 OBJECT  LOCAL  DEFAULT   18 __FRAME_END__
+    41: 0000000000600e20     0 OBJECT  LOCAL  DEFAULT   21 __JCR_END__
+    42: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+    43: 0000000000600e18     0 NOTYPE  LOCAL  DEFAULT   19 __init_array_end
+    44: 0000000000600e28     0 OBJECT  LOCAL  DEFAULT   22 _DYNAMIC
+    45: 0000000000600e10     0 NOTYPE  LOCAL  DEFAULT   19 __init_array_start
+    46: 0000000000400628     0 NOTYPE  LOCAL  DEFAULT   17 __GNU_EH_FRAME_HDR
+    47: 0000000000601000     0 OBJECT  LOCAL  DEFAULT   24 _GLOBAL_OFFSET_TABLE_
+    48: 00000000004005f0     2 FUNC    GLOBAL DEFAULT   14 __libc_csu_fini
+    49: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+    50: 0000000000601028     0 NOTYPE  WEAK   DEFAULT   25 data_start
+    51: 0000000000601040     0 NOTYPE  GLOBAL DEFAULT   25 _edata
+    52: 0000000000601038     4 OBJECT  GLOBAL DEFAULT   25 x
+    53: 00000000004005f4     0 FUNC    GLOBAL DEFAULT   15 _fini
+    54: 0000000000400567    23 FUNC    GLOBAL DEFAULT   14 f
+    55: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@@GLIBC_2.2.5
+    56: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
+    57: 0000000000601028     0 NOTYPE  GLOBAL DEFAULT   25 __data_start
+    58: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    59: 0000000000601030     0 OBJECT  GLOBAL HIDDEN    25 __dso_handle
+    60: 0000000000400600     4 OBJECT  GLOBAL DEFAULT   16 _IO_stdin_used
+    61: 0000000000400580   101 FUNC    GLOBAL DEFAULT   14 __libc_csu_init
+    62: 0000000000601048     0 NOTYPE  GLOBAL DEFAULT   26 _end
+    63: 0000000000400430    42 FUNC    GLOBAL DEFAULT   14 _start
+    64: 000000000060103c     4 OBJECT  GLOBAL DEFAULT   25 y
+    65: 0000000000601040     0 NOTYPE  GLOBAL DEFAULT   26 __bss_start
+    66: 0000000000400526    65 FUNC    GLOBAL DEFAULT   14 main
+    67: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _Jv_RegisterClasses
+    68: 0000000000601040     0 OBJECT  GLOBAL HIDDEN    25 __TMC_END__
+    69: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+    70: 00000000004003c8     0 FUNC    GLOBAL DEFAULT   11 _init
+</code></pre>
+  <p>
+   2）修改方案
+  </p>
+  <p>
+   修改方案：只将 bar5.c 中的 x 的作用域由全局作用域改为局部作用域，即用关键字
+   <code>
+    static
+   </code>
+   修饰。
+  </p>
+  <p>
+   修改后的 bar5.c:
+  </p>
+  <pre><code>static double x;
+
+void f()
+{
+    x = -0.0;
+}
+</code></pre>
+  <p>
+   foo5.c 与原来的保持一致。
+  </p>
+  <p>
+   编译并运行：
+  </p>
+  <pre><code>$ gcc -o foo5 foo5.c bar5.c
+$ ./foo5 
+x = 0x3b6d(15213) y = 0x3b6c(15212)
+</code></pre>
+  <p>
+   查看 foo5 的符号表：
+  </p>
+  <pre><code>$ readelf -s foo5
+
+Symbol table '.dynsym' contains 4 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.2.5 (2)
+     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.2.5 (2)
+     3: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+
+Symbol table '.symtab' contains 72 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000400238     0 SECTION LOCAL  DEFAULT    1 
+     2: 0000000000400254     0 SECTION LOCAL  DEFAULT    2 
+     3: 0000000000400274     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000400298     0 SECTION LOCAL  DEFAULT    4 
+     5: 00000000004002b8     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000400318     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000400358     0 SECTION LOCAL  DEFAULT    7 
+     8: 0000000000400360     0 SECTION LOCAL  DEFAULT    8 
+     9: 0000000000400380     0 SECTION LOCAL  DEFAULT    9 
+    10: 0000000000400398     0 SECTION LOCAL  DEFAULT   10 
+    11: 00000000004003c8     0 SECTION LOCAL  DEFAULT   11 
+    12: 00000000004003f0     0 SECTION LOCAL  DEFAULT   12 
+    13: 0000000000400420     0 SECTION LOCAL  DEFAULT   13 
+    14: 0000000000400430     0 SECTION LOCAL  DEFAULT   14 
+    15: 00000000004005f4     0 SECTION LOCAL  DEFAULT   15 
+    16: 0000000000400600     0 SECTION LOCAL  DEFAULT   16 
+    17: 0000000000400628     0 SECTION LOCAL  DEFAULT   17 
+    18: 0000000000400668     0 SECTION LOCAL  DEFAULT   18 
+    19: 0000000000600e10     0 SECTION LOCAL  DEFAULT   19 
+    20: 0000000000600e18     0 SECTION LOCAL  DEFAULT   20 
+    21: 0000000000600e20     0 SECTION LOCAL  DEFAULT   21 
+    22: 0000000000600e28     0 SECTION LOCAL  DEFAULT   22 
+    23: 0000000000600ff8     0 SECTION LOCAL  DEFAULT   23 
+    24: 0000000000601000     0 SECTION LOCAL  DEFAULT   24 
+    25: 0000000000601028     0 SECTION LOCAL  DEFAULT   25 
+    26: 0000000000601040     0 SECTION LOCAL  DEFAULT   26 
+    27: 0000000000000000     0 SECTION LOCAL  DEFAULT   27 
+    28: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    29: 0000000000600e20     0 OBJECT  LOCAL  DEFAULT   21 __JCR_LIST__
+    30: 0000000000400460     0 FUNC    LOCAL  DEFAULT   14 deregister_tm_clones
+    31: 00000000004004a0     0 FUNC    LOCAL  DEFAULT   14 register_tm_clones
+    32: 00000000004004e0     0 FUNC    LOCAL  DEFAULT   14 __do_global_dtors_aux
+    33: 0000000000601040     1 OBJECT  LOCAL  DEFAULT   26 completed.7593
+    34: 0000000000600e18     0 OBJECT  LOCAL  DEFAULT   20 __do_global_dtors_aux_fin
+    35: 0000000000400500     0 FUNC    LOCAL  DEFAULT   14 frame_dummy
+    36: 0000000000600e10     0 OBJECT  LOCAL  DEFAULT   19 __frame_dummy_init_array_
+    37: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS foo5.c
+    38: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS bar5.c
+    39: 0000000000601048     8 OBJECT  LOCAL  DEFAULT   26 x
+    40: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    41: 0000000000400778     0 OBJECT  LOCAL  DEFAULT   18 __FRAME_END__
+    42: 0000000000600e20     0 OBJECT  LOCAL  DEFAULT   21 __JCR_END__
+    43: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+    44: 0000000000600e18     0 NOTYPE  LOCAL  DEFAULT   19 __init_array_end
+    45: 0000000000600e28     0 OBJECT  LOCAL  DEFAULT   22 _DYNAMIC
+    46: 0000000000600e10     0 NOTYPE  LOCAL  DEFAULT   19 __init_array_start
+    47: 0000000000400628     0 NOTYPE  LOCAL  DEFAULT   17 __GNU_EH_FRAME_HDR
+    48: 0000000000601000     0 OBJECT  LOCAL  DEFAULT   24 _GLOBAL_OFFSET_TABLE_
+    49: 00000000004005f0     2 FUNC    GLOBAL DEFAULT   14 __libc_csu_fini
+    50: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+    51: 0000000000601028     0 NOTYPE  WEAK   DEFAULT   25 data_start
+    52: 0000000000601040     0 NOTYPE  GLOBAL DEFAULT   25 _edata
+    53: 0000000000601038     4 OBJECT  GLOBAL DEFAULT   25 x
+    54: 00000000004005f4     0 FUNC    GLOBAL DEFAULT   15 _fini
+    55: 0000000000400567    23 FUNC    GLOBAL DEFAULT   14 f
+    56: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@@GLIBC_2.2.5
+    57: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
+    58: 0000000000601028     0 NOTYPE  GLOBAL DEFAULT   25 __data_start
+    59: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    60: 0000000000601030     0 OBJECT  GLOBAL HIDDEN    25 __dso_handle
+    61: 0000000000400600     4 OBJECT  GLOBAL DEFAULT   16 _IO_stdin_used
+    62: 0000000000400580   101 FUNC    GLOBAL DEFAULT   14 __libc_csu_init
+    63: 0000000000601050     0 NOTYPE  GLOBAL DEFAULT   26 _end
+    64: 0000000000400430    42 FUNC    GLOBAL DEFAULT   14 _start
+    65: 000000000060103c     4 OBJECT  GLOBAL DEFAULT   25 y
+    66: 0000000000601040     0 NOTYPE  GLOBAL DEFAULT   26 __bss_start
+    67: 0000000000400526    65 FUNC    GLOBAL DEFAULT   14 main
+    68: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _Jv_RegisterClasses
+    69: 0000000000601040     0 OBJECT  GLOBAL HIDDEN    25 __TMC_END__
+    70: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+    71: 00000000004003c8     0 FUNC    GLOBAL DEFAULT   11 _init
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   修改后的可执行目标文件
+   <code>
+    foo5
+   </code>
+   中符号名称为
+   <code>
+    x
+   </code>
+   的符号有两个。一个是全局作用域的，一个是局部作用域的。而修改前的
+   <code>
+    foo5
+   </code>
+   中符号名称为
+   <code>
+    x
+   </code>
+   的符号只有一个。
+  </p>
+  <p>
+   其他修改方案：只将 foo5.c 中的 x 的作用域由全局作用域改为局部作用域，即用关键字
+   <code>
+    static
+   </code>
+   修饰。关于该方案的可行性，有兴趣的可以自己验证一下。
+  </p>
+  <p>
+   <a href="#jump7_7题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="78">
+   <span id="jump7_8解答">
+    7.8 解答
+   </span>
+  </h4>
+  <p>
+   a）A 中 Module 1 和 Module 2 的代码
+  </p>
+  <p>
+   m1_a.c（Module 1）：
+  </p>
+  <pre><code>int main()
+{
+}
+</code></pre>
+  <p>
+   m2_a.c（Module 2）：
+  </p>
+  <pre><code>static int main = 1;
+int p2()
+{
+}
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   这里将原书中 Module 2 里面的
+   <code>
+    ]
+   </code>
+   改为
+   <code>
+    ;
+   </code>
+   ，应该是原书作者的笔误。
+  </p>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m1_a.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m1_a.c
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m2_a.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m2_a.c
+</code></pre>
+  <p>
+   生成可执行目标文件
+   <code>
+    m1_a
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -o m1_a m1_a.o m2_a.o
+</code></pre>
+  <p>
+   成功生成了可执行目标文件
+   <code>
+    m1_a
+   </code>
+   ，即未出现链接错误。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m1_a.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m1_a.o
+
+Symbol table '.symtab' contains 9 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m1_a.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     8: 0000000000000000    11 FUNC    GLOBAL DEFAULT    1 main
+</code></pre>
+  <p>
+   可以看出，Module 1 中的符号引用
+   <code>
+    main
+   </code>
+   的定义在 Module 1 中的
+   <code>
+    .text
+   </code>
+   section 中。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m2_a.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m2_a.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m2_a.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     4 OBJECT  LOCAL  DEFAULT    2 main
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    1 p2
+</code></pre>
+  <p>
+   可以看出，Module 2 中的符号引用
+   <code>
+    main
+   </code>
+   的定义在 Module 2 中的
+   <code>
+    .data
+   </code>
+   section 中。
+  </p>
+  <p>
+   b）B 中 Module 1 和 Module 2 的代码
+  </p>
+  <p>
+   m1_b.c（Module 1）：
+  </p>
+  <pre><code>int x;
+void main()
+{
+}
+</code></pre>
+  <p>
+   m2_b.c（Module 2）：
+  </p>
+  <pre><code>double x;
+int p2()
+{
+}
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m1_b.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m1_b.c
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m2_b.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m2_b.c
+</code></pre>
+  <p>
+   生成可执行目标文件
+   <code>
+    m1_b
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -o m1_b m1_b.o m2_b.o
+</code></pre>
+  <p>
+   成功生成了可执行目标文件
+   <code>
+    m1_b
+   </code>
+   ，即未出现链接错误。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m1_b.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m1_b.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m1_b.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     8: 0000000000000004     4 OBJECT  GLOBAL DEFAULT  COM x
+     9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    1 main
+</code></pre>
+  <p>
+   可以看出，Module 1 中的符号引用
+   <code>
+    x
+   </code>
+   被标记为
+   <code>
+    COMMON
+   </code>
+   。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m2_b.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m2_b.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m2_b.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     8: 0000000000000008     8 OBJECT  GLOBAL DEFAULT  COM x
+     9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    1 p2
+</code></pre>
+  <p>
+   可以看出，Module 2 中的符号引用
+   <code>
+    x
+   </code>
+   也被标记为
+   <code>
+    COMMON
+   </code>
+   。
+  </p>
+  <p>
+   因此，符号引用
+   <code>
+    x
+   </code>
+   的定义在 Module 1 或 Module 2 中任意选择一个。
+  </p>
+  <p>
+   c）C 中 Module 1 和 Module 2 的代码
+  </p>
+  <p>
+   m1_c.c（Module 1）：
+  </p>
+  <pre><code>int x = 1;
+void main()
+{
+}
+</code></pre>
+  <p>
+   m2_c.c（Module 2）：
+  </p>
+  <pre><code>double x = 1.0;
+int p2()
+{
+}
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m1_c.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m1_c.c
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    m2_c.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c m2_c.c
+</code></pre>
+  <p>
+   生成可执行目标文件
+   <code>
+    m1_c
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -o m1_c m1_c.o m2_c.o
+m2_c.o:(.data+0x0): multiple definition of `x'
+m1_c.o:(.data+0x0): first defined here
+/usr/bin/x86_64-linux-gnu-ld: Warning: size of symbol `x' changed from 4 in m1_c.o to 8 in m2_c.o
+collect2: error: ld returned 1 exit status
+</code></pre>
+  <p>
+   可以看出，在生成可执行目标文件
+   <code>
+    m1_c
+   </code>
+   时，出现了链接错误。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m1_c.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m1_c.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m1_c.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    2 x
+     9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    1 main
+</code></pre>
+  <p>
+   可以看出，Module 1 中的符号引用
+   <code>
+    x
+   </code>
+   的定义在 Module 1 中，并且为全局作用域。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    m2_c.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s m2_c.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS m2_c.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     8: 0000000000000000     8 OBJECT  GLOBAL DEFAULT    2 x
+     9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    1 p2
+</code></pre>
+  <p>
+   可以看出，Module 2 中的符号引用
+   <code>
+    x
+   </code>
+   的定义在 Module 2 中，并且为全局作用域。
+  </p>
+  <p>
+   也就是说，Module 1 和 Module 2 中重复定义了全局变量
+   <code>
+    x
+   </code>
+   。所以，在生成可执行目标文件
+   <code>
+    m1_c
+   </code>
+   时，出现了链接错误。
+  </p>
+  <p>
+   因此，该题的解答为：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      题目
+     </th>
+     <th>
+      解答
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      A
+     </td>
+     <td>
+      <li>
+       REF(main.1)-&gt;DEF(main.1)
+      </li>
+      <li>
+       REF(main.2)-&gt;DEF(main.2)
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      B
+     </td>
+     <td>
+      <li>
+       REF(x.1)-&gt;DEF(UNKNOWN)
+      </li>
+      <li>
+       REF(x.2)-&gt;DEF(UNKNOWN)
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      C
+     </td>
+     <td>
+      <li>
+       REF(x.1)-&gt;DEF(ERROR)
+      </li>
+      <li>
+       REF(x.2)-&gt;DEF(ERROR)
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   <a href="#jump7_8题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="79">
+   <span id="jump7_9解答">
+    7.9 解答
+   </span>
+  </h4>
+  <p>
+   a）生成并执行可执行目标文件
+  </p>
+  <p>
+   foo6.c:
+  </p>
+  <pre><code>void p2();
+
+int main()
+{
+    p2();
+    return 0;
+}
+</code></pre>
+  <p>
+   bar6.c:
+  </p>
+  <pre><code>char main;
+
+void p2()
+{
+    printf("main=0x%x\n", main);
+}
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    foo6.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c foo6.c
+</code></pre>
+  <p>
+   生成可重定位目标文件
+   <code>
+    bar6.o
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -c bar6.c
+</code></pre>
+  <p>
+   生成并执行可执行目标文件
+   <code>
+    foo6
+   </code>
+   ：
+  </p>
+  <pre><code>$ gcc -o foo6 foo6.o bar6.o
+$ ./foo6
+main=0x55
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   在我们的系统中（X86-64 Linux, Little-endian），按照上述步骤生成可执行目标文件
+   <code>
+    foo6
+   </code>
+   时，打印的
+   <code>
+    main
+   </code>
+   变量的值为 0x55，而不是题目中的 0x48。要想打印的
+   <code>
+    main
+   </code>
+   变量的值为题目中的 0x48，生成可执行目标文件
+   <code>
+    foo6_Og
+   </code>
+   的方式应该为
+   <code>
+    gcc -o foo6_Og bar6.c foo6.c -Og
+   </code>
+   。
+  </p>
+  <p>
+   查看
+   <code>
+    foo6_Og
+   </code>
+   中
+   <code>
+    main
+   </code>
+   函数的汇编代码（部分）：
+  </p>
+  <pre><code>$ objdump -d foo6_Og 
+
+foo6_Og:     file format elf64-x86-64
+
+# 省略...
+
+Disassembly of section .text:
+
+# 省略...
+
+000000000040056a &lt;main&gt;:
+  40056a:   48 83 ec 08             sub    $0x8,%rsp
+  40056e:   b8 00 00 00 00          mov    $0x0,%eax
+  400573:   e8 ce ff ff ff          callq  400546 &lt;p2&gt;
+  400578:   b8 00 00 00 00          mov    $0x0,%eax
+  40057d:   48 83 c4 08             add    $0x8,%rsp
+  400581:   c3                      retq   
+  400582:   66 2e 0f 1f 84 00 00    nopw   %cs:0x0(%rax,%rax,1)
+  400589:   00 00 00 
+  40058c:   0f 1f 40 00             nopl   0x0(%rax)
+
+# 省略...
+</code></pre>
+  <p>
+   可以看出，可执行目标文件
+   <code>
+    foo6_Og
+   </code>
+   中
+   <code>
+    main
+   </code>
+   函数的第一个字节的值为 0x48，符合题目中的 0x48。
+  </p>
+  <p>
+   b）为什么执行可执行目标文件
+   <code>
+    foo6
+   </code>
+   时，打印的
+   <code>
+    main
+   </code>
+   变量的值为 0x55
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    foo6.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s foo6.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS foo6.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000    21 FUNC    GLOBAL DEFAULT    1 main
+     9: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND p2
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    foo6.c
+   </code>
+   中符号引用
+   <code>
+    main
+   </code>
+   所对应的符号定义在
+   <code>
+    foo6.o
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section 中。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    bar6.o
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -s bar6.o
+
+Symbol table '.symtab' contains 12 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS bar6.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     9: 0000000000000001     1 OBJECT  GLOBAL DEFAULT  COM main
+    10: 0000000000000000    34 FUNC    GLOBAL DEFAULT    1 p2
+    11: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    bar6.c
+   </code>
+   中符号引用
+   <code>
+    main
+   </code>
+   所对应的符号定义还未确定。
+  </p>
+  <p>
+   查看可执行目标文件
+   <code>
+    foo6
+   </code>
+   的汇编代码（部分）：
+  </p>
+  <pre><code>$ objdump -d foo6
+
+foo6:     file format elf64-x86-64
+
+# 省略...
+
+Disassembly of section .text:
+
+# 省略...
+
+0000000000400526 &lt;main&gt;:
+  400526:   55                      push   %rbp
+  400527:   48 89 e5                mov    %rsp,%rbp
+  40052a:   b8 00 00 00 00          mov    $0x0,%eax
+  40052f:   e8 07 00 00 00          callq  40053b &lt;p2&gt;
+  400534:   b8 00 00 00 00          mov    $0x0,%eax
+  400539:   5d                      pop    %rbp
+  40053a:   c3                      retq
+
+# 省略...
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    main
+   </code>
+   函数的汇编代码中第一个字节的值为 0x55，与打印的
+   <code>
+    main
+   </code>
+   变量的值相同。也就是说，
+   <code>
+    main
+   </code>
+   变量符号引用所对应的符号定义为
+   <code>
+    main
+   </code>
+   函数的符号。所以，执行可执行目标文件
+   <code>
+    foo6
+   </code>
+   时，打印的
+   <code>
+    main
+   </code>
+   变量的值为 0x55。另外，可以通过 gdb 调试验证
+   <code>
+    main 变量符号引用的地址就是 main 函数的地址
+   </code>
+   ，具体过程如下：
+  </p>
+  <pre><code>$ gcc -o foo6_g foo6.c bar6.c -g
+$ gdb -q ./foo6_g
+Reading symbols from ./foo6_g...done.
+(gdb) start
+Temporary breakpoint 1 at 0x40052a: file foo6.c, line 7.
+Starting program: /home/xuxiaoqiang/tx/7/7.6/foo6_g 
+
+Temporary breakpoint 1, main () at foo6.c:7
+7       p2();
+(gdb) l
+2   
+3   void p2();
+4   
+5   int main()
+6   {
+7       p2();
+8       return 0;
+9   }
+(gdb) b bar6.c:7
+Breakpoint 2 at 0x40053f: file bar6.c, line 7.
+(gdb) c
+Continuing.
+
+Breakpoint 2, p2 () at bar6.c:7
+7       printf("main=0x%x\n", main);
+(gdb) x/bx main
+0x400526 &lt;main&gt;:    0x55
+(gdb) disas main
+Dump of assembler code for function main:
+   0x0000000000400526 &lt;+0&gt;: push   %rbp
+   0x0000000000400527 &lt;+1&gt;: mov    %rsp,%rbp
+   0x000000000040052a &lt;+4&gt;: mov    $0x0,%eax
+   0x000000000040052f &lt;+9&gt;: callq  0x40053b &lt;p2&gt;
+   0x0000000000400534 &lt;+14&gt;:    mov    $0x0,%eax
+   0x0000000000400539 &lt;+19&gt;:    pop    %rbp
+   0x000000000040053a &lt;+20&gt;:    retq
+End of assembler dump.
+(gdb) 
+</code></pre>
+  <p>
+   可以看出，在
+   <code>
+    bar6.c
+   </code>
+   中打印
+   <code>
+    main
+   </code>
+   变量的值时，
+   <code>
+    main
+   </code>
+   变量的地址为 0x400526，即
+   <code>
+    main
+   </code>
+   函数的地址。
+  </p>
+  <p>
+   <a href="#jump7_9题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="710">
+   <span id="jump7_10解答">
+    7.10 解答
+   </span>
+  </h4>
+  <p>
+   对于 A：p.o libx.a
+  </p>
+  <p>
+   对于 B：p.o libx.a liby.a libx.a
+  </p>
+  <p>
+   对于 C：p.o libx.a liby.a libz.a libx.a
+  </p>
+  <p>
+   <a href="#jump7_10题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="711">
+   <span id="jump7_11解答">
+    7.11 解答
+   </span>
+  </h4>
+  <p>
+   a）生成可执行目标文件
+   <code>
+    foo6
+   </code>
+   作为研究案例
+  </p>
+  <p>
+   具体生成步骤与
+   <a href="#jump7_9解答">
+    7.9解答
+   </a>
+   中的一致。
+  </p>
+  <p>
+   b）查看可执行目标文件
+   <code>
+    foo6
+   </code>
+   的程序表
+  </p>
+  <pre><code>$ readelf -l foo6
+
+Elf file type is EXEC (Executable file)
+Entry point 0x400430
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040
+                 0x00000000000001f8 0x00000000000001f8  R E    8
+  INTERP         0x0000000000000238 0x0000000000400238 0x0000000000400238
+                 0x000000000000001c 0x000000000000001c  R      1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x0000000000000744 0x0000000000000744  R E    200000
+  LOAD           0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x0000000000000228 0x0000000000000230  RW     200000
+  DYNAMIC        0x0000000000000e28 0x0000000000600e28 0x0000000000600e28
+                 0x00000000000001d0 0x00000000000001d0  RW     8
+  NOTE           0x0000000000000254 0x0000000000400254 0x0000000000400254
+                 0x0000000000000044 0x0000000000000044  R      4
+  GNU_EH_FRAME   0x00000000000005f0 0x00000000004005f0 0x00000000004005f0
+                 0x000000000000003c 0x000000000000003c  R      4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     10
+  GNU_RELRO      0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x00000000000001f0 0x00000000000001f0  R      1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame 
+   03     .init_array .fini_array .jcr .dynamic .got .got.plt .data .bss 
+   04     .dynamic 
+   05     .note.ABI-tag .note.gnu.build-id 
+   06     .eh_frame_hdr 
+   07     
+   08     .init_array .fini_array .jcr .dynamic .got 
+</code></pre>
+  <p>
+   可以看出，数据段（data segment）的起始地址为 0x0000000000600e10，目标文件中的段大小为 0x0000000000000228，内存中的段大小为 0x0000000000000230。也就是题目中所说的
+   <code>
+    程序头部表表明数据段占用了内存中 0x230 个字节。然后，其中只有开始的 0x228 字节来自可执行目标文件的节
+   </code>
+   。
+  </p>
+  <p>
+   c）是什么引起了这种差异？
+  </p>
+  <p>
+   查看可执行目标文件
+   <code>
+    foo6
+   </code>
+   的符号表：
+  </p>
+  <pre><code>$ readelf -S foo6
+There are 31 section headers, starting at offset 0x1a18:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .interp           PROGBITS         0000000000400238  00000238
+       000000000000001c  0000000000000000   A       0     0     1
+  [ 2] .note.ABI-tag     NOTE             0000000000400254  00000254
+       0000000000000020  0000000000000000   A       0     0     4
+  [ 3] .note.gnu.build-i NOTE             0000000000400274  00000274
+       0000000000000024  0000000000000000   A       0     0     4
+  [ 4] .gnu.hash         GNU_HASH         0000000000400298  00000298
+       000000000000001c  0000000000000000   A       5     0     8
+  [ 5] .dynsym           DYNSYM           00000000004002b8  000002b8
+       0000000000000060  0000000000000018   A       6     1     8
+  [ 6] .dynstr           STRTAB           0000000000400318  00000318
+       000000000000003f  0000000000000000   A       0     0     1
+  [ 7] .gnu.version      VERSYM           0000000000400358  00000358
+       0000000000000008  0000000000000002   A       5     0     2
+  [ 8] .gnu.version_r    VERNEED          0000000000400360  00000360
+       0000000000000020  0000000000000000   A       6     1     8
+  [ 9] .rela.dyn         RELA             0000000000400380  00000380
+       0000000000000018  0000000000000018   A       5     0     8
+  [10] .rela.plt         RELA             0000000000400398  00000398
+       0000000000000030  0000000000000018  AI       5    24     8
+  [11] .init             PROGBITS         00000000004003c8  000003c8
+       000000000000001a  0000000000000000  AX       0     0     4
+  [12] .plt              PROGBITS         00000000004003f0  000003f0
+       0000000000000030  0000000000000010  AX       0     0     16
+  [13] .plt.got          PROGBITS         0000000000400420  00000420
+       0000000000000008  0000000000000000  AX       0     0     8
+  [14] .text             PROGBITS         0000000000400430  00000430
+       00000000000001a2  0000000000000000  AX       0     0     16
+  [15] .fini             PROGBITS         00000000004005d4  000005d4
+       0000000000000009  0000000000000000  AX       0     0     4
+  [16] .rodata           PROGBITS         00000000004005e0  000005e0
+       000000000000000f  0000000000000000   A       0     0     4
+  [17] .eh_frame_hdr     PROGBITS         00000000004005f0  000005f0
+       000000000000003c  0000000000000000   A       0     0     4
+  [18] .eh_frame         PROGBITS         0000000000400630  00000630
+       0000000000000114  0000000000000000   A       0     0     8
+  [19] .init_array       INIT_ARRAY       0000000000600e10  00000e10
+       0000000000000008  0000000000000000  WA       0     0     8
+  [20] .fini_array       FINI_ARRAY       0000000000600e18  00000e18
+       0000000000000008  0000000000000000  WA       0     0     8
+  [21] .jcr              PROGBITS         0000000000600e20  00000e20
+       0000000000000008  0000000000000000  WA       0     0     8
+  [22] .dynamic          DYNAMIC          0000000000600e28  00000e28
+       00000000000001d0  0000000000000010  WA       6     0     8
+  [23] .got              PROGBITS         0000000000600ff8  00000ff8
+       0000000000000008  0000000000000008  WA       0     0     8
+  [24] .got.plt          PROGBITS         0000000000601000  00001000
+       0000000000000028  0000000000000008  WA       0     0     8
+  [25] .data             PROGBITS         0000000000601028  00001028
+       0000000000000010  0000000000000000  WA       0     0     8
+  [26] .bss              NOBITS           0000000000601038  00001038
+       0000000000000008  0000000000000000  WA       0     0     1
+  [27] .comment          PROGBITS         0000000000000000  00001038
+       0000000000000032  0000000000000001  MS       0     0     1
+  [28] .shstrtab         STRTAB           0000000000000000  00001907
+       000000000000010c  0000000000000000           0     0     1
+  [29] .symtab           SYMTAB           0000000000000000  00001070
+       0000000000000678  0000000000000018          30    48     8
+  [30] .strtab           STRTAB           0000000000000000  000016e8
+       000000000000021f  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+</code></pre>
+  <p>
+   从步骤
+   <code>
+    b)
+   </code>
+   中打印的程序表可以看出，数据段包含的 sections 有：.init_array、.fini_array、.jcr .dynamic、.got、.got.plt、.data、.bss 。
+  </p>
+  <p>
+   这些 sections 的大小（字节） = 0x601038 + 0x8 - 0x60e10 = 0x230（0x601038 为 .bss section 在目标文件中偏移量，0x8 为 .bss section 的大小，0x60e10 为 ..init_array section 在目标文件中偏移量）。
+  </p>
+  <p>
+   也就是说，这些 sections 在内存中会占用 0x230 字节，符合程序表中数据段占用的内存大小。由于数据段包含了
+   <code>
+    .bss
+   </code>
+   section（大小为 8 字节），而该 section 不占用目标文件的空间。因此，只有 0x228 字节来自可执行目标文件的节。
+  </p>
+  <p>
+   <a href="#jump7_11题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="712">
+   <span id="jump7_12解答">
+    7.12 解答
+   </span>
+  </h4>
+  <p>
+   根据公式 VALUE(reference) = ADDR(defined_symbol) + VALUE(r.addend) - ADDR(reference)：
+  </p>
+  <p>
+   对于 A：
+  </p>
+  <pre><code>callq 指令中对 swap 的重定位引用的值 = swap 符号定义的运行时地址 + r.addend - swap 符号引用的运行时地址
+    = 0x4004f8 + (-4) - (.text section 在可执行目标文件中的地址 + swap 符号引用在 .text section 中的偏移量)
+    = 0x4004f8 + (-4) - (0x4004e0 + 0xa)
+    = 0xa
+</code></pre>
+  <p>
+   对于 B：
+  </p>
+  <pre><code>callq 指令中对 swap 的重定位引用的值 = swap 符号定义的运行时地址 + r.addend - swap 符号引用的运行时地址
+    = 0x400500 + (-4) - (.text section 在可执行目标文件中的地址 + swap 符号引用在 .text section 中的偏移量)
+    = 0x400500 + (-4) - (0x4004d0 + 0xa)
+    = 0x22
+</code></pre>
+  <p>
+   <a href="#jump7_12题目">
+    返回题目
+   </a>
+  </p>
+  <hr/>
+  <h4 id="713">
+   <span id="jump7_13解答">
+    7.13 解答
+   </span>
+  </h4>
+  <p>
+   对于 A：
+  </p>
+  <pre><code># 查看 libc.a 中可重定位目标文件的数量
+$ ar t /usr/aarch64-linux-gnu/lib/libc.a | grep ".o" -c
+1522
+# 查看 libm.a 中可重定位目标文件的数量
+$ ar t /usr/aarch64-linux-gnu/lib/libm.a | grep ".o" -c
+431
+</code></pre>
+  <p>
+   对于 B：在我们的系统中（X86-64 Linux, Little-endian），gcc -Og 产生的可执行代码与 gcc -Og -g 产生的是相同的。
+  </p>
+  <p>
+   对于 C：
+  </p>
+  <pre><code># 查看 gcc-6 使用的共享库
+$ ldd /usr/bin/gcc-6
+    linux-vdso.so.1 =&gt;  (0x00007ffc6178d000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f58462a6000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f5846670000)
+# 查看 g++-6 使用的共享库
+$ ldd /usr/bin/g++-6
+    linux-vdso.so.1 =&gt;  (0x00007ffc129d4000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f779003f000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f7790409000)
+</code></pre>
+  <p>
+   <a href="#jump7_13题目">
+    返回题目
+   </a>
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

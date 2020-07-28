@@ -1,0 +1,858 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="16-rtld_next">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（16）：真正理解 RTLD_NEXT 的作用
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Saturday, 21. December 2019 11:58AM
+  </p>
+  <ul>
+   <li>
+    <p>
+     目录
+    </p>
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump问题描述">
+       问题描述
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump验证过程">
+       验证过程
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump验证结论">
+       验证结论
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump问题描述">
+    问题描述
+   </span>
+  </h3>
+  <p>
+   在上一篇文章《计算机系统篇之链接（15）：共享库拦截技术之运行时库打桩（上）》中，通过
+   <code>
+    RTLD_NEXT
+   </code>
+   来获取标准库
+   <code>
+    libc.so
+   </code>
+   中
+   <code>
+    malloc()
+   </code>
+   和
+   <code>
+    free()
+   </code>
+   函数的地址，从而实现了在程序加载时拦截标准库 API 的效果。抱着“知其然，知其所以然”的态度，不免心中嘀咕——为什么
+   <code>
+    RTLD_NEXT
+   </code>
+   可以充当标准库
+   <code>
+    libc.so
+   </code>
+   的句柄（
+   <code>
+    dlsym()
+   </code>
+   函数的第一个参数为指向共享库的句柄）。
+  </p>
+  <p>
+   首先，看下
+   <code>
+    RTLD_NEXT
+   </code>
+   的定义（位于
+   <code>
+    dlfcn/dlfcn.h
+   </code>
+   文件中），如下：
+  </p>
+  <pre><code>/* If the first argument of `dlsym' or `dlvsym' is set to RTLD_NEXT
+   the run-time address of the symbol called NAME in the next shared
+   object is returned.  The "next" relation is defined by the order
+   the shared objects were loaded.  */
+# define RTLD_NEXT  ((void *) -1l)
+</code></pre>
+  <p>
+   直观地，上面的注释有两层含义：
+  </p>
+  <ul>
+   <li>
+    <p>
+     如果
+     <code>
+      dlsym
+     </code>
+     或
+     <code>
+      dlvsym
+     </code>
+     函数的第一个参数的值被设置为
+     <code>
+      RTLD_NEXT
+     </code>
+     ，那么该函数返回下一个共享对象中名为
+     <code>
+      NAME
+     </code>
+     的符号的运行时地址。
+    </p>
+   </li>
+   <li>
+    <p>
+     <code>
+      下一个共享对象
+     </code>
+     是哪个，依赖于共享库被加载的顺序。
+    </p>
+   </li>
+  </ul>
+  <p>
+   那么，问题来了。正好也有两个：
+  </p>
+  <ul>
+   <li>
+    <p>
+     共享库被加载的先后顺序如何确定？
+    </p>
+   </li>
+   <li>
+    <p>
+     如果下一个被加载的共享库中没有名为
+     <code>
+      NAME
+     </code>
+     的符号时，
+     <code>
+      dlsym
+     </code>
+     或
+     <code>
+      dlvsym
+     </code>
+     函数的返回值是否为
+     <code>
+      NULL
+     </code>
+     ？
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    提示：
+   </strong>
+   在继续阅读之前，最好先自己回答上面的两个问题。如果预期结果不符合实际结果，印象才会更让人深刻！
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump验证过程">
+    验证过程
+   </span>
+  </h3>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   确定共享库被加载的先后顺序
+  </p>
+  <p>
+   1）首先，打印可执行目标文件 main 所依赖的共享库
+  </p>
+  <pre><code>$ ldd main
+    linux-vdso.so.1 =&gt;  (0x00007fff37bf4000)
+    ./mymalloc2.so (0x00007fb210f89000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb210bbf000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007fb21118b000)
+</code></pre>
+  <p>
+   上面的输出结果中，共享库的顺序有 3 种（不考虑 linux-vdso.so.1）：
+  </p>
+  <ul>
+   <li>
+    <p>
+     共享库出现的先后顺序依次为：./mymalloc2.so、libc.so.6、/lib64/ld-linux-x86-64.so.2。
+    </p>
+   </li>
+   <li>
+    <p>
+     共享库在内存中的映射地址从高到低依次为：/lib64/ld-linux-x86-64.so.2、./mymalloc2.so、libc.so.6。
+    </p>
+   </li>
+   <li>
+    <p>
+     共享库在内存中的映射地址从低到高依次为：libc.so.6、./mymalloc2.so、/lib64/ld-linux-x86-64.so.2。
+    </p>
+   </li>
+  </ul>
+  <p>
+   那么，所谓的
+   <code>
+    共享库被加载的先后顺序
+   </code>
+   是指上述三种顺序中的哪一种呢。
+  </p>
+  <p>
+   2）通过 gdb 观察可执行目标文件 main 所依赖共享库的加载顺序
+  </p>
+  <p>
+   使用 gdb 运行可执行目标文件 main：
+  </p>
+  <pre><code>$ gdb -q main
+Reading symbols from main...done.
+</code></pre>
+  <p>
+   查看当前进程有哪些 sections（此时，程序还未开始执行任何一条指令）：
+  </p>
+  <pre><code>(gdb) i files 
+Symbols from "/home/test/li_cpp/main".
+Local exec file:
+    `/home/test/li_cpp/main', file type elf64-x86-64.
+    Entry point: 0x400620
+    0x0000000000400238 - 0x0000000000400254 is .interp
+    0x0000000000400254 - 0x0000000000400274 is .note.ABI-tag
+    0x0000000000400274 - 0x0000000000400298 is .note.gnu.build-id
+    0x0000000000400298 - 0x00000000004002d0 is .gnu.hash
+    0x00000000004002d0 - 0x0000000000400420 is .dynsym
+    0x0000000000400420 - 0x00000000004004ea is .dynstr
+    0x00000000004004ea - 0x0000000000400506 is .gnu.version
+    0x0000000000400508 - 0x0000000000400528 is .gnu.version_r
+    0x0000000000400528 - 0x0000000000400540 is .rela.dyn
+    0x0000000000400540 - 0x00000000004005a0 is .rela.plt
+    0x00000000004005a0 - 0x00000000004005ba is .init
+    0x00000000004005c0 - 0x0000000000400610 is .plt
+    0x0000000000400610 - 0x0000000000400618 is .plt.got
+    0x0000000000400620 - 0x00000000004007d2 is .text
+    0x00000000004007d4 - 0x00000000004007dd is .fini
+    0x00000000004007e0 - 0x00000000004007e4 is .rodata
+    0x00000000004007e4 - 0x0000000000400818 is .eh_frame_hdr
+    0x0000000000400818 - 0x000000000040090c is .eh_frame
+    0x0000000000600e00 - 0x0000000000600e08 is .init_array
+    0x0000000000600e08 - 0x0000000000600e10 is .fini_array
+    0x0000000000600e10 - 0x0000000000600e18 is .jcr
+    0x0000000000600e18 - 0x0000000000600ff8 is .dynamic
+    0x0000000000600ff8 - 0x0000000000601000 is .got
+    0x0000000000601000 - 0x0000000000601038 is .got.plt
+    0x0000000000601038 - 0x0000000000601048 is .data
+    0x0000000000601048 - 0x0000000000601050 is .bss
+</code></pre>
+  <p>
+   可以看出，目前只是可执行目标文件 main 中的 sections 被加载到内存中了。其所依赖的共享库还未加载到内存中。
+  </p>
+  <p>
+   启动程序，并在程序的第一条指令处设置断点：
+  </p>
+  <pre><code>(gdb) starti
+Starting program: /home/test/li_cpp/main 
+
+Program stopped.
+0x00007ffff7dd7c30 in _start () from /lib64/ld-linux-x86-64.so.2
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   这里必须用
+   <code>
+    starti
+   </code>
+   命令而不是
+   <code>
+    start
+   </code>
+   命令启动程序。
+   <code>
+    starti
+   </code>
+   命令的作用相当于在程序执行的第一条指令处设置一个临时断点，然后调用
+   <code>
+    run
+   </code>
+   命令。
+  </p>
+  <p>
+   继续查看当前进程有哪些 sections：
+  </p>
+  <pre><code>(gdb) i files 
+Symbols from "/home/test/li_cpp/main".
+Native process:
+    Using the running image of child process 3544.
+    While running this, GDB does not access memory from...
+Local exec file:
+    `/home/test/li_cpp/main', file type elf64-x86-64.
+    Entry point: 0x400620
+    0x0000000000400238 - 0x0000000000400254 is .interp
+    # 省略 ...
+    0x0000000000601048 - 0x0000000000601050 is .bss
+    0x00007ffff7dd71c8 - 0x00007ffff7dd71ec is .note.gnu.build-id in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd71f0 - 0x00007ffff7dd72b0 is .hash in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd72b0 - 0x00007ffff7dd7390 is .gnu.hash in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7390 - 0x00007ffff7dd7648 is .dynsym in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7648 - 0x00007ffff7dd77ef is .dynstr in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd77f0 - 0x00007ffff7dd782a is .gnu.version in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7830 - 0x00007ffff7dd78d4 is .gnu.version_d in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd78d8 - 0x00007ffff7dd79f8 is .rela.dyn in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd79f8 - 0x00007ffff7dd7a58 is .rela.plt in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7a60 - 0x00007ffff7dd7ab0 is .plt in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7ab0 - 0x00007ffff7dd7ab8 is .plt.got in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7dd7ac0 - 0x00007ffff7df5850 is .text in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7df5860 - 0x00007ffff7df9920 is .rodata in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7df9920 - 0x00007ffff7df9921 is .stapsdt.base in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7df9924 - 0x00007ffff7df9f60 is .eh_frame_hdr in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7df9f60 - 0x00007ffff7dfc3f8 is .eh_frame in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffcbc0 - 0x00007ffff7ffce6c is .data.rel.ro in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffce70 - 0x00007ffff7ffcfe0 is .dynamic in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffcfe0 - 0x00007ffff7ffcff0 is .got in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffd000 - 0x00007ffff7ffd038 is .got.plt in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffd040 - 0x00007ffff7ffdfc0 is .data in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffdfc0 - 0x00007ffff7ffe168 is .bss in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffa120 - 0x00007ffff7ffa160 is .hash in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa160 - 0x00007ffff7ffa1a8 is .gnu.hash in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa1a8 - 0x00007ffff7ffa2b0 is .dynsym in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa2b0 - 0x00007ffff7ffa30e is .dynstr in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa30e - 0x00007ffff7ffa324 is .gnu.version in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa328 - 0x00007ffff7ffa360 is .gnu.version_d in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa360 - 0x00007ffff7ffa470 is .dynamic in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa470 - 0x00007ffff7ffa7b0 is .rodata in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa7b0 - 0x00007ffff7ffa7ec is .note in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa7ec - 0x00007ffff7ffa828 is .eh_frame_hdr in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa828 - 0x00007ffff7ffa968 is .eh_frame in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffa970 - 0x00007ffff7ffaf6a is .text in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffaf6a - 0x00007ffff7ffaff9 is .altinstructions in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7ffaff9 - 0x00007ffff7ffb01b is .altinstr_replacement in system-supplied DSO at 0x7ffff7ffa000
+</code></pre>
+  <p>
+   从上面的结果中可以看出，共享库 /lib64/ld-linux-x86-64.so.2 要先于 ./mymalloc2.so 和 libc.so.6 被加载到内存中。
+  </p>
+  <p>
+   在 main() 函数起始处设置断点，并继续执行：
+  </p>
+  <pre><code>(gdb) b main
+Breakpoint 1 at 0x40071e: file main.cpp, line 10.
+(gdb) c
+Continuing.
+
+Breakpoint 1, main () at main.cpp:10
+10      int *p1 = static_cast&lt;int *&gt;(malloc(16));
+</code></pre>
+  <p>
+   继续查看当前进程有哪些 sections：
+  </p>
+  <pre><code>(gdb) i files 
+Symbols from "/home/test/li_cpp/main".
+Native process:
+    Using the running image of child process 3544.
+    While running this, GDB does not access memory from...
+Local exec file:
+    `/home/test/li_cpp/main', file type elf64-x86-64.
+    Entry point: 0x400620
+    0x0000000000400238 - 0x0000000000400254 is .interp
+    # 省略 ...
+    0x00007ffff7ffaff9 - 0x00007ffff7ffb01b is .altinstr_replacement in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7bd51c8 - 0x00007ffff7bd51ec is .note.gnu.build-id in ./mymalloc2.so
+    0x00007ffff7bd51f0 - 0x00007ffff7bd522c is .gnu.hash in ./mymalloc2.so
+    0x00007ffff7bd5230 - 0x00007ffff7bd5380 is .dynsym in ./mymalloc2.so
+    0x00007ffff7bd5380 - 0x00007ffff7bd5431 is .dynstr in ./mymalloc2.so
+    0x00007ffff7bd5432 - 0x00007ffff7bd544e is .gnu.version in ./mymalloc2.so
+    0x00007ffff7bd5450 - 0x00007ffff7bd5470 is .gnu.version_r in ./mymalloc2.so
+    0x00007ffff7bd5470 - 0x00007ffff7bd5530 is .rela.dyn in ./mymalloc2.so
+    0x00007ffff7bd5530 - 0x00007ffff7bd5548 is .rela.plt in ./mymalloc2.so
+    0x00007ffff7bd5548 - 0x00007ffff7bd5562 is .init in ./mymalloc2.so
+    0x00007ffff7bd5570 - 0x00007ffff7bd5590 is .plt in ./mymalloc2.so
+    0x00007ffff7bd5590 - 0x00007ffff7bd55a0 is .plt.got in ./mymalloc2.so
+    0x00007ffff7bd55a0 - 0x00007ffff7bd56b3 is .text in ./mymalloc2.so
+    0x00007ffff7bd56b4 - 0x00007ffff7bd56bd is .fini in ./mymalloc2.so
+    0x00007ffff7bd56bd - 0x00007ffff7bd56c5 is .rodata in ./mymalloc2.so
+    0x00007ffff7bd56c8 - 0x00007ffff7bd56e4 is .eh_frame_hdr in ./mymalloc2.so
+    0x00007ffff7bd56e8 - 0x00007ffff7bd574c is .eh_frame in ./mymalloc2.so
+    0x00007ffff7dd5e00 - 0x00007ffff7dd5e08 is .init_array in ./mymalloc2.so
+    0x00007ffff7dd5e08 - 0x00007ffff7dd5e10 is .fini_array in ./mymalloc2.so
+    0x00007ffff7dd5e10 - 0x00007ffff7dd5e18 is .jcr in ./mymalloc2.so
+    0x00007ffff7dd5e18 - 0x00007ffff7dd5fd8 is .dynamic in ./mymalloc2.so
+    0x00007ffff7dd5fd8 - 0x00007ffff7dd6000 is .got in ./mymalloc2.so
+    0x00007ffff7dd6000 - 0x00007ffff7dd6020 is .got.plt in ./mymalloc2.so
+    0x00007ffff7dd6020 - 0x00007ffff7dd6028 is .data in ./mymalloc2.so
+    0x00007ffff7dd6028 - 0x00007ffff7dd6030 is .bss in ./mymalloc2.so
+    0x00007ffff780b270 - 0x00007ffff780b294 is .note.gnu.build-id in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff780b294 - 0x00007ffff780b2b4 is .note.ABI-tag in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff780b2b8 - 0x00007ffff780ed80 is .gnu.hash in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff780ed80 - 0x00007ffff781bff8 is .dynsym in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff781bff8 - 0x00007ffff78219d7 is .dynstr in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff78219d8 - 0x00007ffff7822b62 is .gnu.version in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7822b68 - 0x00007ffff7822edc is .gnu.version_d in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7822ee0 - 0x00007ffff7822f10 is .gnu.version_r in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7822f10 - 0x00007ffff782a680 is .rela.dyn in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff782a680 - 0x00007ffff782a7b8 is .rela.plt in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff782a7c0 - 0x00007ffff782a8a0 is .plt in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff782a8a0 - 0x00007ffff782a8b0 is .plt.got in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff782a8b0 - 0x00007ffff797db04 is .text in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff797db10 - 0x00007ffff798002d is __libc_freeres_fn in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7980030 - 0x00007ffff79802f2 is __libc_thread_freeres_fn in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7980300 - 0x00007ffff79a1650 is .rodata in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79a1650 - 0x00007ffff79a1651 is .stapsdt.base in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79a1660 - 0x00007ffff79a167c is .interp in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79a167c - 0x00007ffff79a6b38 is .eh_frame_hdr in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79a6b38 - 0x00007ffff79c73cc is .eh_frame in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79c73cc - 0x00007ffff79c780d is .gcc_except_table in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff79c7810 - 0x00007ffff79cab10 is .hash in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb7c0 - 0x00007ffff7bcb7d0 is .tdata in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb7d0 - 0x00007ffff7bcb838 is .tbss in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb7d0 - 0x00007ffff7bcb7e0 is .init_array in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb7e0 - 0x00007ffff7bcb8d8 is __libc_subfreeres in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb8d8 - 0x00007ffff7bcb8e0 is __libc_atexit in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb8e0 - 0x00007ffff7bcb900 is __libc_thread_subfreeres in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcb900 - 0x00007ffff7bceba0 is .data.rel.ro in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bceba0 - 0x00007ffff7bced80 is .dynamic in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bced80 - 0x00007ffff7bceff0 is .got in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcf000 - 0x00007ffff7bcf080 is .got.plt in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bcf080 - 0x00007ffff7bd0720 is .data in /lib/x86_64-linux-gnu/libc.so.6
+    0x00007ffff7bd0720 - 0x00007ffff7bd49a0 is .bss in /lib/x86_64-linux-gnu/libc.so.6
+</code></pre>
+  <p>
+   从上面的结果中可以看出，在共享库 /lib64/ld-linux-x86-64.so.2 被加载后，./mymalloc2.so 和 libc.so.6 也被加载到内存中。并且，共享库 ./mymalloc2.so 在内存中的映射地址要大于 libc.so.6。
+  </p>
+  <p>
+   从上面的分析过程可以得出结论：共享库被加载的先后顺序即为共享库在内存中的映射地址从高到低的顺序。
+  </p>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   研究“如果下一个被加载的共享库中没有名为
+   <code>
+    NAME
+   </code>
+   的符号时，
+   <code>
+    dlsym
+   </code>
+   或
+   <code>
+    dlvsym
+   </code>
+   函数的返回值是否为
+   <code>
+    NULL
+   </code>
+   ？”
+  </p>
+  <p>
+   0）先准备《计算机系统篇之链接（15）：共享库拦截技术之运行时库打桩（上）》中所涉及的代码和共享库。
+  </p>
+  <p>
+   1）引入第二个自定义的共享库 mymalloc2.so
+  </p>
+  <p>
+   生成共享库 mymalloc2.so：
+  </p>
+  <pre><code>$ g++ -o mymalloc2.so mymalloc2.cpp -shared -fpic -g
+</code></pre>
+  <p>
+   mymalloc2.cpp：
+  </p>
+  <pre><code>// how to compile: g++ -o mymalloc2.so mymalloc2.cpp -shared -fpic -g
+
+#include &lt;cstdio&gt;
+
+#define LOG_INFO std::printf
+
+void func()
+{
+    LOG_INFO("func()\n");
+}
+</code></pre>
+  <p>
+   2）修改 main.cpp 后生成可执行目标文件 main
+  </p>
+  <p>
+   修改后的 main.cpp：
+  </p>
+  <pre><code>// how to compile: g++ -o main main.cpp ./mymalloc2.so -g
+// how to run: LD_PRELOAD="./mymalloc.so" ./main
+
+#include &lt;malloc.h&gt;
+
+extern void func();
+
+int main()
+{
+    int *p1 = static_cast&lt;int *&gt;(malloc(16));
+    func();
+    int *p2 = static_cast&lt;int *&gt;(malloc(32));
+    free(p2);
+    free(p1);
+    return 0;
+}
+</code></pre>
+  <p>
+   这里，只是增加了对共享库
+   <code>
+    mymalloc2.so
+   </code>
+   中的
+   <code>
+    func()
+   </code>
+   函数的调用，其他未变。
+  </p>
+  <p>
+   生成可执行目标文件 main：
+  </p>
+  <pre><code>$ g++ -o main main.cpp ./mymalloc2.so -g
+</code></pre>
+  <p>
+   3）调试可执行目标文件 main
+  </p>
+  <p>
+   启动程序，并设置环境变量 LD_PRELOAD：
+  </p>
+  <pre><code>$ gdb -q main
+Reading symbols from main...done.
+(gdb) set environment LD_PRELOAD=./mymalloc.so
+(gdb) start
+Temporary breakpoint 1 at 0x40071e: file main.cpp, line 10.
+Starting program: /home/test/li_cpp/main 
+malloc(72704) = 0x602010
+
+Temporary breakpoint 1, main () at main.cpp:10
+10      int *p1 = static_cast&lt;int *&gt;(malloc(16));
+</code></pre>
+  <p>
+   查看当前进程有哪些 sections：
+  </p>
+  <pre><code>(gdb) i files 
+Symbols from "/home/test/li_cpp/main".
+Native process:
+    Using the running image of child process 25227.
+    While running this, GDB does not access memory from...
+Local exec file:
+    `/home/test/li_cpp/main', file type elf64-x86-64.
+    Entry point: 0x400620
+    0x0000000000400238 - 0x0000000000400254 is .interp
+    # 省略 ...
+    0x0000000000601048 - 0x0000000000601050 is .bss
+    0x00007ffff7dd71c8 - 0x00007ffff7dd71ec is .note.gnu.build-id in /lib64/ld-linux-x86-64.so.2
+    # 省略 ...
+    0x00007ffff7ffdfc0 - 0x00007ffff7ffe168 is .bss in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffa120 - 0x00007ffff7ffa160 is .hash in system-supplied DSO at 0x7ffff7ffa000
+    # 省略 ...
+    0x00007ffff7ffaff9 - 0x00007ffff7ffb01b is .altinstr_replacement in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7bd4200 - 0x00007ffff7bd4224 is .note.gnu.build-id in ./mymalloc.so
+    # 省略 ...
+    0x00007ffff7dd6070 - 0x00007ffff7dd6078 is .bss in ./mymalloc.so
+    0x00007ffff79d21c8 - 0x00007ffff79d21ec is .note.gnu.build-id in ./mymalloc2.so
+    # 省略 ...
+    0x00007ffff7bd3028 - 0x00007ffff7bd3030 is .bss in ./mymalloc2.so
+    0x00007ffff7608270 - 0x00007ffff7608294 is .note.gnu.build-id in /lib/x86_64-linux-gnu/libc.so.6
+    # 省略 ...
+    0x00007ffff79cd720 - 0x00007ffff79d19a0 is .bss in /lib/x86_64-linux-gnu/libc.so.6
+    # 省略 ...
+</code></pre>
+  <p>
+   从上面的结果中可以看出，在加载共享库
+   <code>
+    ./mymalloc.so
+   </code>
+   后，下一个被加载的共享库为
+   <code>
+    ./mymalloc2.so
+   </code>
+   。但是后者并没有提供
+   <code>
+    malloc()
+   </code>
+   和
+   <code>
+    free()
+   </code>
+   函数的定义。
+  </p>
+  <p>
+   继续单步调试：
+  </p>
+  <pre><code>(gdb) n
+malloc(16) = 0x614030
+11      func();
+(gdb) 
+func()
+12      int *p2 = static_cast&lt;int *&gt;(malloc(32));
+(gdb) 
+malloc(32) = 0x614050
+13      free(p2);
+(gdb) 
+free() = 0x614050
+14      free(p1);
+(gdb) 
+free() = 0x614030
+15      return 0;
+</code></pre>
+  <p>
+   从上面的结果中可以看出，共享库
+   <code>
+    ./mymalloc.so
+   </code>
+   中定义的
+   <code>
+    malloc()
+   </code>
+   和
+   <code>
+    free()
+   </code>
+   函数被调用了。也就是说， 如果下一个被加载的共享库中没有名为
+   <code>
+    NAME
+   </code>
+   的符号时，
+   <code>
+    dlsym
+   </code>
+   或
+   <code>
+    dlvsym
+   </code>
+   函数的返回值不是
+   <code>
+    NULL
+   </code>
+   。这一点，与我最初所预期的结果是不相符的。由此可见，动手实践的重要性！
+  </p>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   进一步研究：如何做，使得
+   <code>
+    RTLD_NEXT
+   </code>
+   获取的不是标准库
+   <code>
+    libc.so
+   </code>
+   中
+   <code>
+    malloc()
+   </code>
+   和
+   <code>
+    free()
+   </code>
+   函数的实现？
+  </p>
+  <p>
+   1）引入第三个自定义的共享库 mymalloc3.so
+  </p>
+  <p>
+   生成共享库 mymalloc3.so：
+  </p>
+  <pre><code>$ g++ -o mymalloc3.so mymalloc3.cpp -shared -fpic -g
+</code></pre>
+  <p>
+   mymalloc3.cpp：
+  </p>
+  <pre><code>// how to compile: g++ -o mymalloc3.so mymalloc3.cpp -shared -fpic -g
+
+#include &lt;cstdio&gt;
+
+#define LOG_INFO std::printf
+
+extern "C" {
+
+void* malloc(size_t size)
+{
+    return NULL;
+}
+
+void free(void *ptr)
+{
+    LOG_INFO("free() = %p\n", ptr);
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   2）重新生成可执行目标文件 main
+  </p>
+  <pre><code>$ g++ -o main main.cpp ./mymalloc2.so ./mymalloc3.so -g
+</code></pre>
+  <p>
+   3）调试可执行目标文件 main
+  </p>
+  <p>
+   启动程序，并设置环境变量 LD_PRELOAD：
+  </p>
+  <pre><code>$ gdb -q main
+Reading symbols from main...done.
+(gdb) set environment LD_PRELOAD=./mymalloc.so
+(gdb) start
+Temporary breakpoint 1 at 0x40072e: file main.cpp, line 10.
+Starting program: /home/test/li_cpp/main 
+malloc(72704) = (nil)
+
+Temporary breakpoint 1, main () at main.cpp:10
+10      int *p1 = static_cast&lt;int *&gt;(malloc(16));
+</code></pre>
+  <p>
+   跳进函数：
+  </p>
+  <pre><code>(gdb) s
+malloc (size=16) at mymalloc.cpp:13
+warning: Source file is more recent than executable.
+13      auto symbol_addr = dlsym(RTLD_NEXT, "malloc");
+</code></pre>
+  <p>
+   单步调试，并查看 symbol_addr 的信息：
+  </p>
+  <pre><code>(gdb) n
+14      if (!symbol_addr)
+(gdb) p symbol_addr
+$1 = (void *) 0x7ffff77d06c0 &lt;malloc(size_t)&gt;
+(gdb) info line *0x7ffff77d06c0
+Line 10 of "mymalloc3.cpp" starts at address 0x7ffff77d06c0 &lt;malloc(size_t)&gt; and ends at 0x7ffff77d06c8 &lt;malloc(size_t)+8&gt;.
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    symbol_addr
+   </code>
+   的值为
+   <code>
+    mymalloc3.cpp
+   </code>
+   中
+   <code>
+    malloc()
+   </code>
+   函数的地址，而不是
+   <code>
+    libc.so
+   </code>
+   中的。
+  </p>
+  <p>
+   查看当前进程有哪些 sections：
+  </p>
+  <pre><code>(gdb) i files 
+Symbols from "/home/test/li_cpp/main".
+Native process:
+    Using the running image of child process 691.
+    While running this, GDB does not access memory from...
+Local exec file:
+    `/home/test/li_cpp/main', file type elf64-x86-64.
+    Entry point: 0x400630
+    0x0000000000400238 - 0x0000000000400254 is .interp
+    # 省略 ...
+    0x0000000000601048 - 0x0000000000601050 is .bss
+    0x00007ffff7dd71c8 - 0x00007ffff7dd71ec is .note.gnu.build-id in /lib64/ld-linux-x86-64.so.2
+    # 省略 ...
+    0x00007ffff7ffdfc0 - 0x00007ffff7ffe168 is .bss in /lib64/ld-linux-x86-64.so.2
+    0x00007ffff7ffa120 - 0x00007ffff7ffa160 is .hash in system-supplied DSO at 0x7ffff7ffa000
+    # 省略 ...
+    0x00007ffff7ffaff9 - 0x00007ffff7ffb01b is .altinstr_replacement in system-supplied DSO at 0x7ffff7ffa000
+    0x00007ffff7bd4200 - 0x00007ffff7bd4224 is .note.gnu.build-id in ./mymalloc.so
+    # 省略 ...
+    0x00007ffff7dd6070 - 0x00007ffff7dd6078 is .bss in ./mymalloc.so
+    0x00007ffff79d21c8 - 0x00007ffff79d21ec is .note.gnu.build-id in ./mymalloc2.so
+    # 省略 ...
+    0x00007ffff7bd3028 - 0x00007ffff7bd3030 is .bss in ./mymalloc2.so
+    0x00007ffff77d01c8 - 0x00007ffff77d01ec is .note.gnu.build-id in ./mymalloc3.so
+    # 省略 ...
+    0x00007ffff79d1028 - 0x00007ffff79d1030 is .bss in ./mymalloc3.so
+    0x00007ffff7406270 - 0x00007ffff7406294 is .note.gnu.build-id in /lib/x86_64-linux-gnu/libc.so.6
+    # 省略 ...
+    0x00007ffff77cb720 - 0x00007ffff77cf9a0 is .bss in /lib/x86_64-linux-gnu/libc.so.6
+    # 省略 ...
+</code></pre>
+  <p>
+   可以看出，可执行目标文件 main 所依赖共享库的加载先后顺序依次为：/lib64/ld-linux-x86-64.so.2、./mymalloc.so、./mymalloc2.so、./mymalloc3.so、/lib/x86_64-linux-gnu/libc.so.6。也就是说，共享库 ./mymalloc2.so 要先于 /lib/x86_64-linux-gnu/libc.so.6 被加载到内存中。因此，共享库 ./mymalloc.so 的
+   <code>
+    malloc()
+   </code>
+   函数中所调用的
+   <code>
+    dlsym()
+   </code>
+   函数认为
+   <code>
+    下一个共享对象
+   </code>
+   为 ./mymalloc2.so。
+  </p>
+  <hr/>
+  <h3 id="_3">
+   <span id="jump验证结论">
+    验证结论
+   </span>
+  </h3>
+  <p>
+   如果
+   <code>
+    dlsym
+   </code>
+   或
+   <code>
+    dlvsym
+   </code>
+   函数的第一个参数的值被设置为
+   <code>
+    RTLD_NEXT
+   </code>
+   ，那么该函数返回下一个共享对象中名为
+   <code>
+    NAME
+   </code>
+   的符号的运行时地址。
+  </p>
+  <p>
+   这里，
+   <code>
+    下一个共享对象
+   </code>
+   是指下一个定义了名称为
+   <code>
+    NAME
+   </code>
+   的符号的共享库，而不是下一个加载的共享库。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

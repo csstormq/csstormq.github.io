@@ -1,0 +1,310 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="11-cc">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（11）：为什么要避免在 C/C++ 中使用全局变量
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Friday, 08. May 2020 10:20PM
+  </p>
+  <ul class="checklist">
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump避免使用全局变量的原因">
+     避免使用全局变量的原因
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump不正确地使用全局变量会引发哪些错误">
+     不正确地使用全局变量会引发哪些错误
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump如何正确地使用全局变量">
+     如何正确地使用全局变量
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump避免使用全局变量的原因">
+    避免使用全局变量的原因
+   </span>
+  </h3>
+  <p>
+   避免使用全局变量的原因之一是全局变量的不正确使用容易导致难以发现的程序错误。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump不正确地使用全局变量会引发哪些错误">
+    不正确地使用全局变量会引发哪些错误
+   </span>
+  </h3>
+  <p>
+   不正确使用全局变量会引发的典型错误：
+  </p>
+  <ul>
+   <li>
+    <p>
+     <a href="#jump全局变量的值被同名的变量修改">
+      全局变量的值被同名的全局变量修改
+     </a>
+    </p>
+   </li>
+   <li>
+    <p>
+     <a href="#jump全局变量的值被不同名的变量修改">
+      全局变量的值被不同名的全局变量修改
+     </a>
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    1）
+   </strong>
+   <span id="jump全局变量的值被同名的变量修改">
+    全局变量的值被同名的全局变量修改
+   </span>
+  </p>
+  <pre><code>$ cat test1.c
+int g_val_1 = 0;
+int g_val_2;
+
+void func()
+{
+  g_val_1 = 1;
+  g_val_2 = 2;
+}
+
+$ cat main.c 
+#include &lt;stdio.h&gt;
+
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_1=%d, g_val_2=%d\n", g_val_1, g_val_2);
+  return 0;
+}
+
+$ gcc -c test1.c -o test1.o
+$ gcc -c main.c -o main.o
+$ gcc -o main test1.o main.o
+$ ./main
+g_val_1=1, g_val_2=2
+</code></pre>
+  <p>
+   main.c 中定义的全局变量 g_val_2 的值被 test1.c 中定义的 func() 函数由 3 改为 2 了。
+  </p>
+  <p>
+   <strong>
+    2）
+   </strong>
+   <span id="jump全局变量的值被不同名的变量修改">
+    全局变量的值被不同名的全局变量修改
+   </span>
+  </p>
+  <pre><code>$ cat test2.c 
+double g_val_1;
+
+void func()
+{
+  g_val_1 = 1.1;
+}
+
+$ cat main2.c 
+#include &lt;stdio.h&gt;
+
+int g_val_0 = 1;
+int g_val_1 = 2;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_0=%d, g_val_1=%d, g_val_2=%d\n", g_val_0, g_val_1, g_val_2);
+  return 0;
+}
+$ gcc -o main2 test2.c main2.c
+/usr/bin/x86_64-linux-gnu-ld: Warning: alignment 4 of symbol `g_val_1' in /tmp/ccIc3noO.o is smaller than 8 in /tmp/ccXjyx8c.o
+/usr/bin/x86_64-linux-gnu-ld: Warning: size of symbol `g_val_1' changed from 8 in /tmp/ccXjyx8c.o to 4 in /tmp/ccIc3noO.o
+
+$ ./main2
+g_val_0=1, g_val_1=-1717986918, g_val_2=1072798105
+</code></pre>
+  <p>
+   main2.c 中定义的全局变量 g_val_2 的值被意外地修改了。
+  </p>
+  <hr/>
+  <h3 id="_3">
+   <span id="jump如何正确地使用全局变量">
+    如何正确地使用全局变量
+   </span>
+  </h3>
+  <p>
+   要想正确地使用全局变量，需要遵循以下原则：
+  </p>
+  <ul>
+   <li>
+    <p>
+     原则 1：尽量使用静态局部变量而非全局变量。
+    </p>
+   </li>
+   <li>
+    <p>
+     原则 2：每个定义的全局变量必须显式地初始化。
+    </p>
+   </li>
+   <li>
+    <p>
+     原则 3：每个引用的全局变量必须用
+     <code>
+      extern
+     </code>
+     关键字声明。
+    </p>
+   </li>
+   <li>
+    <p>
+     原则 4：利用编译器检查全局变量的不正确使用。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    1）
+   </strong>
+   为什么要遵循原则 1
+  </p>
+  <p>
+   遵循原则 1 的理由很简单，不用全局变量就不会产生全局变量可能引发的错误。
+  </p>
+  <p>
+   如果一个目标模块中多个函数都会引用同一个变量，并且其他目标模块不会引用该变量，那么将该变量声明为静态局部变量。如果一个变量除了定义它的目标模块以外还会被其他目标模块引用，那么本原则就不适用了。
+  </p>
+  <p>
+   注：一个目标模块指的是一个源文件。
+  </p>
+  <p>
+   <strong>
+    2）
+   </strong>
+   为什么要遵循原则 2
+  </p>
+  <p>
+   遵循原则 2 的理由：编译器和链接器对未初始化的全局变量的处理规则会导致影响程序正确性的行为，但它们不会报任何错误。要想真正理解这一点，需要先理解
+   <code>
+    符号解析
+   </code>
+   和
+   <code>
+    gcc/g++ 处理 .c 和 .cpp 源文件时的区别
+   </code>
+   ，可以参考作者的另一篇文章——
+   <code>
+    计算机系统篇之链接（4）：符号解析
+   </code>
+   。
+  </p>
+  <p>
+   <strong>
+    3）
+   </strong>
+   为什么要遵循原则 3
+  </p>
+  <p>
+   遵循原则 3 的理由：对于 C++ 程序（以 .cpp 或 .cc 结尾的源文件），对全局变量的引用如果不用
+   <code>
+    extern
+   </code>
+   关键字修饰，链接器会直接报错。对于 C 程序（以 .c 结尾的源文件），对全局变量的引用如果不用
+   <code>
+    extern
+   </code>
+   关键字修饰，虽然不会报错，但容易引发上述典型错误。因此，无论是 C 程序还是 C++ 程序，用
+   <code>
+    extern
+   </code>
+   关键字修饰对全局变量的引用都是一个好习惯。
+  </p>
+  <p>
+   <strong>
+    4）
+   </strong>
+   为什么要遵循原则 4
+  </p>
+  <p>
+   遵循原则 4 的理由：对于 C 程序，如果使用 gcc 编译，容易引发上述典型错误。因为使用 gcc 编译 C 程序时，实际调用的编译器是
+   <code>
+    c1
+   </code>
+   ，而编译器
+   <code>
+    c1
+   </code>
+   的默认行为是将未初始化的全局变量放到
+   <code>
+    COMMON
+   </code>
+   块中，从而允许链接器合并临时定义，可以理解为弱符号，所以容易引发上述典型错误。因此，对于该情形，在编译时添加选项
+   <code>
+    -fno-common
+   </code>
+   从而指示编译器
+   <code>
+    c1
+   </code>
+   将未初始化的全局变量放到
+   <code>
+    .bss
+   </code>
+   section 中，从而不允许链接器合并临时定义，可以理解为强符号。对于 C++ 程序，无论是 gcc 还是 g++ 都不会引发上述典型错误。因为对于 C++ 程序，无论是用 gcc 编译还是用 g++编译，实际调用的编译器都是
+   <code>
+    cc1plus
+   </code>
+   ，而编译器
+   <code>
+    cc1plus
+   </code>
+   的默认行为是将未初始化的全局变量放到
+   <code>
+    .bss
+   </code>
+   section 中。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="131">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（13）：升级共享库导致程序运行时错误之案例1
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Saturday, 21. December 2019 11:58AM
+  </p>
+  <ul class="checklist">
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump问题描述">
+     问题描述
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump问题复现">
+     问题复现
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump原因分析">
+     原因分析
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump解决方案">
+     解决方案
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump问题描述">
+    问题描述
+   </span>
+  </h3>
+  <p>
+   问题可以简单描述为：可执行目标文件 main 依赖共享库 libb.so 和 liba.so，而 libb.so 也依赖 liba.so。但是，可执行目标文件 main 所依赖的 liba.so 版本为 liba.so.2.0，而 libb.so 所依赖的 liba.so 版本为 liba.so.1.0。当运行 main 时，程序崩溃退出。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump问题复现">
+    问题复现
+   </span>
+  </h3>
+  <p>
+   <strong>
+    step 0：
+   </strong>
+   目录结构如下
+  </p>
+  <pre><code>test
+├── exe
+│   ├── main
+│   └── main.cpp
+├── liba_v1.0
+│   ├── data.cpp
+│   ├── data.h
+│   └── liba.so.1.0
+├── liba_v2.0
+│   ├── data.cpp
+│   ├── data.h
+│   └── liba.so.2.0
+└── libb
+    ├── init.cpp
+    ├── init.h
+    └── libb.so
+</code></pre>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   生成共享库 liba.so.1.0
+  </p>
+  <p>
+   在 test/liba_v1.0 目录下执行如下命令：
+  </p>
+  <pre><code>$ g++ -o liba.so.1.0 data.cpp -shared -fpic -g
+</code></pre>
+  <p>
+   test/liba_v1.0/data.h:
+  </p>
+  <pre><code>#pragma once
+
+namespace core {
+
+struct NodeData
+{
+    NodeData(int val1, int val2, int val3)
+    : num(val1), type(val2), flag(val3)
+    {
+    }
+
+    int num;
+    int type;
+    int flag;
+};
+
+class Node
+{
+public:
+    Node(int num, int type, int flag);
+    ~Node();
+
+    int count() const;
+    int type() const;
+    int flag() const;
+    bool isNull() const { return pdata_-&gt;type == 0; }
+
+private:
+    NodeData *pdata_;
+};
+
+}   // namespace core
+</code></pre>
+  <p>
+   test/liba_v1.0/data.cpp:
+  </p>
+  <pre><code>#include "data.h"
+
+namespace core {
+
+Node::Node(int num, int type, int flag)
+: pdata_(nullptr)
+{
+    pdata_ = new NodeData(num, type, flag);
+}
+
+Node::~Node()
+{
+    if (!pdata_)
+    {
+        delete pdata_;
+    }
+}
+
+int Node::count() const
+{
+    return pdata_-&gt;num;
+}
+
+int Node::type() const
+{
+    return pdata_-&gt;type;
+}
+
+int Node::flag() const
+{
+    return pdata_-&gt;flag;
+}
+
+}   // namespace core
+</code></pre>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   生成共享库 libb.so
+  </p>
+  <p>
+   在 test/libb 目录下执行如下命令：
+  </p>
+  <pre><code>$ g++ -o libb.so init.cpp -shared -fpic -g -I../liba_v1.0
+</code></pre>
+  <p>
+   test/libb/init.h:
+  </p>
+  <pre><code>#pragma once
+
+namespace sys {
+
+void init();
+
+}   // namespace sys
+</code></pre>
+  <p>
+   test/libb/init.cpp:
+  </p>
+  <pre><code>#include "init.h"
+#include "data.h"
+#include &lt;iostream&gt;
+
+namespace sys {
+
+void init()
+{
+    core::Node node(1, 2, 3);
+    if (node.isNull())
+    {
+        std::cout &lt;&lt; "error: type is 0, not expected" &lt;&lt; std::endl;
+    }
+}
+
+}   // namespace sys
+</code></pre>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   生成共享库 liba.so.2.0
+  </p>
+  <p>
+   在 test/liba_v2.0 目录下执行如下命令：
+  </p>
+  <pre><code>$ g++ -o liba.so.2.0 data.cpp -shared -fpic -g
+</code></pre>
+  <p>
+   test/liba_v2.0/data.h:
+  </p>
+  <pre><code>#pragma once
+
+namespace core {
+
+struct NodeData
+{
+    NodeData(int val1, int val2, int val3)
+    : num(val1), is_valid(false), type(val2), flag(val3)
+    {
+    }
+
+    int num;
+    bool is_valid;
+    int type;
+    int flag;
+};
+
+class Node
+{
+public:
+    Node(int num, int type, int flag);
+    ~Node();
+
+    int count() const;
+    int type() const;
+    int flag() const;
+    bool isNull() const { return pdata_-&gt;type == 0; }
+
+private:
+    NodeData *pdata_;
+};
+
+}   // namespace core
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   相比于 liba.so.1.0，liba.so.2.0 只在 NodeData 中增加了数据成员 is_valid，其余不变。
+  </p>
+  <p>
+   test/liba_v2.0/data.cpp:
+  </p>
+  <pre><code>#include "data.h"
+
+namespace core {
+
+Node::Node(int num, int type, int flag)
+: pdata_(nullptr)
+{
+    pdata_ = new NodeData(num, type, flag);
+}
+
+Node::~Node()
+{
+    if (!pdata_)
+    {
+        delete pdata_;
+    }
+}
+
+int Node::count() const
+{
+    return pdata_-&gt;num;
+}
+
+int Node::type() const
+{
+    return pdata_-&gt;type;
+}
+
+int Node::flag() const
+{
+    return pdata_-&gt;flag;
+}
+
+}   // namespace core
+</code></pre>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   生成可执行目标文件 main
+  </p>
+  <pre><code>$ g++ -o main main.cpp ../libb/libb.so ../liba_v2.0/liba.so.2.0 -g -I../liba_v2.0 -I../libb
+</code></pre>
+  <p>
+   test/exe/main.cpp:
+  </p>
+  <pre><code>#include "init.h"
+#include "data.h"
+#include &lt;iostream&gt;
+
+int main()
+{
+#define TYPE 5
+    sys::init();
+
+    core::Node node(4, TYPE, 6);
+    const auto node_type = node.type();
+    std::cout &lt;&lt; "actual type = " &lt;&lt; node_type &lt;&lt; " in main()"
+              &lt;&lt; ", expected type = " &lt;&lt; TYPE &lt;&lt; std::endl;
+#undef TYPE
+
+    return 0;
+}
+</code></pre>
+  <p>
+   <strong>
+    step 5：
+   </strong>
+   运行可执行目标文件 main
+  </p>
+  <p>
+   在 test/exe 目录下执行如下命令：
+  </p>
+  <pre><code>$ ./main
+</code></pre>
+  <p>
+   运行结果为：
+  </p>
+  <pre><code>error: type is 0, not expected
+actual type = 5 in main(), expected type = 5
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   init() 函数中 node.pdata_-&gt;type 的应该被赋值为 2，而实际值为 0，不符合预期结果。即程序运行时发生了错误。
+  </p>
+  <hr/>
+  <h3 id="_3">
+   <span id="jump原因分析">
+    原因分析
+   </span>
+  </h3>
+  <p>
+   1）使用 gdb 运行可执行目标文件 main
+  </p>
+  <pre><code>$ gdb -q ./main
+Reading symbols from ./main...done.
+(gdb) start
+Temporary breakpoint 1 at 0x400c3f: file main.cpp, line 6.
+Starting program: /home/xuxiaoqiang/Desktop/test/exe/main 
+
+Temporary breakpoint 1, main () at main.cpp:6
+6   {
+(gdb) n
+8       sys::init();
+(gdb) s
+sys::init () at init.cpp:8
+8   {
+(gdb) n
+9       core::Node node(1, 2, 3);
+</code></pre>
+  <p>
+   2）进入 Node::Node 函数
+  </p>
+  <pre><code>(gdb) s
+core::Node::Node (this=0x7fffffffd8d0, num=1, type=2, flag=3) at data.cpp:6
+6   : pdata_(nullptr)
+(gdb) disas 
+Dump of assembler code for function core::Node::Node(int, int, int):
+   0x00007ffff79d28e0 &lt;+0&gt;: push   %rbp
+   0x00007ffff79d28e1 &lt;+1&gt;: mov    %rsp,%rbp
+   0x00007ffff79d28e4 &lt;+4&gt;: push   %rbx
+   0x00007ffff79d28e5 &lt;+5&gt;: sub    $0x28,%rsp
+   0x00007ffff79d28e9 &lt;+9&gt;: mov    %rdi,-0x18(%rbp)
+   0x00007ffff79d28ed &lt;+13&gt;:    mov    %esi,-0x1c(%rbp)
+   0x00007ffff79d28f0 &lt;+16&gt;:    mov    %edx,-0x20(%rbp)
+   0x00007ffff79d28f3 &lt;+19&gt;:    mov    %ecx,-0x24(%rbp)
+=&gt; 0x00007ffff79d28f6 &lt;+22&gt;:    mov    -0x18(%rbp),%rax
+   0x00007ffff79d28fa &lt;+26&gt;:    movq   $0x0,(%rax)
+   0x00007ffff79d2901 &lt;+33&gt;:    mov    $0x10,%edi
+   0x00007ffff79d2906 &lt;+38&gt;:    callq  0x7ffff79d27c0 &lt;_Znwm@plt&gt;
+   0x00007ffff79d290b &lt;+43&gt;:    mov    %rax,%rbx
+   0x00007ffff79d290e &lt;+46&gt;:    mov    -0x24(%rbp),%ecx
+   0x00007ffff79d2911 &lt;+49&gt;:    mov    -0x20(%rbp),%edx
+   0x00007ffff79d2914 &lt;+52&gt;:    mov    -0x1c(%rbp),%eax
+   0x00007ffff79d2917 &lt;+55&gt;:    mov    %eax,%esi
+   0x00007ffff79d2919 &lt;+57&gt;:    mov    %rbx,%rdi
+   0x00007ffff79d291c &lt;+60&gt;:    callq  0x7ffff79d27b0 &lt;_ZN4core8NodeDataC1Eiii@plt&gt;
+   0x00007ffff79d2921 &lt;+65&gt;:    mov    -0x18(%rbp),%rax
+   0x00007ffff79d2925 &lt;+69&gt;:    mov    %rbx,(%rax)
+   0x00007ffff79d2928 &lt;+72&gt;:    nop
+---Type &lt;return&gt; to continue, or q &lt;return&gt; to quit---q
+Quit
+(gdb) info symbol 0x00007ffff79d28e0
+core::Node::Node(int, int, int) in section .text of ../liba_v2.0/liba.so.2.0
+</code></pre>
+  <p>
+   从上面看出，init() 函数实际调用的是定义在 liba.so.2.0 中 Node 构造函数，而不是 liba.so.1.0 中的。
+  </p>
+  <p>
+   3）进入 NodeData::NodeData
+  </p>
+  <pre><code>(gdb) n
+8       pdata_ = new NodeData(num, type, flag);
+(gdb) s
+core::NodeData::NodeData (this=0x614c20, val1=1, val2=2, val3=3) at data.h:8
+8       : num(val1), is_valid(false), type(val2), flag(val3)
+(gdb) disas
+Dump of assembler code for function core::NodeData::NodeData(int, int, int):
+   0x00007ffff79d299c &lt;+0&gt;: push   %rbp
+   0x00007ffff79d299d &lt;+1&gt;: mov    %rsp,%rbp
+   0x00007ffff79d29a0 &lt;+4&gt;: mov    %rdi,-0x8(%rbp)
+   0x00007ffff79d29a4 &lt;+8&gt;: mov    %esi,-0xc(%rbp)
+   0x00007ffff79d29a7 &lt;+11&gt;:    mov    %edx,-0x10(%rbp)
+   0x00007ffff79d29aa &lt;+14&gt;:    mov    %ecx,-0x14(%rbp)
+=&gt; 0x00007ffff79d29ad &lt;+17&gt;:    mov    -0x8(%rbp),%rax
+   0x00007ffff79d29b1 &lt;+21&gt;:    mov    -0xc(%rbp),%edx
+   0x00007ffff79d29b4 &lt;+24&gt;:    mov    %edx,(%rax)
+   0x00007ffff79d29b6 &lt;+26&gt;:    mov    -0x8(%rbp),%rax
+   0x00007ffff79d29ba &lt;+30&gt;:    movb   $0x0,0x4(%rax)
+   0x00007ffff79d29be &lt;+34&gt;:    mov    -0x8(%rbp),%rax
+   0x00007ffff79d29c2 &lt;+38&gt;:    mov    -0x10(%rbp),%edx
+   0x00007ffff79d29c5 &lt;+41&gt;:    mov    %edx,0x8(%rax)
+   0x00007ffff79d29c8 &lt;+44&gt;:    mov    -0x8(%rbp),%rax
+   0x00007ffff79d29cc &lt;+48&gt;:    mov    -0x14(%rbp),%edx
+   0x00007ffff79d29cf &lt;+51&gt;:    mov    %edx,0xc(%rax)
+   0x00007ffff79d29d2 &lt;+54&gt;:    nop
+   0x00007ffff79d29d3 &lt;+55&gt;:    pop    %rbp
+   0x00007ffff79d29d4 &lt;+56&gt;:    retq   
+End of assembler dump.
+(gdb) info symbol 0x00007ffff79d299c
+core::NodeData::NodeData(int, int, int) in section .text of ../liba_v2.0/liba.so.2.0
+</code></pre>
+  <p>
+   从上面看出，init() 函数实际调用的是定义在 liba.so.2.0 中 NodeData 构造函数，而不是 liba.so.1.0 中的。
+  </p>
+  <p>
+   4）打印 NodeData 的 this 指针的内容
+  </p>
+  <pre><code>(gdb) p *this
+$1 = {num = 0, is_valid = false, type = 0, flag = 0}
+(gdb) display *this
+1: *this = {num = 0, is_valid = false, type = 0, flag = 0}
+(gdb) ni
+0x00007ffff79d29b1  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 0, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29b4  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 0, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29b6  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29ba  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29be  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29c2  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29c5  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 0, flag = 0}
+(gdb) 
+0x00007ffff79d29c8  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 2, flag = 0}
+(gdb) 
+0x00007ffff79d29cc  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 2, flag = 0}
+(gdb) 
+0x00007ffff79d29cf  8       : num(val1), is_valid(false), type(val2), flag(val3)
+1: *this = {num = 1, is_valid = false, type = 2, flag = 0}
+(gdb) 
+10      }
+1: *this = {num = 1, is_valid = false, type = 2, flag = 3}
+(gdb) p/x this
+$2 = 0x614c20
+(gdb) p/x &amp;this-&gt;type
+$3 = 0x614c28
+(gdb) n
+core::Node::Node (this=0x7fffffffd8d0, num=1, type=2, flag=3) at data.cpp:9
+9   }
+</code></pre>
+  <p>
+   从上面可以看出，init() 函数中局部变量 node 的数据成员 pdata_ 实际指向的是一个大小为 16 字节的 NodeData 对象，并且数据成员 type 的地址在对象内部的偏移量为 8。从 libb.so 的角度来看，这两点都不符合预期。
+  </p>
+  <p>
+   5）进入 Node::isNull() 函数
+  </p>
+  <pre><code>(gdb) n
+sys::init () at init.cpp:10
+10      if (node.isNull())
+(gdb) s
+core::Node::isNull (this=0x7fffffffd8d0) at ../liba_v1.0/data.h:26
+26      bool isNull() const { return pdata_-&gt;type == 0; }
+(gdb) disas
+Dump of assembler code for function core::Node::isNull() const:
+   0x00007ffff7bd4c80 &lt;+0&gt;: push   %rbp
+   0x00007ffff7bd4c81 &lt;+1&gt;: mov    %rsp,%rbp
+   0x00007ffff7bd4c84 &lt;+4&gt;: mov    %rdi,-0x8(%rbp)
+=&gt; 0x00007ffff7bd4c88 &lt;+8&gt;: mov    -0x8(%rbp),%rax
+   0x00007ffff7bd4c8c &lt;+12&gt;:    mov    (%rax),%rax
+   0x00007ffff7bd4c8f &lt;+15&gt;:    mov    0x4(%rax),%eax
+   0x00007ffff7bd4c92 &lt;+18&gt;:    test   %eax,%eax
+   0x00007ffff7bd4c94 &lt;+20&gt;:    sete   %al
+   0x00007ffff7bd4c97 &lt;+23&gt;:    pop    %rbp
+   0x00007ffff7bd4c98 &lt;+24&gt;:    retq
+End of assembler dump.
+(gdb) info symbol 0x00007ffff7bd4c80
+core::Node::isNull() const in section .text of ../libb/libb.so
+</code></pre>
+  <p>
+   从上面可以看出，init() 函数中实际所调用的 isNull() 函数定义在 ../liba_v1.0/data.h 中。
+  </p>
+  <p>
+   6）打印 pdata_ 及其数据成员
+  </p>
+  <pre><code>(gdb) p/x pdata_
+$4 = 0x614c20
+(gdb) p/x &amp;pdata_-&gt;type
+$5 = 0x614c24
+(gdb) p/x pdata_-&gt;type
+$6 = 0x0
+(gdb) n
+sys::init () at init.cpp:12
+12          std::cout &lt;&lt; "error: type is 0, not expected" &lt;&lt; std::endl;
+</code></pre>
+  <p>
+   从上面可以看出，isNull() 函数中所访问的 pdata_-&gt;type 的地址在对象内部的偏移量为 4。而该偏移量实际对应的字段为 pdata_-&gt;is_valid，值为 0。因此，导致了 init() 函数在运行时执行 isNull() 函数的结果不符合预期。
+  </p>
+  <p>
+   因此，可以得出结论：导致程序运行时错误的原因为：main 所依赖的 liba.so 的版本与 libb.so 所依赖的 liba.so 的版本不兼容（对象布局不一致）。
+  </p>
+  <hr/>
+  <h3 id="_4">
+   <span id="jump解决方案">
+    解决方案
+   </span>
+  </h3>
+  <p>
+   解决方案之一：将 libb.so 所依赖的 liba.so 的版本升级为 liba.so.2.0，并重新编译 libb.so。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

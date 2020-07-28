@@ -1,0 +1,886 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="5">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（5）：重定位
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Wednesday, 15. April 2020 04:35PM
+  </p>
+  <ul class="checklist">
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump重定位的整体过程">
+     重定位的整体过程
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump重定位条目">
+     重定位条目
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump重定位类型">
+     重定位类型
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump重定位符号引用">
+     重定位符号引用
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump重定位的整体过程">
+    重定位的整体过程
+   </span>
+  </h3>
+  <p>
+   重定位的目的是确定每个符号定义的运行时内存地址，并修改对这些符号的引用，使之指向符号定义的运行时内存地址。
+  </p>
+  <p>
+   重定位的整体过程可以分为两个步骤：
+  </p>
+  <ul>
+   <li>
+    <p>
+     重定位节和符号定义。链接器将输入目标文件的相同节合并成一个节，合并的节将作为可执行目标文件中此类型的节。随后，链接器确定每个合并节的运行时内存地址，并确定合并节中符号定义的运行时内存地址。这一步骤完成后，可执行目标文件中的所有指令和符号定义的运行时内存地址就唯一确定了。
+    </p>
+   </li>
+   <li>
+    <p>
+     重定位节中的符号引用。链接器修改所有的符号引用，使之指向符号定义的运行时内存地址。链接器要执行此步骤依赖于目标文件中的重定位信息。
+    </p>
+   </li>
+  </ul>
+  <h3 id="_2">
+   <span id="jump重定位条目">
+    重定位条目
+   </span>
+  </h3>
+  <p>
+   ELF 中的重定位条目分为两种格式：
+   <code>
+    Rel
+   </code>
+   和
+   <code>
+    Rela
+   </code>
+   。每个重定位条目表示一个必须被重定位的符号引用，并指明如何计算被修改的符号引用。重定位条目由汇编器生成。
+  </p>
+  <p>
+   查看可重定位目标文件中的重定位信息：
+  </p>
+  <pre><code>$ readelf -r main.o
+
+Relocation section '.rela.text' at offset 0x208 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000005  000b00000002 R_X86_64_PC32     0000000000000000 _Z4funcv - 4
+
+Relocation section '.rela.eh_frame' at offset 0x220 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000020  000200000002 R_X86_64_PC32     0000000000000000 .text + 0
+</code></pre>
+  <ul>
+   <li>
+    <p>
+     注：
+    </p>
+    <ul>
+     <li>
+      <p>
+       <code>
+        Offset
+       </code>
+       是 Relocation Entry 结构体中的第 1 个字段，占用 8 字节，表示需要修改的符号引用的位置。对于可重定位目标文件，该字段表示需要修改的符号引用的起始位置在目标 section （
+       <code>
+        .rela.text
+       </code>
+       中的重定位条目对应的目标 section 为
+       <code>
+        .text
+       </code>
+       ，
+       <code>
+        .rela.data
+       </code>
+       中的重定位条目对应的目标 section 为
+       <code>
+        .data
+       </code>
+       ，以此类推）中的偏移量（字节）。对于可执行目标文件和可共享目标文件，该字段表示需要修改的符号引用的起始位置所对应的虚拟内存地址。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        Info
+       </code>
+       是 Relocation Entry 结构体中的第 2 个字段，占用 8 字节，表示符号表索引和重定位类型（符号表索引占用高 32 位，重定位类型占用低 32 位）。
+      </p>
+      <p>
+       符号表索引表示需要修改的符号引用在
+       <code>
+        .symtab
+       </code>
+       section中的索引。这里的
+       <code>
+        Sym. Value
+       </code>
+       和
+       <code>
+        Sym. Name
+       </code>
+       列只是打印了所对应符号表条目中
+       <code>
+        Value
+       </code>
+       和
+       <code>
+        Name
+       </code>
+       列的值。
+      </p>
+      <p>
+       重定位类型指示链接器如何修改该符号引用的值。重定位类型因不同的处理器而异。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        Addend
+       </code>
+       是 Relocation Entry 结构体中的第 3 个字段，占用 8 字节，表示一个有符号常数，一些重定位类型要使用它对被修改符号引用的值做偏移调整。
+      </p>
+     </li>
+     <li>
+      <p>
+       重定位条目
+       <code>
+        Rel
+       </code>
+       和
+       <code>
+        Rela
+       </code>
+       之间的唯一区别：
+       <code>
+        Rel
+       </code>
+       中没有
+       <code>
+        Addend
+       </code>
+       字段。
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <p>
+   源码：
+  </p>
+  <pre><code>$ cat test.cpp 
+extern int g_val_1;
+extern int g_val_2;
+
+void func()
+{
+  g_val_1 *= 2;
+  g_val_2 *= 2;
+}
+
+$ cat main.cpp 
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  return 0;
+}
+</code></pre>
+  <p>
+   1）验证
+   <code>
+    对于可重定位目标文件，Offset 字段表示需要修改的符号引用的起始位置在目标 section 中的偏移量（字节）
+   </code>
+  </p>
+  <p>
+   可重定位目标文件
+   <code>
+    main.o
+   </code>
+   中代码的重定位条目放在
+   <code>
+    .rela.text
+   </code>
+   section 中。该 section 只包含一个重定位条目，其中
+   <code>
+    Offset
+   </code>
+   字段的值为 0x5，表示在目标 section （即
+   <code>
+    .text
+   </code>
+   ）中起始位置为 0x5 的内容需要被修改。如果该内容的值在可执行目标文件
+   <code>
+    main
+   </code>
+   中被修改了，即可验证此结论。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    main.o
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section：
+  </p>
+  <pre><code>$ objdump -d main.o
+
+main.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 &lt;main&gt;:
+   0:   55                      push   %rbp
+   1:   48 89 e5                mov    %rsp,%rbp
+   4:   e8 00 00 00 00          callq  9 &lt;main+0x9&gt;
+   9:   b8 00 00 00 00          mov    $0x0,%eax
+   e:   5d                      pop    %rbp
+   f:   c3                      retq   
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    main.o
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section 中偏移量（相对于
+   <code>
+    .text
+   </code>
+   的起始位置，即相对于
+   <code>
+    main
+   </code>
+   函数的起始位置）为 0x5 的内容的当前值为 0x0。这里有两点需要注意：1）由于偏移量为 0x5 的位置与下一条指令的开始位置之间有 4 个字节，所以该内容占用 4 字节；2）由于
+   <code>
+    main.o
+   </code>
+   的字节序是小端，所以，
+   <code>
+    00 00 00 00
+   </code>
+   中最右边的
+   <code>
+    00
+   </code>
+   对应的地址为偏移量 0x5。
+  </p>
+  <p>
+   查看可执行目标文件
+   <code>
+    main
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section：
+  </p>
+  <pre><code>$ objdump -d main
+
+main:     file format elf64-x86-64
+
+# 省略...
+
+Disassembly of section .text:
+
+# 省略...
+
+00000000004004d6 &lt;main&gt;:
+  4004d6:   55                      push   %rbp
+  4004d7:   48 89 e5                mov    %rsp,%rbp
+  4004da:   e8 07 00 00 00          callq  4004e6 &lt;_Z4funcv&gt;
+  4004df:   b8 00 00 00 00          mov    $0x0,%eax
+  4004e4:   5d                      pop    %rbp
+  4004e5:   c3                      retq   
+
+# 省略...
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    main
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section 的
+   <code>
+    main
+   </code>
+   函数中偏移量（相对于
+   <code>
+    main
+   </code>
+   函数的起始位置）为 0x5 的内容的当前值为 0x7。即该内容的值由原来的 0x0 被修改为了 0x7。因此，验证了结论
+   <code>
+    对于可重定位目标文件，Offset 字段表示需要修改的符号引用的起始位置在目标 section 中的偏移量（字节）
+   </code>
+   。
+  </p>
+  <p>
+   2）验证
+   <code>
+    Info 字段的高 32 位的值表示需要修改的符号引用在
+   </code>
+   .symtab
+   <code>
+    section中的索引
+   </code>
+  </p>
+  <p>
+   可重定位目标文件
+   <code>
+    main.o
+   </code>
+   的
+   <code>
+    .rela.text
+   </code>
+   section 只包含一个重定位条目，其中
+   <code>
+    Info
+   </code>
+   字段的值为 0x000b00000002（高 32 位的值为 0xb），符号名称（即
+   <code>
+    Sym. Name
+   </code>
+   列的值）为
+   <code>
+    _Z4funcv
+   </code>
+   。如果
+   <code>
+    main.o
+   </code>
+   的
+   <code>
+    symtab
+   </code>
+   section 中索引为 0xb 的符号表条目为
+   <code>
+    _Z4funcv
+   </code>
+   ，即可验证此结论。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    main.o
+   </code>
+   的
+   <code>
+    symtab
+   </code>
+   section：
+  </p>
+  <pre><code>$ readelf -s main.o
+
+Symbol table '.symtab' contains 12 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.cpp
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    3 g_val_2
+    10: 0000000000000000    16 FUNC    GLOBAL DEFAULT    1 main
+    11: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _Z4funcv
+</code></pre>
+  <p>
+   从上面结果中可以看出，
+   <code>
+    symtab
+   </code>
+   section 中索引为 0xb 的符号表条目正是
+   <code>
+    _Z4funcv
+   </code>
+   。因此，验证了结论
+   <code>
+    Info 字段的高 32 位的值表示需要修改的符号引用在
+   </code>
+   .symtab
+   <code>
+    section中的索引
+   </code>
+   。
+  </p>
+  <h3 id="_3">
+   <span id="jump重定位类型">
+    重定位类型
+   </span>
+  </h3>
+  <ul>
+   <li>
+    X86_64 中的重定位类型（部分）
+   </li>
+  </ul>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      X86_64 中的重定位类型
+     </th>
+     <th>
+      含义
+     </th>
+     <th>
+      地址在指令中占用的字节数
+     </th>
+     <th>
+      符号引用的值如何计算
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      R_X86_64_PC32
+     </td>
+     <td>
+      32 位 PC 相对地址
+     </td>
+     <td>
+      4
+     </td>
+     <td>
+      <a href="#jump重定位类型R_X86_64_PC32">
+       计算方式详见下文
+      </a>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      R_X86_64_64
+     </td>
+     <td>
+      64 位绝对地址
+     </td>
+     <td>
+      8
+     </td>
+     <td>
+      <a href="#jump重定位类型R_X86_64_64">
+       计算方式详见下文
+      </a>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      R_X86_64_32
+     </td>
+     <td>
+      32 位绝对地址
+     </td>
+     <td>
+      4
+     </td>
+     <td>
+      <a href="#jump重定位类型R_X86_64_32">
+       计算方式详见下文
+      </a>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   1）
+   <span id="jump重定位类型R_X86_64_PC32">
+    重定位类型 R_X86_64_PC32 如何计算符号引用的值
+   </span>
+  </p>
+  <p>
+   重定位类型
+   <code>
+    R_X86_64_PC32
+   </code>
+   表示重定位符号引用的结果是一个 32 位的 PC 相对地址。
+  </p>
+  <p>
+   一个 PC 相对地址就是距程序计数器（即
+   <code>
+    PC
+   </code>
+   寄存器）的当前运行时值的偏移量。当 CPU 执行一条使用 32 位 PC 相对寻址的指令时，它会将指令中编码的 32 位值加上 PC 寄存器的当前运行值，作为目的地址（如
+   <code>
+    call
+   </code>
+   指令的目标地址），PC 寄存器中的值通常是下一条指令在内存中的地址。
+  </p>
+  <p>
+   因此，可以得出公式1：
+   <code>
+    ADDR(PC) + VALUE(reference) = ADDR(defined_symbol)
+   </code>
+   。
+  </p>
+  <p>
+   注：
+   <code>
+    ADDR(PC)
+   </code>
+   表示符号引用所在指令的下一条指令的运行时地址；
+   <code>
+    VALUE(reference)
+   </code>
+   表示要修改的符号引用的值，重定位符号引用的目的就是计算出该值的大小；
+   <code>
+    ADDR(defined_symbol)
+   </code>
+   表示被引用的符号定义的运行时地址。
+  </p>
+  <p>
+   另外，公式2：
+   <code>
+    ADDR(PC) + VALUE(r.addend) = ADDR(s) + VALUE(r.offset)
+   </code>
+   。（该公式是根据结果反向推导而来的）
+  </p>
+  <p>
+   注：
+   <code>
+    VALUE(r.addend)
+   </code>
+   表示重定位条目中
+   <code>
+    addend
+   </code>
+   字段的值；
+   <code>
+    ADDR(s)
+   </code>
+   表示符号引用的目标 section 的运行时地址；
+   <code>
+    VALUE(r.offset)
+   </code>
+   表示重定位条目中
+   <code>
+    offset
+   </code>
+   字段的值；。
+  </p>
+  <p>
+   根据公式1和公式2，可以得出
+   <code>
+    VALUE(reference)
+   </code>
+   的计算方式。推导过程为：
+  </p>
+  <pre><code>VALUE(reference) = ADDR(defined_symbol) - ADDR(PC)
+                 = ADDR(defined_symbol) - ( ADDR(s) + VALUE(r.offset) - VALUE(r.addend) )
+                 = ADDR(defined_symbol) + VALUE(r.addend) - ( ADDR(s) + VALUE(r.offset) )
+                 = ADDR(defined_symbol) + VALUE(r.addend) - ADDR(reference) 
+</code></pre>
+  <p>
+   注：
+   <code>
+    ADDR(reference)
+   </code>
+   表示需要修改的符号引用的运行时地址。
+  </p>
+  <p>
+   最终，得出需要修改的符号引用的值等于
+   <code>
+    ADDR(defined_symbol) + VALUE(r.addend) - ADDR(reference)
+   </code>
+   。
+  </p>
+  <p>
+   接下来，通过示例验证上述过程。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    main.o
+   </code>
+   的重定位信息：
+  </p>
+  <pre><code>$ readelf -r main.o
+
+Relocation section '.rela.text' at offset 0x208 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000005  000b00000002 R_X86_64_PC32     0000000000000000 _Z4funcv - 4
+
+Relocation section '.rela.eh_frame' at offset 0x220 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000020  000200000002 R_X86_64_PC32     0000000000000000 .text + 0
+</code></pre>
+  <p>
+   从上面结果中可以看出，
+   <code>
+    VALUE(r.offset)
+   </code>
+   的值为 0x5，
+   <code>
+    VALUE(r.addend)
+   </code>
+   的值为 -0x4。
+  </p>
+  <p>
+   查看可重定位目标文件
+   <code>
+    main.o
+   </code>
+   和可执行目标文件
+   <code>
+    main
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section：
+  </p>
+  <pre><code>$ objdump -d main.o
+
+main.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 &lt;main&gt;:
+   0:   55                      push   %rbp
+   1:   48 89 e5                mov    %rsp,%rbp
+   4:   e8 00 00 00 00          callq  9 &lt;main+0x9&gt;
+   9:   b8 00 00 00 00          mov    $0x0,%eax
+   e:   5d                      pop    %rbp
+   f:   c3                      retq   
+
+$ objdump -d main
+
+main:     file format elf64-x86-64
+
+# 省略...
+
+Disassembly of section .text:
+
+# 省略...
+
+00000000004004d6 &lt;main&gt;:
+  4004d6:   55                      push   %rbp
+  4004d7:   48 89 e5                mov    %rsp,%rbp
+  4004da:   e8 07 00 00 00          callq  4004e6 &lt;_Z4funcv&gt;
+  4004df:   b8 00 00 00 00          mov    $0x0,%eax
+  4004e4:   5d                      pop    %rbp
+  4004e5:   c3                      retq   
+
+00000000004004e6 &lt;_Z4funcv&gt;:
+  4004e6:   55                      push   %rbp
+  4004e7:   48 89 e5                mov    %rsp,%rbp
+  4004ea:   8b 05 48 0b 20 00       mov    0x200b48(%rip),%eax        # 601038 &lt;__TMC_END__&gt;
+  4004f0:   01 c0                   add    %eax,%eax
+  4004f2:   89 05 40 0b 20 00       mov    %eax,0x200b40(%rip)        # 601038 &lt;__TMC_END__&gt;
+  4004f8:   8b 05 32 0b 20 00       mov    0x200b32(%rip),%eax        # 601030 &lt;g_val_2&gt;
+  4004fe:   01 c0                   add    %eax,%eax
+  400500:   89 05 2a 0b 20 00       mov    %eax,0x200b2a(%rip)        # 601030 &lt;g_val_2&gt;
+  400506:   90                      nop
+  400507:   5d                      pop    %rbp
+  400508:   c3                      retq   
+  400509:   0f 1f 80 00 00 00 00    nopl   0x0(%rax)
+
+# 省略...
+</code></pre>
+  <p>
+   从上面结果中可以看出，
+   <code>
+    ADDR(s)
+   </code>
+   的值为 0x4004d6，
+   <code>
+    ADDR(defined_symbol)
+   </code>
+   的值为 0x4004e6。
+  </p>
+  <p>
+   因此，
+   <code>
+    VALUE(reference)
+   </code>
+   的值等于 0x4004e6 + (-0x4) - (0x4004d6 + 0x5) = 0x7。即链接器需要将符号引用的值修改为 0x7。查看
+   <code>
+    main
+   </code>
+   中该符号引用的值也确实是 0x7。
+  </p>
+  <p>
+   2）
+   <span id="jump重定位类型R_X86_64_64">
+    重定位类型 R_X86_64_64 如何计算符号引用的值
+   </span>
+  </p>
+  <p>
+   重定位类型
+   <code>
+    R_X86_64_64
+   </code>
+   表示重定位符号引用的结果是一个 64 位的绝对地址。
+  </p>
+  <p>
+   首先，编译源码时使用大型代码模型，即编译时添加选项
+   <code>
+    -mcmodel=large
+   </code>
+   ，从而出现重定位类型为
+   <code>
+    R_X86_64_64
+   </code>
+   的重定位条目。
+  </p>
+  <p>
+   生成并查看可重定位目标文件
+   <code>
+    main_large.o
+   </code>
+   的重定位信息：
+  </p>
+  <pre><code>$ g++ -c main.cpp -mcmodel=large -o main_large.o
+$ readelf -r main_large.o 
+
+Relocation section '.rela.text' at offset 0x210 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000006  000b00000001 R_X86_64_64       0000000000000000 _Z4funcv + 0
+
+Relocation section '.rela.eh_frame' at offset 0x228 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000020  000200000002 R_X86_64_PC32     0000000000000000 .text + 0
+</code></pre>
+  <p>
+   生成并查看可执行目标文件
+   <code>
+    main_large
+   </code>
+   的
+   <code>
+    .text
+   </code>
+   section：
+  </p>
+  <pre><code>$ g++ -o main_large main_large.o test.o
+$ objdump -d main_large
+
+main_large:     file format elf64-x86-64
+
+# 省略...
+
+Disassembly of section .text:
+
+# 省略...
+
+00000000004004d6 &lt;main&gt;:
+  4004d6:   55                      push   %rbp
+  4004d7:   48 89 e5                mov    %rsp,%rbp
+  4004da:   48 b8 ed 04 40 00 00    movabs $0x4004ed,%rax
+  4004e1:   00 00 00 
+  4004e4:   ff d0                   callq  *%rax
+  4004e6:   b8 00 00 00 00          mov    $0x0,%eax
+  4004eb:   5d                      pop    %rbp
+  4004ec:   c3                      retq   
+
+00000000004004ed &lt;_Z4funcv&gt;:
+  4004ed:   55                      push   %rbp
+  4004ee:   48 89 e5                mov    %rsp,%rbp
+  4004f1:   8b 05 41 0b 20 00       mov    0x200b41(%rip),%eax        # 601038 &lt;__TMC_END__&gt;
+  4004f7:   01 c0                   add    %eax,%eax
+  4004f9:   89 05 39 0b 20 00       mov    %eax,0x200b39(%rip)        # 601038 &lt;__TMC_END__&gt;
+  4004ff:   8b 05 2b 0b 20 00       mov    0x200b2b(%rip),%eax        # 601030 &lt;g_val_2&gt;
+  400505:   01 c0                   add    %eax,%eax
+  400507:   89 05 23 0b 20 00       mov    %eax,0x200b23(%rip)        # 601030 &lt;g_val_2&gt;
+  40050d:   90                      nop
+  40050e:   5d                      pop    %rbp
+  40050f:   c3                      retq
+
+# 省略...
+</code></pre>
+  <p>
+   从上面可以看出，链接器需要将符号引用的值修改为 0x4004ed，正是
+   <code>
+    _Z4funcv
+   </code>
+   符号定义的运行时地址。
+  </p>
+  <p>
+   3）
+   <span id="jump重定位类型R_X86_64_32">
+    重定位类型 R_X86_64_32 如何计算符号引用的值
+   </span>
+  </p>
+  <p>
+   重定位类型
+   <code>
+    R_X86_64_32
+   </code>
+   表示重定位符号引用的结果是一个 32 位的绝对地址。与重定位类型
+   <code>
+    R_X86_64_64
+   </code>
+   的验证过程类似，此处不再赘述。
+  </p>
+  <h3 id="_4">
+   <span id="jump重定位符号引用">
+    重定位符号引用
+   </span>
+  </h3>
+  <p>
+   重定位符号引用的过程为遍历所有的重定位条目，每个重定位条目根据其重定位类型修改其目标 section 中此符号所有的引用。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

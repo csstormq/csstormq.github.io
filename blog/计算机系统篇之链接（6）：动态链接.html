@@ -1,0 +1,980 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="6">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（6）：动态链接
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Wednesday, 15. April 2020 04:35PM
+  </p>
+  <ul class="checklist">
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump引入共享库的动机">
+     引入共享库的动机
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump静态链接与动态链接的区别">
+     静态链接与动态链接的区别
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump如何生成共享库">
+     如何生成共享库
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump运行期加载和链接共享库">
+     运行期加载和链接共享库
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump引入共享库的动机">
+    引入共享库的动机
+   </span>
+  </h3>
+  <p>
+   共享库，也被称为可共享目标文件，可以被动态链接器在加载期或运行期加载到任意的内存地址，并和一个内存中的程序链接起来。
+  </p>
+  <p>
+   引入共享库的目的是为了解决静态库的缺点。相比于静态库的三个缺点，共享库对应的优点为：1）可以在加载期或运行期进行链接过程。因此，共享库更新后不用像静态库那样，可执行目标文件必须显式地重新链接。2）节省磁盘空间。共享库的代码和数据被所有引用该共享库的可执行目标文件共享。3）节省内存空间。共享库的代码在内存中的一份拷贝被所有引用该共享库的进程共享。
+  </p>
+  <h3 id="_2">
+   <span id="jump静态链接与动态链接的区别">
+    静态链接与动态链接的区别
+   </span>
+  </h3>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      区别
+     </th>
+     <th>
+      使用的链接器
+     </th>
+     <th>
+      作用对象
+     </th>
+     <th>
+      发生的时期
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      静态链接
+     </td>
+     <td>
+      静态链接器（如：ld on Linux）
+     </td>
+     <td>
+      静态库
+     </td>
+     <td>
+      编译期
+     </td>
+    </tr>
+    <tr>
+     <td>
+      动态链接
+     </td>
+     <td>
+      动态链接器（如：ld-linux-x86-64.so.2 on Linux）
+     </td>
+     <td>
+      动态库
+     </td>
+     <td>
+      加载期或运行期
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <ul>
+   <li>
+    <p>
+     注：
+    </p>
+    <ul>
+     <li>
+      <p>
+       Linux 中的静态链接器
+       <code>
+        ld
+       </code>
+       是可执行目标文件，Linux 中的动态链接器（如
+       <code>
+        ld-linux-x86-64.so.2
+       </code>
+       ）是可共享目标文件。
+      </p>
+     </li>
+     <li>
+      <p>
+       Linux 中的静态链接器
+       <code>
+        ld
+       </code>
+       的输入文件可以是共享库，但只是拷贝了重定位信息和符号表并解析符号，但未重定位。也就是说，即便共享库可以作为Linux 中的静态链接器
+       <code>
+        ld
+       </code>
+       的输入文件，但实际上没有完全链接。
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <h3 id="_3">
+   <span id="jump如何生成共享库">
+    如何生成共享库
+   </span>
+  </h3>
+  <p>
+   1）生成共享库（On Linux x86-64）
+  </p>
+  <pre><code>$ g++ -o libtest.so test.cpp -shared -fpic
+</code></pre>
+  <ul>
+   <li>
+    <p>
+     注：
+    </p>
+    <ul>
+     <li>
+      <p>
+       <code>
+        -shared
+       </code>
+       属于链接器选项，指示链接器生成共享库。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        -fpic
+       </code>
+       属于编译器器选项，指示编译器生成位置无关代码。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        -fno-pic
+       </code>
+       选项指示编译器不生成位置无关代码，但在 Linux x86-64 中使用该选项生成上述共享库时链接器会报错：
+       <code>
+        /usr/bin/x86_64-linux-gnu-ld: /tmp/ccdwqRF4.o: relocation R_X86_64_PC32 against symbol g_val_1 can not be used when making a shared object; recompile with -fPIC
+/usr/bin/x86_64-linux-gnu-ld: final link failed: Bad value
+collect2: error: ld returned 1 exit status
+       </code>
+       。
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <p>
+   查看 test.cpp 和 main.cpp 的源码：
+  </p>
+  <pre><code>$ cat test.cpp 
+int g_val_1 = 1;
+int g_val_2 = 2;
+
+void func()
+{
+  g_val_1 *= 2;
+  g_val_2 *= 2;
+}
+$ cat main.cpp
+extern int g_val_1;
+extern int g_val_2;
+
+void func();
+
+int main()
+{
+  func();
+  return 0;
+}
+</code></pre>
+  <p>
+   使用共享库：
+  </p>
+  <pre><code>$ g++ -o main main.cpp ./libtest.so
+</code></pre>
+  <p>
+   虽然生成的可执行目标文件引用了共享库中的函数或全局变量，但是共享库中的代码和数据不会拷贝到可执行目标文件中。实际上，只是将共享库中的重定位信息和符号表拷贝到了可执行目标文件中，以便于在加载期解析对共享库中的函数或全局变量的引用。
+  </p>
+  <p>
+   当加载器加载并运行可执行目标文件时，如果可执行目标文件中包含 .interp section（该 section 用于指定动态链接器的路径），那么加载器会加载并运行动态链接器，动态链接器完成链接过程后，动态链接器会将控制权交给应用程序，从而开始执行应用程序的入口点函数。
+  </p>
+  <p>
+   查看可执行目标文件 main 需要的共享库：
+  </p>
+  <pre><code>$ ldd main
+    linux-vdso.so.1 =&gt;  (0x00007ffc8e793000)
+    ./libtest.so (0x00007f21de5ed000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f21de223000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f21de7ef000)
+</code></pre>
+  <p>
+   查看可执行目标文件 main 的 .interp section：
+  </p>
+  <pre><code>$ readelf -p .interp main
+
+String dump of section '.interp':
+  [     0]  /lib64/ld-linux-x86-64.so.2
+</code></pre>
+  <h3 id="_4">
+   <span id="jump运行期加载和链接共享库">
+    运行期加载和链接共享库
+   </span>
+  </h3>
+  <p>
+   <strong>
+    共享库常用函数：
+   </strong>
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      函数作用
+     </th>
+     <th>
+      函数原型
+     </th>
+     <th>
+      参数含义
+     </th>
+     <th>
+      返回值
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      打开共享库
+     </td>
+     <td>
+      <code>
+       void *dlopen(const char *filename, int flag);
+      </code>
+     </td>
+     <td>
+      <li>
+       参数1：指定共享库的路径。
+      </li>
+      <li>
+       参数2：指定打开共享库的标志。常用可选项：
+       <code>
+        RTLD_LAZY
+       </code>
+       、
+       <code>
+        RTLD_NOW
+       </code>
+       、
+       <code>
+        RTLD_GLOBAL
+       </code>
+       、
+       <code>
+        RTLD_LOCAL
+       </code>
+      </li>
+     </td>
+     <td>
+      <li>
+       执行成功，返回指向共享库的句柄指针
+      </li>
+      <li>
+       执行失败，返回 NULL
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      关闭共享库
+     </td>
+     <td>
+      <code>
+       int dlclose(void *handle);
+      </code>
+     </td>
+     <td>
+      <li>
+       参数：指向共享库的句柄指针。
+      </li>
+     </td>
+     <td>
+      <li>
+       执行成功，返回 0
+      </li>
+      <li>
+       执行失败，返回 -1
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      查找共享库中的符号定义
+     </td>
+     <td>
+      <code>
+       void *dlsym(void *handle, char *symbol);
+      </code>
+     </td>
+     <td>
+      <li>
+       参数1：指向共享库的句柄指针。
+      </li>
+      <li>
+       参数2：要查找的符号定义的名称。
+      </li>
+     </td>
+     <td>
+      <li>
+       执行成功，返回指向符号定义的指针
+      </li>
+      <li>
+       执行失败，返回 NULL
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <ul>
+   <li>
+    <p>
+     注：
+    </p>
+    <ul>
+     <li>
+      <p>
+       <code>
+        dlopen()
+       </code>
+       等函数包含在
+       <code>
+        dlfcn.h
+       </code>
+       头文件中。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        RTLD_LAZY
+       </code>
+       标志表示延迟绑定，即只有在执行符号引用的代码时才解析符号。延迟绑定的作用对象为对共享库中函数的引用。对共享库中全局变量的引用不涉及延迟绑定，即在 dlopen() 函数返回之前就完成了对共享库中全局变量的解析。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        RTLD_NOW
+       </code>
+       标志表示立即解析。也就是说，在 dlopen() 函数返回之前需要完成所有对共享库中函数引用和全局变量引用的解析。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        RTLD_GLOBAL
+       </code>
+       标志表示该共享库中的符号定义可以用于随后加载的共享库的符号解析。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        RTLD_LOCAL
+       </code>
+       标志表示的含义与
+       <code>
+        RTLD_GLOBAL
+       </code>
+       相反。
+      </p>
+     </li>
+     <li>
+      <p>
+       <code>
+        RTLD_LAZY
+       </code>
+       和
+       <code>
+        RTLD_NOW
+       </code>
+       只能二选其一。
+       <code>
+        RTLD_GLOBAL
+       </code>
+       和
+       <code>
+        RTLD_LOCAL
+       </code>
+       只能二选其一。这两组的标志可以取
+       <code>
+        |
+       </code>
+       ，比如：
+       <code>
+        RTLD_LAZY | RTLD_GLOBAL
+       </code>
+       。
+      </p>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    进一步理解共享库：
+   </strong>
+  </p>
+  <p>
+   1）问题1：如果一个进程在关闭共享库后，正在执行或再次执行该共享库中的代码。那么，这两种情况分别会导致什么后果？
+  </p>
+  <p>
+   验证过程：
+  </p>
+  <p>
+   a）验证问题1
+  </p>
+  <p>
+   进程关闭共享库（即执行 dlclose 函数）后，如果该进程对该共享库的引用计数减为 0，那么无论是正在执行还是再次执行该共享库中的代码，都会发生违规访问，这是因为进程已撤销对共享库中代码和数据的映射，即进程看不到共享库中的任何代码和数据了。通常情况下，会导致进程崩溃退出。
+  </p>
+  <p>
+   实例验证如下：
+  </p>
+  <p>
+   首先，生成共享库 libtest.so 和可执行目标文件 main：
+  </p>
+  <pre><code>$ g++ -o libtest.so test.cpp -shared -fpic -g
+$ g++ -o main main.cpp shared_library.cpp -std=c++11 -ldl -g
+</code></pre>
+  <p>
+   接下来，使用 gdb 调试：
+  </p>
+  <pre><code>$ gdb -q --args ./main "./libtest.so" "func"
+</code></pre>
+  <p>
+   启动 main，并执行到第一次加载 libtest.so 完成的位置：
+  </p>
+  <pre><code>(gdb) start
+Temporary breakpoint 1 at 0x400ddf: file main.cpp, line 12.
+Starting program: /home/xuxiaoqiang/tx/dyn/t/main ./libtest.so func
+
+Temporary breakpoint 1, main (argc=3, argv=0x7fffffffdb38) at main.cpp:12
+12  {
+(gdb) n
+13      if (argc != 3)
+(gdb) 
+20          std::string lib_name(argv[1]);
+(gdb) 
+21          std::string symbol_name(argv[2]);
+(gdb) 
+23          SharedLibrary loader;
+(gdb) 
+25              SharedLibrary::LOAD_FLAG_LAZY);
+(gdb) 
+27          SharedLibrary loader_2;
+</code></pre>
+  <p>
+   自动打印 libtest.so 中定义的全局变量
+   <code>
+    g_val_1
+   </code>
+   和
+   <code>
+    g_val_2
+   </code>
+   ，及它们的内存地址、函数
+   <code>
+    func
+   </code>
+   的地址和函数指针
+   <code>
+    lib_func
+   </code>
+   的值，观察它们的值变化情况：
+  </p>
+  <pre><code>(gdb) display/d g_val_1
+1: /d g_val_1 = 1
+(gdb) display/x &amp;g_val_1
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+(gdb) display/d g_val_2
+3: /d g_val_2 = 2
+(gdb) display/x &amp;g_val_2
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+(gdb) display func
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+(gdb) display lib_func
+6: lib_func = (void (*)(void)) 0x7ffff729f299 &lt;__GI___cxa_atexit+25&gt;
+</code></pre>
+  <p>
+   查看进程已加载 sections 的信息：
+  </p>
+  <pre><code>(gdb) info files 
+// 省略 ...
+    0x00007ffff6d5a1c8 - 0x00007ffff6d5a1ec is .note.gnu.build-id in ./libtest.so
+    0x00007ffff6d5a1f0 - 0x00007ffff6d5a234 is .gnu.hash in ./libtest.so
+    0x00007ffff6d5a238 - 0x00007ffff6d5a3a0 is .dynsym in ./libtest.so
+    0x00007ffff6d5a3a0 - 0x00007ffff6d5a442 is .dynstr in ./libtest.so
+    0x00007ffff6d5a448 - 0x00007ffff6d5a538 is .rela.dyn in ./libtest.so
+    0x00007ffff6d5a538 - 0x00007ffff6d5a552 is .init in ./libtest.so
+    0x00007ffff6d5a560 - 0x00007ffff6d5a570 is .plt in ./libtest.so
+    0x00007ffff6d5a570 - 0x00007ffff6d5a580 is .plt.got in ./libtest.so
+    0x00007ffff6d5a580 - 0x00007ffff6d5a6b1 is .text in ./libtest.so
+    0x00007ffff6d5a6b4 - 0x00007ffff6d5a6bd is .fini in ./libtest.so
+    0x00007ffff6d5a6c0 - 0x00007ffff6d5a6dc is .eh_frame_hdr in ./libtest.so
+    0x00007ffff6d5a6e0 - 0x00007ffff6d5a744 is .eh_frame in ./libtest.so
+    0x00007ffff6f5ae60 - 0x00007ffff6f5ae68 is .init_array in ./libtest.so
+    0x00007ffff6f5ae68 - 0x00007ffff6f5ae70 is .fini_array in ./libtest.so
+    0x00007ffff6f5ae70 - 0x00007ffff6f5ae78 is .jcr in ./libtest.so
+    0x00007ffff6f5ae78 - 0x00007ffff6f5afc8 is .dynamic in ./libtest.so
+    0x00007ffff6f5afc8 - 0x00007ffff6f5b000 is .got in ./libtest.so
+    0x00007ffff6f5b000 - 0x00007ffff6f5b018 is .got.plt in ./libtest.so
+    0x00007ffff6f5b018 - 0x00007ffff6f5b028 is .data in ./libtest.so
+    0x00007ffff6f5b028 - 0x00007ffff6f5b030 is .bss in ./libtest.so
+</code></pre>
+  <p>
+   可以看出，
+   <code>
+    g_val_1
+   </code>
+   、
+   <code>
+    g_val_2
+   </code>
+   和
+   <code>
+    func
+   </code>
+   的内存地址都在 ./libtest.so 中。
+  </p>
+  <p>
+   继续执行至第一次执行
+   <code>
+    lib_func
+   </code>
+   完成的位置：
+  </p>
+  <pre><code>(gdb) n
+29              SharedLibrary::LOAD_FLAG_LAZY);
+1: /d g_val_1 = 1
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 2
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff729f299 &lt;__GI___cxa_atexit+25&gt;
+(gdb) 
+32          *(void **)&amp;lib_func = loader.getSymbol(symbol_name.c_str());
+1: /d g_val_1 = 1
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 2
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff729f299 &lt;__GI___cxa_atexit+25&gt;
+(gdb) 
+34          lib_func();
+1: /d g_val_1 = 1
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 2
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff6d5a680 &lt;func&gt;
+(gdb) 
+35          loader.unload();
+1: /d g_val_1 = 2
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 4
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff6d5a680 &lt;func&gt;
+</code></pre>
+  <p>
+   可以看出，第二次加载 libtest.so（dlopen 函数是执行成功了的），并未改变
+   <code>
+    g_val_1
+   </code>
+   、
+   <code>
+    g_val_2
+   </code>
+   和
+   <code>
+    func
+   </code>
+   的内存地址。
+  </p>
+  <p>
+   继续执行至第一次关闭
+   <code>
+    libtest.so
+   </code>
+   完成的位置：
+  </p>
+  <pre><code>(gdb) 
+36          lib_func();
+1: /d g_val_1 = 2
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 4
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff6d5a680 &lt;func&gt;
+(gdb) 
+37          loader_2.unload();
+1: /d g_val_1 = 4
+2: /x &amp;g_val_1 = 0x7ffff6f5b020
+3: /d g_val_2 = 8
+4: /x &amp;g_val_2 = 0x7ffff6f5b024
+5: func = {&lt;text variable, no debug info&gt;} 0x7ffff6d5a680 &lt;func&gt;
+6: lib_func = (void (*)(void)) 0x7ffff6d5a680 &lt;func&gt;
+</code></pre>
+  <p>
+   可以看出，第一次关闭
+   <code>
+    libtest.so
+   </code>
+   （dlclose 函数是执行成功了的），并未改变
+   <code>
+    g_val_1
+   </code>
+   、
+   <code>
+    g_val_2
+   </code>
+   和
+   <code>
+    func
+   </code>
+   的内存地址。
+  </p>
+  <p>
+   继续执行至第二次关闭
+   <code>
+    libtest.so
+   </code>
+   完成的位置：
+  </p>
+  <pre><code>(gdb) 
+38          lib_func();
+warning: Unable to display "g_val_1": No symbol "g_val_1" in current context.
+warning: Unable to display "&amp;g_val_1": No symbol "g_val_1" in current context.
+warning: Unable to display "g_val_2": No symbol "g_val_2" in current context.
+warning: Unable to display "&amp;g_val_2": No symbol "g_val_2" in current context.
+warning: Unable to display "func": No symbol "func" in current context.
+6: lib_func = (void (*)(void)) 0x7ffff6d5a680
+</code></pre>
+  <p>
+   可以看出，第二次关闭
+   <code>
+    libtest.so
+   </code>
+   （dlclose 函数也是执行成功了的），
+   <code>
+    g_val_1
+   </code>
+   、
+   <code>
+    g_val_2
+   </code>
+   和
+   <code>
+    func
+   </code>
+   的内存地址变为不可访问。而此时
+   <code>
+    lib_func
+   </code>
+   的值仍为
+   <code>
+    func
+   </code>
+   的内存地址。
+  </p>
+  <p>
+   继续执行：
+  </p>
+  <pre><code>(gdb) 
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff6d5a680 in ?? ()
+(gdb) bt
+#0  0x00007ffff6d5a680 in ?? ()
+#1  0x0000000000400f85 in main (argc=3, argv=0x7fffffffdb38) at main.cpp:38
+</code></pre>
+  <p>
+   可以看出，第二次关闭
+   <code>
+    libtest.so
+   </code>
+   后，进程对共享库的引用计数减为 0，进程会撤销对共享库中的代码和数据的映射。再次执行共享库中的代码，会发生越界访问，从而导致进程崩溃退出。
+  </p>
+  <p>
+   从上述验证过程中，可以得出如下结论：
+  </p>
+  <ul>
+   <li>
+    <p>
+     如果同一个进程多次调用
+     <code>
+      dlopen
+     </code>
+     函数加载同一个共享库，那么自从第一次将共享库中的代码和数据等映射到进程后，其余的加载操作只是将进程对该共享库的引用计数递增 1。
+    </p>
+   </li>
+   <li>
+    <p>
+     如果同一个进程调用
+     <code>
+      dlclose
+     </code>
+     函数卸载同一个共享库，每成功调用
+     <code>
+      dlclose
+     </code>
+     函数一次，进程对该共享库的引用计数递减 1，当引用计数减为 0 时，进程才会真正地卸载共享库，即撤销进程对该共享库中的代码和数据的映射。从此以后，进程对该共享库中的代码和数据的访问会导致进程崩溃退出。
+    </p>
+   </li>
+   <li>
+    <p>
+     同一个共享库可以被映射到不同的进程中，每个进程各自维护对该共享库的引用计数，互不影响。关于这一点很容易验证，有兴趣的可以自己验证一下。
+    </p>
+   </li>
+  </ul>
+  <p>
+   注：dlopen、dlclose 的引用计数保存在
+   <code>
+    link_map
+   </code>
+   结构体中的
+   <code>
+    l_direct_opencount
+   </code>
+   字段。
+  </p>
+  <pre><code>// in glibc-2.19/include/link.h
+struct link_map
+{
+    // 省略...
+    unsigned int l_direct_opencount; /* Reference count for dlopen/dlclose.  */
+    // 省略...
+};
+</code></pre>
+  <p>
+   <strong>
+    完整程序：
+   </strong>
+  </p>
+  <p>
+   main.cpp：
+  </p>
+  <pre><code>// how to compile: g++ -o main main.cpp shared_library.cpp -std=c++11 -ldl -g
+// how to debug: gdb -q --args ./main "./libtest.so" "func"
+
+#include "shared_library.h"
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;string&gt;
+
+using common::SharedLibrary;
+
+int main(int argc, char **argv)
+{
+    if (argc != 3)
+    {
+        std::cerr &lt;&lt; "Usage: &lt;path of shared library&gt; &lt;symbol name&gt;\n";
+        return 1;
+    }
+
+    {
+        std::string lib_name(argv[1]);
+        std::string symbol_name(argv[2]);
+
+        SharedLibrary loader;
+        loader.load(lib_name, SharedLibrary::LOAD_FLAG_GLOBAL | 
+            SharedLibrary::LOAD_FLAG_LAZY);
+
+        SharedLibrary loader_2;
+        loader_2.load(lib_name, SharedLibrary::LOAD_FLAG_GLOBAL | 
+            SharedLibrary::LOAD_FLAG_LAZY);
+
+        void (*lib_func)();
+        *(void **)&amp;lib_func = loader.getSymbol(symbol_name.c_str());
+
+        lib_func();
+        loader.unload();
+        lib_func();
+        loader_2.unload();
+        lib_func();
+    }
+    return 0;
+}
+</code></pre>
+  <p>
+   test.cpp：
+  </p>
+  <pre><code>// how to compile: g++ -o libtest.so test.cpp -shared -fpic -g
+
+int g_val_1 = 1;
+int g_val_2 = 2;
+
+extern "C"
+{
+
+void func()
+{
+    g_val_1 *= 2;
+    g_val_2 *= 2;
+}
+
+}   // extern "C"
+</code></pre>
+  <p>
+   shared_library.h：
+  </p>
+  <pre><code>#pragma once
+
+#include &lt;mutex&gt;
+#include &lt;string&gt;
+
+namespace common
+{
+
+class SharedLibrary
+{
+public:
+    enum LoadFlag
+    {
+        LOAD_FLAG_GLOBAL    = 1,
+        LOAD_FLAG_LOCAL     = 2,
+        LOAD_FLAG_NOW       = 4,
+        LOAD_FLAG_LAZY      = 8,
+    };
+
+    SharedLibrary() = default;
+    ~SharedLibrary() = default;
+    SharedLibrary(const SharedLibrary &amp;) = delete;
+    SharedLibrary&amp; operator = (const SharedLibrary &amp;) = delete;
+
+    void load(const std::string &amp;file_name, int flag);
+    void unload();
+    void* getSymbol(const std::string &amp;symbol_name);
+
+private:
+    int realLoadFlag(int flag) const;
+
+private:
+    void *handle_ = nullptr;
+    static std::mutex handle_mutex_;
+};
+
+}   // namespace common
+</code></pre>
+  <p>
+   shared_library.cpp：
+  </p>
+  <pre><code>#include "shared_library.h"
+#include &lt;dlfcn.h&gt;
+#include &lt;iostream&gt;
+
+#define CHECK_DLERROR(cond) if (cond) { std::cerr &lt;&lt; dlerror(); }
+
+namespace common
+{
+
+std::mutex SharedLibrary::handle_mutex_;
+
+void SharedLibrary::load(const std::string &amp;file_name, int flag)
+{
+    const auto real_flag = realLoadFlag(flag);
+    std::lock_guard&lt;std::mutex&gt; lock(handle_mutex_);
+    if (nullptr == handle_)
+    {
+        handle_ = dlopen(file_name.c_str(), real_flag);
+    }
+    CHECK_DLERROR(!handle_);
+}
+
+int SharedLibrary::realLoadFlag(int flag) const
+{
+    int real_flag = 0;
+    real_flag |=  (flag &amp; LOAD_FLAG_NOW ? RTLD_NOW : RTLD_LAZY);
+    real_flag |=  (flag &amp; LOAD_FLAG_GLOBAL ? RTLD_GLOBAL : RTLD_LOCAL);
+    return real_flag;
+}
+
+void SharedLibrary::unload()
+{
+    std::lock_guard&lt;std::mutex&gt; lock(handle_mutex_);
+    if (handle_)
+    {
+        auto success = !dlclose(handle_);
+        if (success)
+        {
+            handle_ = nullptr;
+        }
+        else
+        {
+            handle_mutex_.unlock();
+            CHECK_DLERROR(!success);
+        }
+    }
+}
+
+void* SharedLibrary::getSymbol(const std::string &amp;symbol_name)
+{
+    std::lock_guard&lt;std::mutex&gt; lock(handle_mutex_);
+    if (handle_)
+    {
+        auto result = dlsym(handle_, symbol_name.c_str());
+        handle_mutex_.unlock();
+        CHECK_DLERROR(!result);
+        return result;
+    }
+    return nullptr;
+}
+
+}  // namespace common
+</code></pre>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

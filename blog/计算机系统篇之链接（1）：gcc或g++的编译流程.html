@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="1gccg">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（1）：gcc/g++的编译流程
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Saturday, 21. December 2019 09:48AM
+  </p>
+  <hr/>
+  <p>
+   gcc/g++，实质上是一个编译驱动器（Compile Driver），对它的调用意味着调用一系列的程序——预处理器、编译器、汇编器和链接器，从而将源代码转化成可执行目标文件。具体流程可以分为如下四个步骤：
+  </p>
+  <p>
+   <strong>
+    1）预处理
+   </strong>
+  </p>
+  <p>
+   首先调用 C 预处理器（名称为
+   <code>
+    cpp
+   </code>
+   的可执行目标文件，通常位于
+   <code>
+    /usr/bin/
+   </code>
+   目录下）将每个源文件（比如：以
+   <code>
+    .c 或 .cc 或. cpp
+   </code>
+   结尾的文件）扩展源代码——即插入所有用
+   <code>
+    #include
+   </code>
+   命令指定的文件，并扩展所有用
+   <code>
+    #define
+   </code>
+   声明指定的宏。对一个源文件进行预处理的输出结果是一个以
+   <code>
+    .i
+   </code>
+   结尾的中间文件，即编码为 ASCII 码的源代码中间文件。
+  </p>
+  <p>
+   由源文件生成预处理文件的命令：
+  </p>
+  <pre><code># 一个源文件（以.c/.cc/.cpp结尾的文件）对应一个预处理后的源文件（以.i结尾的文件）
+$ cpp -std=c++11 main.cpp -o main.i
+$ cpp -std=c++11 shm_manager_sim.cpp -o shm_manager_sim.i
+$ cpp -std=c++11 subscription_sim.cpp -o subscription_sim.i
+$ cpp -std=c++11 topic_manager_sim.cpp -o topic_manager_sim.i
+</code></pre>
+  <p>
+   或
+  </p>
+  <pre><code>$ g++ -E main.cpp -o main.i
+$ g++ -E shm_manager_sim.cpp -o shm_manager_sim.i
+$ g++ -E subscription_sim.cpp -o subscription_sim.i
+$ g++ -E topic_manager_sim.cpp -o topic_manager_sim.i
+</code></pre>
+  <p>
+   注意：
+  </p>
+  <ul>
+   <li>
+    <p>
+     main.cpp 中包含了
+     <code>
+      &lt;thread&gt;
+     </code>
+     头文件（在 C++11 标准中涵盖）。所以，直接调用预处理器
+     <code>
+      cpp
+     </code>
+     时需要添加
+     <code>
+      -std=c++11
+     </code>
+     选项，而采用
+     <code>
+      g++ -E
+     </code>
+     的方式不需要添加该选项。
+    </p>
+   </li>
+   <li>
+    <p>
+     如果源文件与其包含的用户头文件不在同一个目录中，需要添加
+     <code>
+      -I
+     </code>
+     选项指定搜索路径，从而成功地生成
+     <code>
+      .i
+     </code>
+     文件。示例：1）用户头文件都处于同一个目录时，对应的命令：
+     <code>
+      g++ -E main.cpp -o main.i -I &lt;directory&gt;
+     </code>
+     ；2）用户头文件处于不同目录时，对应的命令：
+     <code>
+      g++ -E main.cpp -o main.i -I &lt;directory 1&gt; -I &lt;directory 2&gt; -I &lt;directory n&gt;
+     </code>
+     。
+    </p>
+   </li>
+   <li>
+    <p>
+     在某些 gcc/g++ 版本中，预处理器被集成到编译驱动器中，而不是作为独立的程序存在。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    2）编译
+   </strong>
+  </p>
+  <p>
+   其次，调用编译器（名称为
+   <code>
+    cc1
+   </code>
+   ——用于编译C程序的可执行目标文件或
+   <code>
+    cc1plus
+   </code>
+   ——用于编译C++程序的可执行目标文件，在本人的机器上两者位于
+   <code>
+    /usr/lib/gcc/x86_64-linux-gnu/6
+   </code>
+   目录下）将扩展后的源代码（以
+   <code>
+    .i
+   </code>
+   结尾的文件）编译成汇编代码（以
+   <code>
+    .s
+   </code>
+   结尾的文件，即编码为 ASCII 码的汇编语言文件）。
+  </p>
+  <p>
+   由预处理文件生成汇编语言文件的命令：
+  </p>
+  <pre><code># 一个预处理后的源文件（以.i结尾的文件）对应一个汇编代码文件（以.s结尾的文件）
+# /usr/lib/gcc/x86_64-linux-gnu/6/cc1plus -o main.s main.cpp &lt;other arguments&gt;
+$ /usr/lib/gcc/x86_64-linux-gnu/6/cc1plus -o main.s main.cpp -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE -quiet -dumpbase -mtune=generic -march=x86-64 -auxbase-strip -version -fstack-protector-strong -Wformat -Wformat-security
+</code></pre>
+  <p>
+   或
+  </p>
+  <pre><code>$ g++ -S main.i -o main.s
+$ g++ -S shm_manager_sim.i -o shm_manager_sim.s
+$ g++ -S subscription_sim.i -o subscription_sim.s
+$ g++ -S topic_manager_sim.i -o topic_manager_sim.s
+</code></pre>
+  <p>
+   注意：
+  </p>
+  <ul>
+   <li>
+    <p>
+     <code>
+      cc1plus
+     </code>
+     命令中
+     <code>
+      &lt;other arguments&gt;
+     </code>
+     部分如何确定？详见下文。
+    </p>
+   </li>
+   <li>
+    <p>
+     如果需要添加调试信息，只能在执行本步骤时加
+     <code>
+      -g
+     </code>
+     选项。其他时期：步骤1）、步骤3）、步骤4）时加
+     <code>
+      -g
+     </code>
+     选项都没有任何作用。添加
+     <code>
+      -g
+     </code>
+     所生成的汇编代码文件中可以看到与调试相关的 sections，如：
+     <code>
+      .debug_aranges
+     </code>
+     、
+     <code>
+      .debug_info
+     </code>
+     、
+     <code>
+      .debug_abbrev
+     </code>
+     、
+     <code>
+      .debug_line
+     </code>
+     、
+     <code>
+      .debug_str
+     </code>
+     、
+     <code>
+      .debug_ranges
+     </code>
+     等。
+    </p>
+   </li>
+   <li>
+    <p>
+     区分目标文件是 DEBUG 版本还是 RELEASE 版本的方法之一：
+     <code>
+      readelf -S main | grep debug
+     </code>
+     。如果是 DEBUG 版本，会有带
+     <code>
+      .debug*
+     </code>
+     的信息输出；否则，什么也不会输出。
+    </p>
+   </li>
+   <li>
+    <p>
+     编译器的输入可以是源文件，也可以是预处理后的文件。
+    </p>
+   </li>
+   <li>
+    <p>
+     对于以 .cpp 结尾的源文件，无论是 gcc 还是 g++，实际调用的编译器都是 cc1plus。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <code>
+    &lt;other arguments&gt;
+   </code>
+   部分的确定过程：
+  </p>
+  <p>
+   1）使用
+   <code>
+    -v
+   </code>
+   选项打印
+  </p>
+  <pre><code>$ g++ -S main.cpp -o main.s -v
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>$ g++ -S main.cpp -o main.s -v
+Using built-in specs.
+COLLECT_GCC=g++
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.5.0-2ubuntu1~16.04' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --with-as=/usr/bin/x86_64-linux-gnu-as --with-ld=/usr/bin/x86_64-linux-gnu-ld --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 6.5.0 20181026 (Ubuntu 6.5.0-2ubuntu1~16.04) 
+COLLECT_GCC_OPTIONS='-S' '-o' 'main.s' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE main.cpp -quiet -dumpbase main.cpp -mtune=generic -march=x86-64 -auxbase-strip main.s -version -o main.s -fstack-protector-strong -Wformat -Wformat-security
+GNU C++14 (Ubuntu 6.5.0-2ubuntu1~16.04) version 6.5.0 20181026 (x86_64-linux-gnu)
+    compiled by GNU C version 6.5.0 20181026, GMP version 6.1.0, MPFR version 3.1.4, MPC version 1.0.3, isl version 0.15
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/6"
+ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/6/../../../../x86_64-linux-gnu/include"
+#include "..." search starts here:
+#include &lt;...&gt; search starts here:
+ /usr/include/c++/6
+ /usr/include/x86_64-linux-gnu/c++/6
+ /usr/include/c++/6/backward
+ /usr/lib/gcc/x86_64-linux-gnu/6/include
+ /usr/local/include
+ /usr/lib/gcc/x86_64-linux-gnu/6/include-fixed
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+GNU C++14 (Ubuntu 6.5.0-2ubuntu1~16.04) version 6.5.0 20181026 (x86_64-linux-gnu)
+    compiled by GNU C version 6.5.0 20181026, GMP version 6.1.0, MPFR version 3.1.4, MPC version 1.0.3, isl version 0.15
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: f1f1eb1c4b7ccfc7f1bfde5650f1de21
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-S' '-o' 'main.s' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+</code></pre>
+  <p>
+   2）完整的编译选项为 cc1plus 后面的内容，即
+  </p>
+  <pre><code>-quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE main.cpp -quiet -dumpbase main.cpp -mtune=generic -march=x86-64 -auxbase-strip main.s -version -o main.s -fstack-protector-strong -Wformat -Wformat-security
+</code></pre>
+  <p>
+   从上面的输出结果中可以看到，
+   <code>
+    -o main.s
+   </code>
+   、
+   <code>
+    main.cpp
+   </code>
+   。除这部分之外的就是
+   <code>
+    &lt;other arguments&gt;
+   </code>
+   部分对应的内容了。
+  </p>
+  <p>
+   <strong>
+    3）汇编
+   </strong>
+  </p>
+  <p>
+   接下来，调用汇编器（名称为
+   <code>
+    as
+   </code>
+   的可执行目标文件，通常位于
+   <code>
+    /usr/bin/
+   </code>
+   目录下）将汇编代码（以
+   <code>
+    .s
+   </code>
+   结尾的文件）转化成可重定位目标代码（以
+   <code>
+    .o
+   </code>
+   结尾的文件，汇编代码的二进制表示，但还未填入全局值的地址）。
+  </p>
+  <p>
+   由汇编语言文件生成可重定位目标文件的命令：
+  </p>
+  <pre><code># 一个汇编代码文件（以.s结尾的文件）对应一个可重定位目标文件（以.o结尾的文件）
+$ as main.s -o main.o
+$ as shm_manager_sim.s -o shm_manager_sim.o
+$ as subscription_sim.s -o subscription_sim.o
+$ as topic_manager_sim.s -o topic_manager_sim.o
+</code></pre>
+  <p>
+   或
+  </p>
+  <pre><code>$ g++ -c main.s -o main.o
+$ g++ -c shm_manager_sim.s -o shm_manager_sim.o
+$ g++ -c subscription_sim.s -o subscription_sim.o
+$ g++ -c topic_manager_sim.s -o topic_manager_sim.o
+</code></pre>
+  <p>
+   <strong>
+    4）链接
+   </strong>
+  </p>
+  <p>
+   最后，调用链接器（名称为
+   <code>
+    ld
+   </code>
+   的可执行目标文件，通常位于
+   <code>
+    /usr/bin/
+   </code>
+   目录下）将（多个）可重定位目标文件以及一些必要的系统目标文件组合起来，并产生最终的可执行目标文件。
+  </p>
+  <p>
+   由（多个）可重定位目标文件生成可执行文件的命令：
+  </p>
+  <pre><code># 将多个可重定位目标文件（以.o结尾的文件）组合起来生成一个可执行目标文件
+# ld -o main main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o &lt;system object files and args&gt;
+ld -o main main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccCu2RiH.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro  /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../..  -lstdc++ -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/6/crtend.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o
+</code></pre>
+  <p>
+   或
+  </p>
+  <pre><code>$ g++ -o main main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o -pthread
+</code></pre>
+  <p>
+   注：
+  </p>
+  <ul>
+   <li>
+    <p>
+     <code>
+      ld
+     </code>
+     命令中
+     <code>
+      &lt;system object files and args&gt;
+     </code>
+     部分如何确定？详见下文。
+    </p>
+   </li>
+   <li>
+    <p>
+     <code>
+      g++ -o main main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o -pthread
+     </code>
+     命令将多个可重定位目标文件（main.o、shm_manager_sim.o、subscription_sim.o、topic_manager_sim.o）和系统目标文件（通过
+     <code>
+      -pthread
+     </code>
+     选项指定）等生成最终的可执行目标文件——main。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <code>
+    &lt;system object files and args&gt;
+   </code>
+   部分的确定过程：
+  </p>
+  <p>
+   1）使用
+   <code>
+    -v
+   </code>
+   选项打印
+  </p>
+  <pre><code>$ g++ -v -o main_test main.o  shm_manager_sim.o subscription_sim.o topic_manager_sim.o -pthread
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>$ g++ -v -o main_test main.o  shm_manager_sim.o subscription_sim.o topic_manager_sim.o -pthread
+Using built-in specs.
+COLLECT_GCC=g++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.5.0-2ubuntu1~16.04' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --with-as=/usr/bin/x86_64-linux-gnu-as --with-ld=/usr/bin/x86_64-linux-gnu-ld --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 6.5.0 20181026 (Ubuntu 6.5.0-2ubuntu1~16.04) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'main_test' '-pthread' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccCu2RiH.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o main_test /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o -lstdc++ -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/6/crtend.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'main_test' '-pthread' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+</code></pre>
+  <p>
+   2）完整的链接选项为 collect2 后面的内容，即
+  </p>
+  <pre><code>-plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=--plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccCu2RiH.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o main_test /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o -lstdc++ -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/6/crtend.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o
+</code></pre>
+  <p>
+   从上面的输出结果中可以看到，
+   <code>
+    -o main_test
+   </code>
+   、
+   <code>
+    main.o shm_manager_sim.o subscription_sim.o topic_manager_sim.o
+   </code>
+   等。除这部分之外的就是
+   <code>
+    &lt;system object files and args&gt;
+   </code>
+   部分对应的内容了。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

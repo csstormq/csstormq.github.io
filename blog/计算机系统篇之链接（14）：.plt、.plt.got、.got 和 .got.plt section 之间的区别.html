@@ -1,0 +1,616 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="14pltpltgotgot-gotplt-section">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（14）：.plt、.plt.got、.got 和 .got.plt section 之间的区别
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Saturday, 21. December 2019 11:58AM
+  </p>
+  <hr/>
+  <p>
+   <strong>
+    step 1:
+   </strong>
+   <span id="jumpstep_1_生成共享库">
+    生成共享库
+   </span>
+  </p>
+  <p>
+   1）第一个共享库的源文件——add.cpp:
+  </p>
+  <pre><code>int g_sum = 0;
+
+int add(int a, int b)
+{
+    g_sum = a + b;
+    return g_sum;
+}
+</code></pre>
+  <p>
+   生成第一个共享库——libadd_debug.so
+  </p>
+  <pre><code>$ g++ -fpic -shared -g -o libadd_debug.so add.cpp
+</code></pre>
+  <p>
+   2）第二个共享库的源文件——sub.cpp:
+  </p>
+  <pre><code>int g_sub = 0;
+
+int sub(int a, int b)
+{
+    g_sub = a - b;
+    return g_sub;
+}
+</code></pre>
+  <p>
+   生成第二个共享库——libsub_debug.so
+  </p>
+  <pre><code>$ g++ -fpic -shared -g -o libsub_debug.so sub.cpp
+</code></pre>
+  <p>
+   <strong>
+    step 2:
+   </strong>
+   <span id="jumpstep_2_生成测试程序">
+    生成测试程序（用于调用以上两个共享库）——main_mix
+   </span>
+  </p>
+  <p>
+   测试程序的源文件——main_mix.cpp:
+  </p>
+  <pre><code>extern int add(int, int);
+extern int sub(int, int);
+
+int main()
+{
+    add(0xb, 0xc);
+    add(0xb, 0xc);
+    sub(0xf, 0xd);
+    sub(0xf, 0xd);
+    return 0;
+}
+</code></pre>
+  <p>
+   生成测试程序——main_mix
+  </p>
+  <pre><code>$ g++ -o main_mix main_mix.cpp ./libadd_debug.so ./libsub_debug.so -g
+</code></pre>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   查看可执行目标文件 main_mix 的程序表
+  </p>
+  <pre><code>$ readelf -l main_mix
+
+Elf file type is EXEC (Executable file)
+Entry point 0x4005f0
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040
+                 0x00000000000001f8 0x00000000000001f8  R E    8
+  INTERP         0x0000000000000238 0x0000000000400238 0x0000000000400238
+                 0x000000000000001c 0x000000000000001c  R      1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x00000000000008dc 0x00000000000008dc  R E    200000
+  LOAD           0x0000000000000df0 0x0000000000600df0 0x0000000000600df0
+                 0x0000000000000250 0x0000000000000258  RW     200000
+  DYNAMIC        0x0000000000000e08 0x0000000000600e08 0x0000000000600e08
+                 0x00000000000001f0 0x00000000000001f0  RW     8
+  NOTE           0x0000000000000254 0x0000000000400254 0x0000000000400254
+                 0x0000000000000044 0x0000000000000044  R      4
+  GNU_EH_FRAME   0x00000000000007b4 0x00000000004007b4 0x00000000004007b4
+                 0x0000000000000034 0x0000000000000034  R      4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     10
+  GNU_RELRO      0x0000000000000df0 0x0000000000600df0 0x0000000000600df0
+                 0x0000000000000210 0x0000000000000210  R      1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00
+   01     .interp 
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame 
+   03     .init_array .fini_array .jcr .dynamic .got .got.plt .data .bss 
+   04     .dynamic 
+   05     .note.ABI-tag .note.gnu.build-id 
+   06     .eh_frame_hdr 
+   07
+   08     .init_array .fini_array .jcr .dynamic .got
+</code></pre>
+  <p>
+   从上面可以看出，
+   <code>
+    .plt
+   </code>
+   、
+   <code>
+    .plt.got
+   </code>
+   和
+   <code>
+    .text
+   </code>
+   等位于同一个 segment（代码段），
+   <code>
+    .got
+   </code>
+   、
+   <code>
+    .got.plt
+   </code>
+   和
+   <code>
+    .data
+   </code>
+   等位于同一个 segment（数据段）。
+  </p>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   分析 .plt section 的作用
+  </p>
+  <p>
+   1）查看可执行目标文件 main_mix 的 .plt section
+  </p>
+  <pre><code>$ objdump -d --section=.plt main_mix
+
+main_mix:     file format elf64-x86-64
+
+
+Disassembly of section .plt:
+
+00000000004005a0 &lt;_Z3addii@plt-0x10&gt;:
+  4005a0:   ff 35 62 0a 20 00       pushq  0x200a62(%rip)        # 601008 &lt;_GLOBAL_OFFSET_TABLE_+0x8&gt;
+  4005a6:   ff 25 64 0a 20 00       jmpq   *0x200a64(%rip)        # 601010 &lt;_GLOBAL_OFFSET_TABLE_+0x10&gt;
+  4005ac:   0f 1f 40 00             nopl   0x0(%rax)
+
+00000000004005b0 &lt;_Z3addii@plt&gt;:
+  4005b0:   ff 25 62 0a 20 00       jmpq   *0x200a62(%rip)        # 601018 &lt;_GLOBAL_OFFSET_TABLE_+0x18&gt;
+  4005b6:   68 00 00 00 00          pushq  $0x0
+  4005bb:   e9 e0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+
+00000000004005c0 &lt;_Z3subii@plt&gt;:
+  4005c0:   ff 25 5a 0a 20 00       jmpq   *0x200a5a(%rip)        # 601020 &lt;_GLOBAL_OFFSET_TABLE_+0x20&gt;
+  4005c6:   68 01 00 00 00          pushq  $0x1
+  4005cb:   e9 d0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+
+00000000004005d0 &lt;__libc_start_main@plt&gt;:
+  4005d0:   ff 25 52 0a 20 00       jmpq   *0x200a52(%rip)        # 601028 &lt;_GLOBAL_OFFSET_TABLE_+0x28&gt;
+  4005d6:   68 02 00 00 00          pushq  $0x2
+  4005db:   e9 c0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+</code></pre>
+  <p>
+   从上面可以看出，.plt section 中的条目有4 个，后 3 个分别是函数 add、sub 和 __libc_start_main 的 PLT 条目。
+  </p>
+  <p>
+   另外，.plt section 中的第 1 个条目用于跳转到动态链接器，具体的目的跳转函数为 _dl_runtime_resolve_avx。关于这一点，有兴趣的可以自己验证。
+  </p>
+  <p>
+   因此，.plt section 实际就是通常所说的过程链接表（Procedure Linkage Table, PLT）。
+  </p>
+  <p>
+   <strong>
+    step 5：
+   </strong>
+   分析 .plt.got section 的作用
+  </p>
+  <p>
+   1）查看可共享目标文件 libadd_debug.so 的 .plt.got section
+  </p>
+  <pre><code>$ objdump -d --section=.plt.got libadd_debug.so 
+
+libadd_debug.so:     file format elf64-x86-64
+
+
+Disassembly of section .plt.got:
+
+0000000000000530 &lt;.plt.got&gt;:
+ 530:   ff 25 9a 0a 20 00       jmpq   *0x200a9a(%rip)        # 200fd0 &lt;_DYNAMIC+0x150&gt;
+ 536:   66 90                   xchg   %ax,%ax
+ 538:   ff 25 ba 0a 20 00       jmpq   *0x200aba(%rip)        # 200ff8 &lt;_DYNAMIC+0x178&gt;
+ 53e:   66 90                   xchg   %ax,%ax
+</code></pre>
+  <p>
+   从上面可以看出，.plt.got section 中的条目只有 1 个。
+  </p>
+  <p>
+   2）使用 gdb 运行可执行目标文件 main_mix
+  </p>
+  <pre><code>$ gdb -q main_mix
+Reading symbols from main_mix...done.
+(gdb) start
+Temporary breakpoint 1 at 0x4006ea: file main_mix.cpp, line 6.
+Starting program: /home/xuxiaoqiang/tx/dyn/t14/main_mix 
+
+Temporary breakpoint 1, main () at main_mix.cpp:6
+6       add(0xb, 0xc);
+</code></pre>
+  <p>
+   3）查看 libadd_debug.so 的 .plt.got 和 .got section 的内存映射
+  </p>
+  <pre><code>(gdb) info files
+# 省略 ...
+    0x00007ffff7bd5530 - 0x00007ffff7bd5540 is .plt.got in ./libadd_debug.so
+# 省略 ...
+    0x00007ffff7bd3fd0 - 0x00007ffff7bd4000 is .got in ./libsub_debug.so
+# 省略 ...
+</code></pre>
+  <p>
+   4）查看运行期 libadd_debug.so 的 .plt.got section 中唯一条目的内容
+  </p>
+  <pre><code>(gdb) x/3i 0x00007ffff79d3530
+   0x7ffff79d3530:  jmpq   *0x200a9a(%rip)        # 0x7ffff7bd3fd0
+   0x7ffff79d3536:  xchg   %ax,%ax
+   0x7ffff79d3538:  jmpq   *0x200aba(%rip)        # 0x7ffff7bd3ff8
+</code></pre>
+  <p>
+   结合“3）”中的信息，可以看出 libadd_debug.so 的 .plt.got section 的唯一条目中第一条指令的目的地址为 0x7ffff7bd3fd0 的内容（即 .got section 中第 1 个条目的内容）。
+  </p>
+  <p>
+   5）查看起始地址为 0x7ffff7bd3fd0 后面 8 个字节的内容
+  </p>
+  <pre><code>(gdb) x/gx 0x7ffff7bd3fd0
+0x7ffff7bd3fd0: 0x00007ffff76432d0
+(gdb) info symbol 0x00007ffff76432d0
+__cxa_finalize in section .text of /lib/x86_64-linux-gnu/libc.so.6
+</code></pre>
+  <p>
+   从上面可以看出，libadd_debug.so 的 .plt.got section 中唯一条目中第一条指令的目的地址为 0x00007ffff76432d0，即 __cxa_finalize 函数的地址。
+  </p>
+  <p>
+   因此，可以得出结论：.plt.got section 用于存放 __cxa_finalize 函数对应的 PLT 条目。
+  </p>
+  <p>
+   <strong>
+    step 6：
+   </strong>
+   分析 .got section 的作用
+  </p>
+  <p>
+   1）使用 gdb 运行可执行目标文件 main_mix
+  </p>
+  <pre><code>$ gdb -q main_mix
+Reading symbols from main_mix...done.
+(gdb) start
+Temporary breakpoint 1 at 0x4006ea: file main_mix.cpp, line 6.
+Starting program: /home/xuxiaoqiang/tx/dyn/t14/main_mix 
+
+Temporary breakpoint 1, main () at main_mix.cpp:6
+6       add(0xb, 0xc);
+</code></pre>
+  <p>
+   2）反汇编 add 函数，并在 0x00007ffff7bd5652 地址处设置断点
+  </p>
+  <pre><code>(gdb) disas add
+Dump of assembler code for function add(int, int):
+   0x00007ffff7bd5640 &lt;+0&gt;: push   %rbp
+   0x00007ffff7bd5641 &lt;+1&gt;: mov    %rsp,%rbp
+   0x00007ffff7bd5644 &lt;+4&gt;: mov    %edi,-0x4(%rbp)
+   0x00007ffff7bd5647 &lt;+7&gt;: mov    %esi,-0x8(%rbp)
+   0x00007ffff7bd564a &lt;+10&gt;:    mov    -0x4(%rbp),%edx
+   0x00007ffff7bd564d &lt;+13&gt;:    mov    -0x8(%rbp),%eax
+   0x00007ffff7bd5650 &lt;+16&gt;:    add    %eax,%edx
+   0x00007ffff7bd5652 &lt;+18&gt;:    mov    0x20097f(%rip),%rax        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5659 &lt;+25&gt;:    mov    %edx,(%rax)
+   0x00007ffff7bd565b &lt;+27&gt;:    mov    0x200976(%rip),%rax        # 0x7ffff7dd5fd8
+   0x00007ffff7bd5662 &lt;+34&gt;:    mov    (%rax),%eax
+   0x00007ffff7bd5664 &lt;+36&gt;:    pop    %rbp
+   0x00007ffff7bd5665 &lt;+37&gt;:    retq
+End of assembler dump.
+(gdb) b *0x00007ffff7bd5652
+Breakpoint 2 at 0x7ffff7bd5652: file add.cpp, line 5.
+</code></pre>
+  <p>
+   3）继续执行，并查看起始地址为 0x7ffff7dd5fd8 的内容
+  </p>
+  <pre><code>(gdb) c
+Continuing.
+
+Breakpoint 2, 0x00007ffff7bd5652 in add (a=11, b=12) at add.cpp:5
+5       g_sum = a + b;
+(gdb) ni
+0x00007ffff7bd5659  5       g_sum = a + b;
+(gdb) p/x $rip+0x20097f
+$1 = 0x7ffff7dd5fd8
+(gdb) x/gx $rip+0x20097f
+0x7ffff7dd5fd8: 0x00007ffff7dd6024
+(gdb) p/x &amp;g_sum
+$2 = 0x7ffff7dd6024
+</code></pre>
+  <p>
+   从上面可以看出，起始地址为 0x7ffff7dd5fd8 后面 8 字节的内容即为全局变量 g_sum 的地址。
+  </p>
+  <p>
+   4）查看地址 0x7ffff7dd5fd8 位于哪个 section
+  </p>
+  <pre><code>(gdb) info files
+# 省略 ...
+    0x00007ffff7dd5fd0 - 0x00007ffff7dd6000 is .got in ./libadd_debug.so
+# 省略 ...
+</code></pre>
+  <p>
+   从上面可以看出，0x7ffff7dd5fd8 为 libadd_debug.so 的 .got section 中第二个条目的地址。
+  </p>
+  <p>
+   因此，可以得出结论：.got section 的其中一个条目的内容为全局变量 g_sum 的地址。
+  </p>
+  <p>
+   5）查看完整的运行期 libadd_debug.so 的 .got section
+  </p>
+  <pre><code>(gdb) x/6gx 0x00007ffff7dd5fd0
+0x7ffff7dd5fd0: 0x00007ffff76432d0  0x00007ffff7dd6024
+0x7ffff7dd5fe0: 0x0000000000000000  0x0000000000000000
+0x7ffff7dd5ff0: 0x0000000000000000  0x0000000000000000
+</code></pre>
+  <p>
+   从上面可以看出，在运行期 libadd_debug.so 的 .got section 的条目有 6 个。并且 GOT[2] ~ GOT[5] 的内容全为 0。
+  </p>
+  <p>
+   6）查看运行期 libadd_debug.so 的 .got section 的第一个条目的内容
+  </p>
+  <pre><code>(gdb) disas 0x00007ffff76432d0, 0x00007ffff76432d0+10
+Dump of assembler code from 0x7ffff76432d0 to 0x7ffff76432da:
+   0x00007ffff76432d0 &lt;__cxa_finalize+0&gt;:   push   %r15
+   0x00007ffff76432d2 &lt;__cxa_finalize+2&gt;:   push   %r14
+   0x00007ffff76432d4 &lt;__cxa_finalize+4&gt;:   push   %r13
+   0x00007ffff76432d6 &lt;__cxa_finalize+6&gt;:   push   %r12
+   0x00007ffff76432d8 &lt;__cxa_finalize+8&gt;:   xor    %r13d,%r13d
+End of assembler dump.
+(gdb) info symbol 0x00007ffff76432d0
+__cxa_finalize in section .text of /lib/x86_64-linux-gnu/libc.so.6
+</code></pre>
+  <p>
+   从上面可以看出，在运行期 libadd_debug.so 的 .got section 的第一个条目的内容为 __cxa_finalize 函数的地址，定义在 /lib/x86_64-linux-gnu/libc.so.6 的 .text section 中。
+  </p>
+  <p>
+   另外，__cxa_finalize 函数没有对应的 PLT 条目（从“step 4”步骤中可以看出），意味着该函数不需要延迟绑定。
+  </p>
+  <p>
+   因此，可以得出结论：.got section 的其中一个条目的内容为不需要延迟绑定的 __cxa_finalize 函数的地址。
+  </p>
+  <p>
+   <strong>
+    step 7：
+   </strong>
+   分析 .got.plt section 的作用
+  </p>
+  <p>
+   1）使用 gdb 运行可执行目标文件 main_mix
+  </p>
+  <pre><code>$ gdb -q main_mix
+Reading symbols from main_mix...done.
+(gdb) start
+Temporary breakpoint 1 at 0x4006ea: file main_mix.cpp, line 6.
+Starting program: /home/xuxiaoqiang/tx/dyn/t14/main_mix 
+
+Temporary breakpoint 1, main () at main_mix.cpp:6
+6       add(0xb, 0xc);
+</code></pre>
+  <p>
+   2）反汇编 main 函数和 _Z3addii@plt，并单步调试 _Z3addii@plt 的汇编代码
+  </p>
+  <pre><code>(gdb) disas
+Dump of assembler code for function main():
+   0x00000000004006e6 &lt;+0&gt;: push   %rbp
+   0x00000000004006e7 &lt;+1&gt;: mov    %rsp,%rbp
+=&gt; 0x00000000004006ea &lt;+4&gt;: mov    $0xc,%esi
+   0x00000000004006ef &lt;+9&gt;: mov    $0xb,%edi
+   0x00000000004006f4 &lt;+14&gt;:    callq  0x4005b0 &lt;_Z3addii@plt&gt;
+   0x00000000004006f9 &lt;+19&gt;:    mov    $0xc,%esi
+   0x00000000004006fe &lt;+24&gt;:    mov    $0xb,%edi
+   0x0000000000400703 &lt;+29&gt;:    callq  0x4005b0 &lt;_Z3addii@plt&gt;
+   0x0000000000400708 &lt;+34&gt;:    mov    $0xd,%esi
+   0x000000000040070d &lt;+39&gt;:    mov    $0xf,%edi
+   0x0000000000400712 &lt;+44&gt;:    callq  0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400717 &lt;+49&gt;:    mov    $0xd,%esi
+   0x000000000040071c &lt;+54&gt;:    mov    $0xf,%edi
+   0x0000000000400721 &lt;+59&gt;:    callq  0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400726 &lt;+64&gt;:    mov    $0x0,%eax
+   0x000000000040072b &lt;+69&gt;:    pop    %rbp
+   0x000000000040072c &lt;+70&gt;:    retq
+End of assembler dump.
+(gdb) b *0x00000000004006f4
+Breakpoint 2 at 0x4006f4: file main_mix.cpp, line 6.
+(gdb) x/3i 0x4005b0
+   0x4005b0 &lt;_Z3addii@plt&gt;: jmpq   *0x200a62(%rip)        # 0x601018
+   0x4005b6 &lt;_Z3addii@plt+6&gt;:   pushq  $0x0
+   0x4005bb &lt;_Z3addii@plt+11&gt;:  jmpq   0x4005a0
+(gdb) b *0x4005b0
+Breakpoint 3 at 0x4005b0
+(gdb) b * 0x4005bb
+Breakpoint 4 at 0x4005bb
+(gdb) c
+Continuing.
+
+Breakpoint 2, 0x00000000004006f4 in main () at main_mix.cpp:6
+6       add(0xb, 0xc);
+(gdb) c
+Continuing.
+
+Breakpoint 3, 0x00000000004005b0 in add(int, int)@plt ()
+(gdb) disas
+Dump of assembler code for function _Z3addii@plt:
+=&gt; 0x00000000004005b0 &lt;+0&gt;: jmpq   *0x200a62(%rip)        # 0x601018
+   0x00000000004005b6 &lt;+6&gt;: pushq  $0x0
+   0x00000000004005bb &lt;+11&gt;:    jmpq   0x4005a0
+End of assembler dump.
+</code></pre>
+  <p>
+   3）查看 _Z3addii@plt 中第一个 jumq 指令的目的地址
+  </p>
+  <pre><code>(gdb) x/gx 0x00000000004005b6+0x200a62
+0x601018:   0x00000000004005b6
+</code></pre>
+  <p>
+   从上面看出，_Z3addii@plt 中第一个 jumq 指令的目的地址为 0x00000000004005b6，即 _Z3addii@plt 中第三条指令的地址。
+  </p>
+  <p>
+   4）查看地址 0x601018 位于哪个 section
+  </p>
+  <pre><code>(gdb) info files
+# 省略 ...
+    0x0000000000601000 - 0x0000000000601030 is .got.plt
+# 省略 ...
+</code></pre>
+  <p>
+   从上面可以看出，0x601018 为 main_mix 的 .got.plt section 中第 4 个条目的地址。
+  </p>
+  <p>
+   5）查看完整的 main_mix 的 .got.plt section 及其条目的内容
+  </p>
+  <pre><code>(gdb) x/6gx 0x0000000000601000
+0x601000:   0x0000000000600e08  0x00007ffff7ffe168
+0x601010:   0x00007ffff7dee870  0x00000000004005b6
+0x601020:   0x00000000004005c6  0x00007ffff7629740
+(gdb) info symbol 0x0000000000600e08
+_DYNAMIC in section .dynamic of /home/test/main_mix
+(gdb) info symbol 0x00007ffff7dee870
+_dl_runtime_resolve_avx in section .text of /lib64/ld-linux-x86-64.so.2
+(gdb) info symbol 0x00007ffff7629740
+__libc_start_main in section .text of /lib/x86_64-linux-gnu/libc.so.6
+
+# 省略 ...
+
+(gdb) x/6gx 0x0000000000601000
+0x601000:   0x0000000000600e08  0x00007ffff7ffe168
+0x601010:   0x00007ffff7dee870  0x00007ffff7bd5640
+0x601020:   0x00007ffff79d3640  0x00007ffff7629740
+(gdb) info symbol 0x00007ffff7bd5640
+add(int, int) in section .text of ./libadd_debug.so
+(gdb) info symbol 0x00007ffff79d3640
+sub(int, int) in section .text of ./libsub_debug.so
+</code></pre>
+  <p>
+   从上面可以看出，main_mix 的 .got.plt section 中第 1 个条目的内容为 .dynamic section 的地址，第 3 个条目的内容为 _dl_runtime_resolve_avx 函数的地址，第 6 个条目的内容为 __libc_start_main 函数的地址。
+  </p>
+  <p>
+   另外，第 4、5 个条目的最终内容为 add、sub 函数的地址。这一点，有兴趣的可以自己验证。
+  </p>
+  <p>
+   因此，可以得出结论：.got.plt section 用于存放需要延迟绑定的函数的地址。
+  </p>
+  <p>
+   所以，可以得出如下结论：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      section
+     </th>
+     <th>
+      所在 segment
+     </th>
+     <th>
+      section 属性
+     </th>
+     <th>
+      用途
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      .plt
+     </td>
+     <td>
+      代码段
+     </td>
+     <td>
+      RE（可读，可执行）
+     </td>
+     <td>
+      .plt section 实际就是通常所说的过程链接表（Procedure Linkage Table, PLT）
+     </td>
+    </tr>
+    <tr>
+     <td>
+      .plt.got
+     </td>
+     <td>
+      代码段
+     </td>
+     <td>
+      RE
+     </td>
+     <td>
+      .plt.got section 用于存放 __cxa_finalize 函数对应的 PLT 条目
+     </td>
+    </tr>
+    <tr>
+     <td>
+      .got
+     </td>
+     <td>
+      数据段
+     </td>
+     <td>
+      RW（可读，可写）
+     </td>
+     <td>
+      <li>
+       .got section 中可以用于存放全局变量的地址；
+      </li>
+      <li>
+       .got section 中也可以用于存放不需要延迟绑定的函数的地址。
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      .got.plt
+     </td>
+     <td>
+      数据段
+     </td>
+     <td>
+      RW
+     </td>
+     <td>
+      .got.plt section 用于存放需要延迟绑定的函数的地址
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   注：查看 section 属性的命令：
+   <code>
+    readelf -S main_mix
+   </code>
+   。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

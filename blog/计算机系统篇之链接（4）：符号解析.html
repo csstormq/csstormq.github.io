@@ -1,0 +1,1031 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="4">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（4）：符号解析
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Wednesday, 15. April 2020 12:35PM
+  </p>
+  <ul class="checklist">
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump符号解析的整体过程">
+     符号解析的整体过程
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump链接器如何解析重复的全局符号名称">
+     链接器如何解析重复的全局符号名称
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump链接器如何使用静态库来解析外部符号引用">
+     链接器如何使用静态库来解析外部符号引用
+    </a>
+   </li>
+   <li>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump符号解析引发的问题">
+     符号解析引发的问题
+    </a>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_1">
+   <span id="jump符号解析的整体过程">
+    符号解析的整体过程
+   </span>
+  </h3>
+  <p>
+   符号解析的目的是将每个符号引用与唯一的符号定义关联起来。符号解析的过程由编译器、汇编器和链接器协作完成。具体地处理行为如下：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      符号
+     </th>
+     <th>
+      编译器如何处理
+     </th>
+     <th>
+      汇编器如何处理
+     </th>
+     <th>
+      链接器如何处理
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      对于全局符号定义
+     </td>
+     <td>
+      <a href="#jump验证过程1">
+       如果同一个全局符号在同一个目标模块内有多个定义，那么编译器会报错，不会进行后面的汇编和链接过程。
+      </a>
+     </td>
+     <td>
+      只要编译器不报错，汇编器也不会报错。
+     </td>
+     <td>
+      <a href="#jump验证过程2">
+       如果同一个全局符号在不同的目标模块内都有定义，那么链接器会报错。
+      </a>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      对于全局符号引用
+     </td>
+     <td>
+      <li>
+       <a href="#jump验证过程3">
+        如果一个全局符号引用在目标模块内既没有声明也没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。
+       </a>
+      </li>
+      <li>
+       <a href="#jump验证过程4">
+        如果一个全局符号引用在目标模块内只有声明没有定义，那么编译器不会报错，继续进行后面的汇编和链接过程。
+       </a>
+      </li>
+     </td>
+     <td>
+      只要编译器不报错，汇编器也不会报错。
+     </td>
+     <td>
+      <a href="#jump验证过程5">
+       如果一个全局符号引用在其他目标模块内都没有定义，那么链接器会报错。
+      </a>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      对于局部符号定义
+     </td>
+     <td>
+      <a href="#jump验证过程6">
+       如果同一个局部符号在同一个目标模块内有多个定义，那么编译器会报错，不会进行后面的汇编和链接过程。
+      </a>
+     </td>
+     <td>
+      只要编译器不报错，汇编器也不会报错。
+     </td>
+     <td>
+      链接器不会涉及局部符号定义的处理过程。
+     </td>
+    </tr>
+    <tr>
+     <td>
+      对于局部符号引用
+     </td>
+     <td>
+      <li>
+       <a href="#jump验证过程7">
+        如果一个局部符号引用在同一个目标模块内既没有声明也没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。
+       </a>
+      </li>
+      <li>
+       <a href="#jump验证过程8">
+        如果一个局部符号引用在同一个目标模块内只有声明但没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。
+       </a>
+      </li>
+     </td>
+     <td>
+      只要编译器不报错，汇编器也不会报错。
+     </td>
+     <td>
+      链接器不会涉及局部符号引用的处理过程。
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   1）
+   <span id="jump验证过程1">
+    验证“如果同一个全局符号在同一个目标模块内有多个定义，那么编译器会报错，不会进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># 全局变量 g_val（int 类型的）和 g_val（double 类型的）对应的全局符号的名称相同，属于“同一个全局符号在同一个目标模块内有多个定义”的情况
+# 函数 int func(int val) 和 void func(int val) 对应的全局符号的名称相同，属于“同一个全局符号在同一个目标模块内有多个定义”的情况
+$ cat compile_error1.cpp 
+int g_val = 0;
+double g_val = 0;
+
+int func(int val)
+{
+  return val;
+}
+
+void func(int val)
+{
+}
+
+# 在生成汇编文件时报错，即编译器会报错
+$ g++ -S compile_error1.cpp -o compile_error1.s
+compile_error1.cpp:2:8: error: conflicting declaration ‘double g_val’
+ double g_val;
+        ^~~~~
+compile_error1.cpp:1:5: note: previous declaration as ‘int g_val’
+ int g_val;
+     ^~~~~
+compile_error1.cpp: In function ‘void func(int)’:
+compile_error1.cpp:9:6: error: ambiguating new declaration of ‘void func(int)’
+ void func(int val)
+      ^~~~
+compile_error1.cpp:4:5: note: old declaration ‘int func(int)’
+ int func(int val)
+     ^~~~
+</code></pre>
+  <p>
+   2）
+   <span id="jump验证过程2">
+    验证“如果同一个全局符号在不同的目标模块内都有定义，那么链接器会报错。”
+   </span>
+  </p>
+  <pre><code># 在不同的目标模块中定义相同名称的全局符号
+$ cat link_error1.cpp 
+int g_val = 1;
+
+int func(int val)
+{
+  return val;
+}
+$ cat main.cpp
+int g_val = 100;
+
+void func(int val)
+{
+}
+
+int main()
+{
+    return 0;
+}
+# 编译器和汇编器不会报错
+$ g++ -c link_error1.cpp -o link_error1.o
+$ g++ -c main.cpp -o main.o
+# 在生成可执行目标文件时报错，即链接器会报错
+$ g++ -o main main.o link_error1.o
+link_error1.o:(.data+0x0): multiple definition of `g_val'
+main.o:(.data+0x0): first defined here
+link_error1.o: In function `func(int)':
+link_error1.cpp:(.text+0x0): multiple definition of `func(int)'
+main.o:main.cpp:(.text+0x0): first defined here
+collect2: error: ld returned 1 exit status
+</code></pre>
+  <p>
+   3）
+   <span id="jump验证过程3">
+    验证“如果一个全局符号引用在目标模块内既没有声明也没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># func2 在目标模块中既没有声明也没有定义
+$ cat compile_error2.cpp 
+int func(int val)
+{
+  return val + func2(val);
+}
+# 编译器会报错
+$ g++ -S compile_error2.cpp -o compile_error2.s
+compile_error2.cpp: In function ‘int func(int)’:
+compile_error2.cpp:3:25: error: ‘func2’ was not declared in this scope
+   return val + func2(val);
+                         ^
+</code></pre>
+  <p>
+   4）
+   <span id="jump验证过程4">
+    验证“如果一个全局符号引用在目标模块内只有声明没有定义，那么编译器不会报错，继续进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># 一个全局符号引用在目标模块内只有声明没有定义
+$ cat compile_correct1.cpp 
+int func2(int);
+
+int func(int val)
+{
+  return val + func2(val);
+}
+# 编译器和汇编器不会报错
+$ g++ -c compile_correct1.cpp -o compile_correct
+</code></pre>
+  <p>
+   5）
+   <span id="jump验证过程5">
+    验证“如果一个全局符号引用在其他目标模块内都没有定义，那么链接器会报错。”
+   </span>
+  </p>
+  <pre><code># 一个全局符号引用在其他目标模块内都没有定义
+$ cat compile_correct1.cpp 
+int func2(int);
+
+int func(int val)
+{
+  return val + func2(val);
+}
+$ cat main.cpp
+int main()
+{
+    return 0;
+}
+# 编译器和汇编器不会报错
+$ g++ -o main main.o compile_correct
+$ g++ -c main.cpp -o main.o
+# 链接器会报错
+$ g++ -o main main.o compile_correct.o
+compile_correct.o: In function `func(int)':
+compile_correct1.cpp:(.text+0x11): undefined reference to `func2(int)'
+collect2: error: ld returned 1 exit status
+</code></pre>
+  <p>
+   6）
+   <span id="jump验证过程6">
+    验证“如果同一个局部符号在同一个目标模块内有多个定义，那么编译器会报错，不会进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># 局部变量 value（值为1的）与局部变量 value（值为2的）对应的局部符号的名称相同，属于“同一个局部符号在同一个目标模块内有多个定义”
+# 局部函数 int func(int val) 与 void func(int val) 对应的局部符号的名称相同，属于“同一个局部符号在同一个目标模块内有多个定义”
+# 局部变量 value（值为3的）与局部变量 value（值为4的）对应的局部符号的名称不相同
+$ cat compile_error3.cpp 
+static int value = 1;
+static double value = 2;
+
+static int func(int val)
+{
+  static int value = 3;
+  return val + value;
+}
+
+static void func(int val)
+{
+  static int value = 4;
+}
+# 编译器会报错
+$ g++ -S compile_error3.cpp -o compile_error3.s
+compile_error3.cpp:2:15: error: conflicting declaration ‘double value’
+ static double value = 2;
+               ^~~~~
+compile_error3.cpp:1:12: note: previous declaration as ‘int value’
+ static int value = 1;
+            ^~~~~
+compile_error3.cpp: In function ‘void func(int)’:
+compile_error3.cpp:10:13: error: ambiguating new declaration of ‘void func(int)’
+ static void func(int val)
+             ^~~~
+compile_error3.cpp:4:12: note: old declaration ‘int func(int)’
+ static int func(int val)
+            ^~~~
+</code></pre>
+  <p>
+   7）
+   <span id="jump验证过程7">
+    验证“如果一个局部符号引用在同一个目标模块内既没有声明也没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># 一个局部符号引用在同一个目标模块内既没有声明也没有定义
+# 局部函数 func 在引用变量 value 的前面没有 value 变量的声明或定义
+$ cat compile_error4.cpp 
+static int func(int val)
+{
+  return val + value;
+}
+
+static int value = 1;
+# 编译器会报错
+$ g++ -S compile_error4.cpp -o compile_error4.s
+compile_error4.cpp: In function ‘int func(int)’:
+compile_error4.cpp:3:16: error: ‘value’ was not declared in this scope
+   return val + value;
+                ^~~~~
+</code></pre>
+  <p>
+   8）
+   <span id="jump验证过程8">
+    验证“如果一个局部符号引用在同一个目标模块内只有声明但没有定义，那么编译器会报错，不会进行后面的汇编和链接过程。”
+   </span>
+  </p>
+  <pre><code># 一个局部符号引用在同一个目标模块内只有声明但没有定义
+$ cat compile_error5.cpp 
+static int func2(int);
+
+static int func(int val)
+{
+  return val + func2(val);
+}
+# 编译器会报错
+$ g++ -S compile_error5.cpp -o compile_error5.s
+compile_error5.cpp:1:12: warning: ‘int func2(int)’ used but never defined
+ static int func2(int);
+            ^~~~~
+</code></pre>
+  <h3 id="_2">
+   <span id="jump链接器如何解析重复的全局符号名称">
+    链接器如何解析重复的全局符号名称
+   </span>
+  </h3>
+  <p>
+   编译器 cc1 将每个全局符号标记为强符号（Strong Symbol）或弱符号（Weak Symbol），汇编器将该标记信息隐式地编码在可重定位目标文件的符号表中（即用 READELF 查看符号表条目中的 Ndx 列的值为 COM）。而编译器 cc1plus 将每个全局符号标记为强符号。
+  </p>
+  <p>
+   编译器 cc1 的默认行为：全局函数定义和已初始化的全局变量（包括初始值为0的全局变量）属于强符号，未初始化的全局变量属于弱符号。另外，默认行为可以通过
+   <code>
+    -fno-common
+   </code>
+   选项改变，更改后的行为：全局函数定义和全局变量（无论是否已初始化）都属于强符号。
+  </p>
+  <p>
+   编译器 cc1plus 的默认行为：全局函数定义和全局变量（无论是否已初始化）都属于强符号。另外，默认行为不能通过
+   <code>
+    -fcommon
+   </code>
+   选项改变。
+  </p>
+  <p>
+   Linux 链接器处理重复的全局符号名称的规则为：
+  </p>
+  <ul>
+   <li>
+    <p>
+     规则1：不允许有多个同名的全局强符号。
+    </p>
+   </li>
+   <li>
+    <p>
+     规则2：如果有一个全局强符号和多个全局弱符号同名，那么选择全局强符号。
+    </p>
+   </li>
+   <li>
+    <p>
+     规则3：如果有多个全局弱符号同名，那么选择这些全局弱符号中的任意一个。
+    </p>
+   </li>
+  </ul>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      情形
+     </th>
+     <th>
+      编译驱动器
+     </th>
+     <th>
+      源文件后缀
+     </th>
+     <th>
+      实际调用的编译器
+     </th>
+     <th>
+      外部添加的编译选项
+     </th>
+     <th>
+      行为
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      <a href="#jump情形1">
+       情形1
+      </a>
+     </td>
+     <td>
+      gcc
+     </td>
+     <td>
+      .c
+     </td>
+     <td>
+      cc1
+     </td>
+     <td>
+      无（即编译器 cc1 的默认行为）
+     </td>
+     <td>
+      <li>
+       全局函数定义和已初始化的全局变量（包括初始值为0的全局变量）属于强符号
+      </li>
+      <li>
+       未初始化的全局变量属于弱符号。
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <a href="#jump情形2">
+       情形2
+      </a>
+     </td>
+     <td>
+      gcc
+     </td>
+     <td>
+      .c
+     </td>
+     <td>
+      cc1
+     </td>
+     <td>
+      <code>
+       -fno-common
+      </code>
+     </td>
+     <td>
+      全局函数定义和全局变量（无论是否已初始化）都属于强符号。
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <a href="#jump情形3">
+       情形3
+      </a>
+     </td>
+     <td>
+      gcc
+     </td>
+     <td>
+      .cpp
+     </td>
+     <td>
+      cc1plus
+     </td>
+     <td>
+      无（即编译器 cc1plus 的默认行为）
+     </td>
+     <td>
+      全局函数定义和全局变量（无论是否已初始化）都属于强符号。
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <a href="#jump情形3">
+       情形4
+      </a>
+     </td>
+     <td>
+      g++
+     </td>
+     <td>
+      .c
+     </td>
+     <td>
+      cc1plus
+     </td>
+     <td>
+      无（即编译器 cc1plus 的默认行为）
+     </td>
+     <td>
+      全局函数定义和全局变量（无论是否已初始化）都属于强符号。
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <a href="#jump情形3">
+       情形5
+      </a>
+     </td>
+     <td>
+      g++
+     </td>
+     <td>
+      .cpp
+     </td>
+     <td>
+      cc1plus
+     </td>
+     <td>
+      无（即编译器 cc1plus 的默认行为）
+     </td>
+     <td>
+      全局函数定义和全局变量（无论是否已初始化）都属于强符号。
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   1）
+   <span id="jump情形1">
+    验证“编译器 cc1 的默认行为：全局函数定义和已初始化的全局变量（包括初始值为0的全局变量）属于强符号，未初始化的全局变量属于弱符号。”
+   </span>
+  </p>
+  <pre><code>$ cat test1.c
+int g_val_1 = 0;
+int g_val_2;
+
+void func()
+{
+  g_val_1 = 1;
+  g_val_2 = 2;
+}
+
+$ cat main.c 
+#include &lt;stdio.h&gt;
+
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_1=%d, g_val_2=%d\n", g_val_1, g_val_2);
+  return 0;
+}
+
+$ gcc -c test1.c -o test1.o
+$ gcc -c main.c -o main.o
+$ readelf -s test1.o
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test1.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+     9: 0000000000000004     4 OBJECT  GLOBAL DEFAULT  COM g_val_2
+    10: 0000000000000000    27 FUNC    GLOBAL DEFAULT    1 func
+
+$ readelf -s main.o
+
+Symbol table '.symtab' contains 14 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     9: 0000000000000004     4 OBJECT  GLOBAL DEFAULT  COM g_val_1
+    10: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    3 g_val_2
+    11: 0000000000000000    50 FUNC    GLOBAL DEFAULT    1 main
+    12: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND func
+    13: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf
+
+$ gcc -o main main.c test1.c -v
+#省略
+COLLECT_GCC_OPTIONS='-o' 'main' '-v' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/cc1
+#省略
+
+$ ./main
+g_val_1=1, g_val_2=2
+</code></pre>
+  <p>
+   2）
+   <span id="jump情形2">
+    验证“编译器 cc1 添加 -fno-common 编译选项后的行为：全局函数定义和全局变量（无论是否已初始化）都属于强符号。”
+   </span>
+  </p>
+  <pre><code>$ cat test1.c
+int g_val_1 = 0;
+int g_val_2;
+
+void func()
+{
+  g_val_1 = 1;
+  g_val_2 = 2;
+}
+
+$ cat main.c 
+#include &lt;stdio.h&gt;
+
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_1=%d, g_val_2=%d\n", g_val_1, g_val_2);
+  return 0;
+}
+
+$ gcc -c test1.c -o test1.o -fno-common
+$ gcc -c main.c -o main.o -fno-common
+$ readelf -s test1.o
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test1.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+     9: 0000000000000004     4 OBJECT  GLOBAL DEFAULT    4 g_val_2
+    10: 0000000000000000    27 FUNC    GLOBAL DEFAULT    1 func
+
+$ readelf -s main.o
+
+Symbol table '.symtab' contains 14 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+    10: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    3 g_val_2
+    11: 0000000000000000    50 FUNC    GLOBAL DEFAULT    1 main
+    12: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND func
+    13: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf
+
+$ gcc -o main main.o test1.o
+test1.o:(.bss+0x0): multiple definition of `g_val_1'
+main.o:(.bss+0x0): first defined here
+test1.o:(.bss+0x4): multiple definition of `g_val_2'
+main.o:(.data+0x0): first defined here
+collect2: error: ld returned 1 exit status
+</code></pre>
+  <p>
+   3）
+   <span id="jump情形3">
+    验证“编译器 cc1plus 的默认行为：全局函数定义和全局变量（无论是否已初始化）都属于强符号。”
+   </span>
+  </p>
+  <pre><code>$ cat test1.cpp 
+int g_val_1 = 0;
+int g_val_2;
+
+void func()
+{
+  g_val_1 = 1;
+  g_val_2 = 2;
+}
+
+$ cat main.cpp
+#include &lt;stdio.h&gt;
+
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_1=%d, g_val_2=%d\n", g_val_1, g_val_2);
+  return 0;
+}
+
+$ gcc -c test1.cpp -o test_cpp.o
+$ gcc -c main.cpp -o main_cpp.o
+$ readelf -s test_cpp.o
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test1.cpp
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+     9: 0000000000000004     4 OBJECT  GLOBAL DEFAULT    4 g_val_2
+    10: 0000000000000000    27 FUNC    GLOBAL DEFAULT    1 _Z4funcv
+
+$ readelf -s main_cpp.o
+
+Symbol table '.symtab' contains 14 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.cpp
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 g_val_1
+    10: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    3 g_val_2
+    11: 0000000000000000    45 FUNC    GLOBAL DEFAULT    1 main
+    12: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _Z4funcv
+    13: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf
+
+$ gcc -o main main_cpp.o test_cpp.o
+test_cpp.o:(.bss+0x0): multiple definition of `g_val_1'
+main_cpp.o:(.bss+0x0): first defined here
+test_cpp.o:(.bss+0x4): multiple definition of `g_val_2'
+main_cpp.o:(.data+0x0): first defined here
+collect2: error: ld returned 1 exit status
+
+$ gcc -o main main.cpp test1.cpp -v
+#省略
+COLLECT_GCC_OPTIONS='-o' 'main' '-v' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/cc1plus
+#省略
+/tmp/ccIVPplI.o:(.bss+0x0): multiple definition of `g_val_1'
+/tmp/cc715sBV.o:(.bss+0x0): first defined here
+/tmp/ccIVPplI.o:(.bss+0x4): multiple definition of `g_val_2'
+/tmp/cc715sBV.o:(.data+0x0): first defined here
+collect2: error: ld returned 1 exit status
+</code></pre>
+  <h3 id="_3">
+   <span id="jump链接器如何使用静态库来解析外部符号引用">
+    链接器如何使用静态库来解析外部符号引用
+   </span>
+  </h3>
+  <p>
+   Linux 链接器
+   <code>
+    ld
+   </code>
+   使用静态库来解析可重定位目标文件中外部符号引用的规则为：链接器从左到右按照可重定位目标文件和静态库在编译驱动器的命令行上出现的顺序依次扫描，在扫描的过程中维护三个集合：a）一个可重定位目标文件的集合
+   <code>
+    E
+   </code>
+   （这个集合中的文件会被合并起来生成可执行目标文件）；b）一个未解析的符号（即引用了但是尚未定义的符号）集合
+   <code>
+    U
+   </code>
+   ；c）一个在前面输入文件中已定义的符号集合
+   <code>
+    D
+   </code>
+   。初始时，集合
+   <code>
+    E
+   </code>
+   、
+   <code>
+    U
+   </code>
+   和
+   <code>
+    D
+   </code>
+   均为空。
+  </p>
+  <p>
+   链接器对每个输入文件的处理规则为：
+  </p>
+  <ul>
+   <li>
+    <p>
+     首先，链接器判断输入文件的类型。如果是可重定位目标文件，那么链接器直接将其添加到集合
+     <code>
+      E
+     </code>
+     中，并将该目标文件中的符号定义和外部符号引用分别更新到集合
+     <code>
+      D
+     </code>
+     和
+     <code>
+      U
+     </code>
+     中，然后链接器继续处理下一个输入文件。如果是静态库，那么链接器尝试匹配集合
+     <code>
+      U
+     </code>
+     中未解析的符号和由该静态库中的可重定位目标文件中定义的符号。如果匹配成功，那么将静态库中所匹配的可重定位目标文件添加到集合
+     <code>
+      E
+     </code>
+     中，并将该目标文件中的符号定义和外部符号引用分别更新到集合
+     <code>
+      D
+     </code>
+     和
+     <code>
+      U
+     </code>
+     中。对静态库中的每个可重定位目标文件都一次进行这个过程，直到集合
+     <code>
+      U
+     </code>
+     和
+     <code>
+      D
+     </code>
+     都不再发生变化。此时，静态库中任何不包含在集合
+     <code>
+      E
+     </code>
+     中的可重定位目标文件都被直接丢弃，然后链接器继续处理下一个输入文件。
+    </p>
+   </li>
+   <li>
+    <p>
+     当链接器扫描完所有的输入文件后，判断集合
+     <code>
+      U
+     </code>
+     是否为空。如果为空，链接器会输出错误信息并终止；否则，它会合并和重定位集合
+     <code>
+      E
+     </code>
+     中的可重定位目标文件，最终生成可执行目标文件。
+    </p>
+   </li>
+  </ul>
+  <p>
+   上述 Linux 链接器
+   <code>
+    ld
+   </code>
+   所使用的规则会带来这样一个问题：如果定义一个符号的库出现在引用这个符号的目标文件之前，那么引用就不能被解析，链接会失败。因此，可重定位目标文件和静态库在编译驱动器命令行中出现的先后顺序就非常重要了。
+  </p>
+  <p>
+   关于库的一般准则是将它们放在编译驱动器命令行的末尾。对于有循环依赖的两个库而言，比如：liba.a 依赖 libb.a，libb.a 也依赖 liba.a，那么这两个库的在编译驱动器命令行中的先后顺序必须为：
+   <code>
+    liba.a libb.a liba.a
+   </code>
+   或
+   <code>
+    libb.a liba.a libb.a
+   </code>
+   。
+  </p>
+  <h3 id="_4">
+   <span id="jump符号解析引发的问题">
+    符号解析引发的问题
+   </span>
+  </h3>
+  <p>
+   编译器 cc1 的默认行为容易导致一些诡异的错误。比如：全局变量的值被意外地修改，可以分为两种情形：
+   <a href="#jump全局变量的值被同名的变量修改">
+    全局变量的值被同名的全局变量修改
+   </a>
+   、
+   <a href="#jump全局变量的值被不同名的变量修改">
+    全局变量的值被不同名的全局变量修改
+   </a>
+   。
+  </p>
+  <p>
+   <strong>
+    1）
+   </strong>
+   <span id="jump全局变量的值被同名的变量修改">
+    全局变量的值被同名的全局变量修改
+   </span>
+  </p>
+  <pre><code>$ cat test1.c
+int g_val_1 = 0;
+int g_val_2;
+
+void func()
+{
+  g_val_1 = 1;
+  g_val_2 = 2;
+}
+
+$ cat main.c 
+#include &lt;stdio.h&gt;
+
+int g_val_1;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_1=%d, g_val_2=%d\n", g_val_1, g_val_2);
+  return 0;
+}
+
+$ gcc -c test1.c -o test1.o
+$ gcc -c main.c -o main.o
+$ gcc -o main test1.o main.o
+$ ./main
+g_val_1=1, g_val_2=2
+</code></pre>
+  <p>
+   main.c 中定义的全局变量 g_val_2 的值被 test1.c 中定义的 func() 函数由 3 改为 2 了。
+  </p>
+  <p>
+   <strong>
+    2）
+   </strong>
+   <span id="jump全局变量的值被不同名的变量修改">
+    全局变量的值被不同名的全局变量修改
+   </span>
+  </p>
+  <pre><code>$ cat test2.c 
+double g_val_1;
+
+void func()
+{
+  g_val_1 = 1.1;
+}
+
+$ cat main2.c 
+#include &lt;stdio.h&gt;
+
+int g_val_0 = 1;
+int g_val_1 = 2;
+int g_val_2 = 3;
+
+void func();
+
+int main()
+{
+  func();
+  printf("g_val_0=%d, g_val_1=%d, g_val_2=%d\n", g_val_0, g_val_1, g_val_2);
+  return 0;
+}
+$ gcc -o main2 test2.c main2.c
+/usr/bin/x86_64-linux-gnu-ld: Warning: alignment 4 of symbol `g_val_1' in /tmp/ccIc3noO.o is smaller than 8 in /tmp/ccXjyx8c.o
+/usr/bin/x86_64-linux-gnu-ld: Warning: size of symbol `g_val_1' changed from 8 in /tmp/ccXjyx8c.o to 4 in /tmp/ccIc3noO.o
+
+$ ./main2
+g_val_0=1, g_val_1=-1717986918, g_val_2=1072798105
+</code></pre>
+  <p>
+   main2.c 中定义的全局变量 g_val_2 的值被意外地修改了。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>

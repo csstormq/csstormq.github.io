@@ -1,0 +1,399 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="9pic-linux-x86-64">
+  </h1>
+  <p align="center">
+   计算机系统篇之链接（9）：PIC 函数调用在 Linux 上的 X86-64 示例
+  </p>
+  <p align="right">
+   Author:stormQ
+  </p>
+  <p align="right">
+   Wednesday, 15. April 2020 04:35PM
+  </p>
+  <hr/>
+  <p>
+   <strong>
+    step 1:
+   </strong>
+   <a href="#jumpstep_1_生成共享库">
+    生成共享库 libadd_debug.so 和 libsub_debug.so
+   </a>
+   ，见前篇
+  </p>
+  <p>
+   <strong>
+    step 2:
+   </strong>
+   <a href="#jumpstep_2_生成测试程序">
+    生成测试程序（用于调用以上两个共享库）——main_mix
+   </a>
+   ，见前篇
+  </p>
+  <p>
+   <strong>
+    step 3:
+   </strong>
+   分析可执行文件 main_mix 中 PLT 与 GOT 条目间的对应关系
+  </p>
+  <p>
+   1）查看可执行文件 main_mix 的 sections
+  </p>
+  <pre><code>$ readelf -S main_mix
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>There are 36 section headers, starting at offset 0x1c40:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+; Skip ......
+  [ 9] .rela.dyn         RELA             0000000000400520  00000520
+       0000000000000018  0000000000000018   A       5     0     8
+  [10] .rela.plt         RELA             0000000000400538  00000538
+       0000000000000048  0000000000000018  AI       5    24     8
+  [11] .init             PROGBITS         0000000000400580  00000580
+       000000000000001a  0000000000000000  AX       0     0     4
+  [12] .plt              PROGBITS         00000000004005a0  000005a0
+       0000000000000040  0000000000000010  AX       0     0     16
+  [13] .plt.got          PROGBITS         00000000004005e0  000005e0
+       0000000000000008  0000000000000000  AX       0     0     8
+  [14] .text             PROGBITS         00000000004005f0  000005f0
+       0000000000000192  0000000000000000  AX       0     0     16
+  [15] .fini             PROGBITS         0000000000400784  00000784
+       0000000000000009  0000000000000000  AX       0     0     4
+  [16] .rodata           PROGBITS         0000000000400790  00000790
+       0000000000000004  0000000000000004  AM       0     0     4
+  [17] .eh_frame_hdr     PROGBITS         0000000000400794  00000794
+       0000000000000034  0000000000000000   A       0     0     4
+  [18] .eh_frame         PROGBITS         00000000004007c8  000007c8
+       00000000000000f4  0000000000000000   A       0     0     8
+  [19] .init_array       INIT_ARRAY       0000000000600df0  00000df0
+       0000000000000008  0000000000000000  WA       0     0     8
+  [20] .fini_array       FINI_ARRAY       0000000000600df8  00000df8
+       0000000000000008  0000000000000000  WA       0     0     8
+  [21] .jcr              PROGBITS         0000000000600e00  00000e00
+       0000000000000008  0000000000000000  WA       0     0     8
+  [22] .dynamic          DYNAMIC          0000000000600e08  00000e08
+       00000000000001f0  0000000000000010  WA       6     0     8
+  [23] .got              PROGBITS         0000000000600ff8  00000ff8
+       0000000000000008  0000000000000008  WA       0     0     8
+  [24] .got.plt          PROGBITS         0000000000601000  00001000
+       0000000000000030  0000000000000008  WA       0     0     8
+  [25] .data             PROGBITS         0000000000601030  00001030
+       0000000000000010  0000000000000000  WA       0     0     8
+  [26] .bss              NOBITS           0000000000601040  00001040
+       0000000000000008  0000000000000000  WA       0     0     1
+; Skip ......
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+</code></pre>
+  <p>
+   从输出结果中可以看出：
+  </p>
+  <ul>
+   <li>
+    可执行文件 main_mix 的 .got.plt 的起始位置为 0x601000，大小为 0x30，共有 6 个条目
+   </li>
+  </ul>
+  <p>
+   2）反汇编可执行文件 main_mix 的 .plt section
+  </p>
+  <pre><code>$ objdump -d main_mix
+</code></pre>
+  <p>
+   输出结果为：
+  </p>
+  <pre><code>; Skip ......
+
+Disassembly of section .plt:
+
+00000000004005a0 &lt;_Z3addii@plt-0x10&gt;:
+  4005a0:   ff 35 62 0a 20 00       pushq  0x200a62(%rip)        # 601008 &lt;_GLOBAL_OFFSET_TABLE_+0x8&gt;
+  4005a6:   ff 25 64 0a 20 00       jmpq   *0x200a64(%rip)        # 601010 &lt;_GLOBAL_OFFSET_TABLE_+0x10&gt;
+  4005ac:   0f 1f 40 00             nopl   0x0(%rax)
+
+00000000004005b0 &lt;_Z3addii@plt&gt;:
+  4005b0:   ff 25 62 0a 20 00       jmpq   *0x200a62(%rip)        # 601018 &lt;_GLOBAL_OFFSET_TABLE_+0x18&gt;
+  4005b6:   68 00 00 00 00          pushq  $0x0
+  4005bb:   e9 e0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+
+00000000004005c0 &lt;_Z3subii@plt&gt;:
+  4005c0:   ff 25 5a 0a 20 00       jmpq   *0x200a5a(%rip)        # 601020 &lt;_GLOBAL_OFFSET_TABLE_+0x20&gt;
+  4005c6:   68 01 00 00 00          pushq  $0x1
+  4005cb:   e9 d0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+
+00000000004005d0 &lt;__libc_start_main@plt&gt;:
+  4005d0:   ff 25 52 0a 20 00       jmpq   *0x200a52(%rip)        # 601028 &lt;_GLOBAL_OFFSET_TABLE_+0x28&gt;
+  4005d6:   68 02 00 00 00          pushq  $0x2
+  4005db:   e9 c0 ff ff ff          jmpq   4005a0 &lt;_init+0x20&gt;
+
+; Skip ......
+</code></pre>
+  <p>
+   从输出结果中可以看出：
+  </p>
+  <ul>
+   <li>
+    <p>
+     .plt section 的每个条目是16字节代码。可执行文件 main_mix 的 PLT[1] 条目负责调用由共享库 libadd_debug.so定义的 add() 函数，PLT[2] 条目负责调用由共享库 libsub_debug.so 定义的 sub() 函数，PLT[3] 条目负责调用系统启动函数（__libc_start_main），它初始化执行环境，调用 main() 函数并处理其返回值。
+    </p>
+   </li>
+   <li>
+    <p>
+     PLT[1] 条目的第一条指令
+     <code>
+      jmpq   *0x200a62(%rip)
+     </code>
+     的含义：跳转到某目的地址，该目的地址为下一条指令的地址（0x4005b6）与 0x200a62 相加的结果（0x601018）。结合可执行文件 main_mix 的 .got.plt 的起始位置（0x601000）和大小（0x30），可以得出地址 0x601018 即为 .got.plt 的第 4 个条目。所以，与 PLT[1] 条目对应的 GOT 条目为 .got.plt[3]。
+    </p>
+   </li>
+   <li>
+    <p>
+     同理，与 PLT[2] 条目对应的 GOT 条目为 .got.plt[4]。
+    </p>
+   </li>
+  </ul>
+  <p>
+   <strong>
+    step 4:
+   </strong>
+   分析第一次调用由共享库 libadd_debug.so 定义的 add() 函数的执行流程
+  </p>
+  <p>
+   1）使用 gdb（使用了GEF插件）运行测试程序——main_mix
+  </p>
+  <pre><code>$ gdb -q main_mix
+gef➤ start
+</code></pre>
+  <p>
+   2）反汇编 main() 函数，并在在第一次调用 add() 函数处打断点
+  </p>
+  <pre><code>gef➤  disas                         ; a）反汇编 main() 函数
+Dump of assembler code for function main():
+   0x00000000004006e6 &lt;+0&gt;: push   rbp
+   0x00000000004006e7 &lt;+1&gt;: mov    rbp,rsp
+=&gt; 0x00000000004006ea &lt;+4&gt;: mov    esi,0xc
+   0x00000000004006ef &lt;+9&gt;: mov    edi,0xb
+   0x00000000004006f4 &lt;+14&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x00000000004006f9 &lt;+19&gt;:    mov    esi,0xc
+   0x00000000004006fe &lt;+24&gt;:    mov    edi,0xb
+   0x0000000000400703 &lt;+29&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x0000000000400708 &lt;+34&gt;:    mov    esi,0xd
+   0x000000000040070d &lt;+39&gt;:    mov    edi,0xf
+   0x0000000000400712 &lt;+44&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400717 &lt;+49&gt;:    mov    esi,0xd
+   0x000000000040071c &lt;+54&gt;:    mov    edi,0xf
+   0x0000000000400721 &lt;+59&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400726 &lt;+64&gt;:    mov    eax,0x0
+   0x000000000040072b &lt;+69&gt;:    pop    rbp
+   0x000000000040072c &lt;+70&gt;:    ret
+End of assembler dump.
+gef➤  b *0x00000000004006f4         ; b）在第一次调用 add() 函数处打断点
+</code></pre>
+  <p>
+   3）反汇编
+   <code>
+    &lt;_Z3addii@plt&gt;
+   </code>
+   ，并打断点
+  </p>
+  <pre><code>gef➤  x/3i 0x4005b0                 ; c）反汇编 add() 函数对应的 PLT 条目中的代码
+   0x4005b0 &lt;_Z3addii@plt&gt;: jmp    QWORD PTR [rip+0x200a62]        # 0x601018
+   0x4005b6 &lt;_Z3addii@plt+6&gt;:   push   0x0
+   0x4005bb &lt;_Z3addii@plt+11&gt;:  jmp    0x4005a0
+gef➤  b *0x4005b0                   ; d）在 add() 函数对应的 PLT 条目的第一条指令处打断点
+Breakpoint 5 at 0x4005b0
+gef➤  b *0x4005b6                   ; e）在 add() 函数对应的 PLT 条目的第二条指令处打断点
+Breakpoint 6 at 0x4005b6
+gef➤  b *0x4005bb                   ; f）在 add() 函数对应的 PLT 条目的第三条指令处打断点
+Breakpoint 7 at 0x4005bb
+</code></pre>
+  <p>
+   4）继续执行程序，add() 函数对应的 PLT 条目的第一条指令处的断点被击中
+  </p>
+  <pre><code>gef➤  c
+gef➤  disas
+Dump of assembler code for function _Z3addii@plt:
+=&gt; 0x00000000004005b0 &lt;+0&gt;: jmp    QWORD PTR [rip+0x200a62]        # 0x601018
+   0x00000000004005b6 &lt;+6&gt;: push   0x0
+   0x00000000004005bb &lt;+11&gt;:    jmp    0x4005a0
+End of assembler dump.
+</code></pre>
+  <p>
+   5）计算 add() 函数对应的 PLT 条目的第一条指令要跳转的目的地址。
+   <strong>
+    验证“初始时，每个GOT条目（这里为.got.plt[3]）都指向对应PLT条目的第二条指令”。
+   </strong>
+  </p>
+  <pre><code>gef➤  p /x 0x00000000004005b6+0x200a62
+$1 = 0x601018                       ; g）下一条指令的地址（0x4005b6）与 0x200a62 相加的结果为 0x601018（指向 .got.plt[3]）
+gef➤  x/gx 0x601018
+0x601018:   0x00000000004005b6      ; h）要跳转的目的地址为 0x4005b6，即该 PLT 条目的第二条指令的地址
+</code></pre>
+  <p>
+   6）继续执行程序
+  </p>
+  <pre><code>gef➤  c
+gef➤  disas
+Dump of assembler code for function _Z3addii@plt:
+   0x00000000004005b0 &lt;+0&gt;: jmp    QWORD PTR [rip+0x200a62]        # 0x601018
+=&gt; 0x00000000004005b6 &lt;+6&gt;: push   0x0                          ; i）可以看到确实是跳转到了该 PLT 条目的第二条指令
+   0x00000000004005bb &lt;+11&gt;:    jmp    0x4005a0
+End of assembler dump.
+</code></pre>
+  <p>
+   7）
+   <strong>
+    验证“add() 函数的 PLT 条目的第三条指令的作用为：跳转到动态链接器中的解析函数”
+   </strong>
+  </p>
+  <pre><code>gef➤  x/3i 0x4005a0                                             ; j）反汇编 add() 函数的 PLT 条目的第三条指令要跳转的代码
+   0x4005a0:    push   QWORD PTR [rip+0x200a62]        # 0x601008
+   0x4005a6:    jmp    QWORD PTR [rip+0x200a64]        # 0x601010
+   0x4005ac:    nop    DWORD PTR [rax+0x0]
+gef➤  p /x 0x4005ac+0x200a64
+$2 = 0x601010
+gef➤  x/gx 0x601010
+0x601010:   0x00007ffff7dee870
+gef➤  x/gx 0x00007ffff7dee870
+0x7ffff7dee870 &lt;_dl_runtime_resolve_avx&gt;:   0xe0e48348e3894853      ; k）add() 函数的 PLT 条目的第三条指令实际跳转到了 _dl_runtime_resolve_avx 函数中
+gef➤  xinfo 0x7ffff7dee870                                      ; l）查看地址0x7ffff7dee870（_dl_runtime_resolve_avx）的信息
+───────────────────────────────────────────────────────────────────────────────── xinfo: 0x7ffff7dee870 ─────────────────────────────────────────────────────────────────────────────────
+Page: 0x00007ffff7dd7000  →  0x00007ffff7dfd000 (size=0x26000)
+Permissions: r-x
+Pathname: /lib/x86_64-linux-gnu/ld-2.23.so      ; m）可以看到，_dl_runtime_resolve_avx函数确实是由动态链接器 ld-2.23.so 定义的
+Offset (from page): 0x17870
+Inode: 12325294
+Segment: .text (0x00007ffff7dd7ac0-0x00007ffff7df5850)
+Symbol: _dl_runtime_resolve_avx
+</code></pre>
+  <p>
+   8）
+   <strong>
+    验证“动态链接器确定该函数（这里为 add() 函数）的运行时位置，用这个地址（这里为 0x7ffff7bd5640）重写其GOT条目（这里为.got.plt[3]）”
+   </strong>
+  </p>
+  <pre><code>gef➤  disas main
+Dump of assembler code for function main():
+   0x00000000004006e6 &lt;+0&gt;: push   rbp
+   0x00000000004006e7 &lt;+1&gt;: mov    rbp,rsp
+   0x00000000004006ea &lt;+4&gt;: mov    esi,0xc
+   0x00000000004006ef &lt;+9&gt;: mov    edi,0xb
+   0x00000000004006f4 &lt;+14&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x00000000004006f9 &lt;+19&gt;:    mov    esi,0xc
+   0x00000000004006fe &lt;+24&gt;:    mov    edi,0xb
+   0x0000000000400703 &lt;+29&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x0000000000400708 &lt;+34&gt;:    mov    esi,0xd
+   0x000000000040070d &lt;+39&gt;:    mov    edi,0xf
+   0x0000000000400712 &lt;+44&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400717 &lt;+49&gt;:    mov    esi,0xd
+   0x000000000040071c &lt;+54&gt;:    mov    edi,0xf
+   0x0000000000400721 &lt;+59&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400726 &lt;+64&gt;:    mov    eax,0x0
+   0x000000000040072b &lt;+69&gt;:    pop    rbp
+   0x000000000040072c &lt;+70&gt;:    ret
+End of assembler dump.
+gef➤  b *0x00000000004006f9                                 ; n）在第一次调用 add() 函数后面的第一条指令（0x4006f9）处打断点
+Breakpoint 8 at 0x4006f9: file main_mix.cpp, line 7.
+gef➤  c
+gef➤  c
+gef➤  disas
+Dump of assembler code for function main():
+   0x00000000004006e6 &lt;+0&gt;: push   rbp
+   0x00000000004006e7 &lt;+1&gt;: mov    rbp,rsp
+   0x00000000004006ea &lt;+4&gt;: mov    esi,0xc
+   0x00000000004006ef &lt;+9&gt;: mov    edi,0xb
+   0x00000000004006f4 &lt;+14&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+=&gt; 0x00000000004006f9 &lt;+19&gt;:    mov    esi,0xc              ; o）0x4006f9 处的断点被击中
+   0x00000000004006fe &lt;+24&gt;:    mov    edi,0xb
+   0x0000000000400703 &lt;+29&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x0000000000400708 &lt;+34&gt;:    mov    esi,0xd
+   0x000000000040070d &lt;+39&gt;:    mov    edi,0xf
+   0x0000000000400712 &lt;+44&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400717 &lt;+49&gt;:    mov    esi,0xd
+   0x000000000040071c &lt;+54&gt;:    mov    edi,0xf
+   0x0000000000400721 &lt;+59&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400726 &lt;+64&gt;:    mov    eax,0x0
+   0x000000000040072b &lt;+69&gt;:    pop    rbp
+   0x000000000040072c &lt;+70&gt;:    ret
+End of assembler dump.
+gef➤  x/gx 0x601018                                     ; p）在_dl_runtime_resolve_avx函数执行完后，查看 .got.plt[3] 的值
+0x601018:   0x00007ffff7bd5640
+gef➤  x/gx 0x00007ffff7bd5640
+0x7ffff7bd5640 &lt;add(int, int)&gt;: 0x89fc7d89e5894855      ; q）可以看到 .got.plt[3] 的值变成了 add() 函数的运行时地址
+gef➤  x/i 0x00007ffff7bd5640
+   0x7ffff7bd5640 &lt;add(int, int)&gt;:  push   rbp          ; r）.got.plt[3] 的值确实指向 add() 函数的运行时地址
+</code></pre>
+  <p>
+   <strong>
+    step 5:
+   </strong>
+   分析后续再调用 add() 函数的执行流程
+  </p>
+  <pre><code>gef➤  c
+gef➤  disas
+Dump of assembler code for function main():
+   0x00000000004006e6 &lt;+0&gt;: push   rbp
+   0x00000000004006e7 &lt;+1&gt;: mov    rbp,rsp
+   0x00000000004006ea &lt;+4&gt;: mov    esi,0xc
+   0x00000000004006ef &lt;+9&gt;: mov    edi,0xb
+   0x00000000004006f4 &lt;+14&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x00000000004006f9 &lt;+19&gt;:    mov    esi,0xc
+   0x00000000004006fe &lt;+24&gt;:    mov    edi,0xb
+=&gt; 0x0000000000400703 &lt;+29&gt;:    call   0x4005b0 &lt;_Z3addii@plt&gt;
+   0x0000000000400708 &lt;+34&gt;:    mov    esi,0xd
+   0x000000000040070d &lt;+39&gt;:    mov    edi,0xf
+   0x0000000000400712 &lt;+44&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400717 &lt;+49&gt;:    mov    esi,0xd
+   0x000000000040071c &lt;+54&gt;:    mov    edi,0xf
+   0x0000000000400721 &lt;+59&gt;:    call   0x4005c0 &lt;_Z3subii@plt&gt;
+   0x0000000000400726 &lt;+64&gt;:    mov    eax,0x0
+   0x000000000040072b &lt;+69&gt;:    pop    rbp
+   0x000000000040072c &lt;+70&gt;:    ret
+End of assembler dump.
+gef➤  x/3i 0x4005b0
+   0x4005b0 &lt;_Z3addii@plt&gt;: jmp    QWORD PTR [rip+0x200a62]        # 0x601018
+   0x4005b6 &lt;_Z3addii@plt+6&gt;:   push   0x0
+   0x4005bb &lt;_Z3addii@plt+11&gt;:  jmp    0x4005a0
+gef➤  x/gx 0x4005b6+0x200a62
+0x601018:   0x00007ffff7bd5640
+gef➤  x/i 0x00007ffff7bd5640
+   0x7ffff7bd5640 &lt;add(int, int)&gt;:  push   rbp          ; s）可以看出，后续再调用 add() 函数时，其对应的 PLT 条目中的第一条指令会直接跳转到 add() 函数的运行时地址
+</code></pre>
+  <p>
+   <strong>
+    step 6:
+   </strong>
+   进一步研究
+  </p>
+  <p>
+   如果可执行文件和共享库都调用由共享库定义的函数时，验证“如果一个目标模块（包括共享模块）调用定义在共享库中的任何函数，那么它就有自己的GOT和PLT。”。
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>
