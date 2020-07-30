@@ -7,14 +7,18 @@
   </title>
   <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
   <style type="text/css">
-   body,table tr{background-color:#fff}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}pre code,table,table tr{padding:0}hr,pre code{background:0 0}body{font:16px Helvetica,Arial,sans-serif;line-height:1.4;color:#333;word-wrap:break-word;padding:10px 15px}strong,table tr th{font-weight:700}h1{font-size:2em;margin:.67em 0;text-align:center}h2{font-size:1.75em}h3{font-size:1.5em}h4{font-size:1.25em}h1,h2,h3,h4,h5,h6{font-weight:700;position:relative;margin-top:15px;margin-bottom:15px;line-height:1.1}h1,h2{border-bottom:1px solid #eee}hr{height:0;margin:15px 0;overflow:hidden;border:0;border-bottom:1px solid #ddd}a{color:#4183C4}a.absent{color:#c00}ol,ul{padding-left:15px;margin-left:5px}ol{list-style-type:lower-roman}table tr{border-top:1px solid #ccc;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}img{max-width:100%}blockquote{padding:0 15px;border-left:4px solid #ccc}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;white-space:pre;border:none}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+   ::selection,a::selection{background:rgba(255,255,0,.3)}a,a::selection{color:#0645ad}hr,img{border:0}a,ins{text-decoration:none}::selection,ins,mark{color:#000}dfn,mark{font-style:italic}hr,ol,p,ul{margin:1em 0}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}hr,pre code,table,table tr{padding:0}pre,pre code{white-space:pre}html{font-size:100%;overflow-y:scroll;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}body{color:#444;font-family:Georgia,Palatino,"Palatino Linotype",Times,"Times New Roman",serif;font-size:12px;line-height:1.5em;padding:1em;margin:auto;max-width:42em;background:#fefefe}a:visited{color:#0b0080}a:hover{color:#06e}a:active{color:#faa700}a:focus{outline:dotted thin}a:active,a:hover{outline:0}::-moz-selection{background:rgba(255,255,0,.3);color:#000}a::-moz-selection{background:rgba(255,255,0,.3);color:#0645ad}img{max-width:100%;-ms-interpolation-mode:bicubic;vertical-align:middle}h1,h2,h3,h4,h5,h6{font-weight:400;color:#111;line-height:1em}b,h4,h5,h6,mark,strong,table tr th{font-weight:700}h1{font-size:2.5em}h2{font-size:2em}h3{font-size:1.5em}h4{font-size:1.2em}h5{font-size:1em}h6{font-size:.9em}blockquote{color:#666;margin:0;padding-left:3em;border-left:.5em #EEE solid}hr{display:block;height:2px;border-top:1px solid #aaa;border-bottom:1px solid #eee}code,kbd,pre,samp{color:#000;font-family:monospace,monospace;font-size:.98em}pre{white-space:pre-wrap;word-wrap:break-word}ins{background:#ff9}mark{background:#ff0}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-.5em}sub{bottom:-.25em}ol,ul{padding:0 0 0 2em}li p:last-child{margin:0}dd{margin:0 0 0 2em}table{border-collapse:collapse;border-spacing:0}td{vertical-align:top}@media only screen and (min-width:480px){body{font-size:14px}}@media only screen and (min-width:768px){body{font-size:16px}}@media print{blockquote,img,pre,tr{page-break-inside:avoid}*{background:0 0!important;color:#000!important;filter:none!important;-ms-filter:none!important}body{font-size:12pt;max-width:100%}a,a:visited{text-decoration:underline}hr{height:1px;border:0;border-bottom:1px solid #000}a[href]:after{content:" (" attr(href) ")"}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}blockquote,pre{border:1px solid #999;padding-right:1em}img{max-width:100%!important}@page :left{margin:15mm 20mm 15mm 10mm}@page :right{margin:15mm 10mm 15mm 20mm}h2,h3,p{orphans:3;widows:3}h2,h3{page-break-after:avoid}}table tr{border-top:1px solid #ccc;background-color:#fff;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;border:none;background:0 0}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
   </style>
  </head>
  <body>
   <h1 id="4neonrgbbgraarch64">
   </h1>
   <p align="center">
-   性能优化篇（4）：NEON优化案例——图像转换之RGB到BGR（aarch64版）
+   <strong>
+    <font size="6">
+     性能优化篇（4）：NEON优化案例——图像转换之RGB到BGR（aarch64版）
+    </font>
+   </strong>
   </p>
   <p align="right">
    Author:stormQ
@@ -24,9 +28,9 @@
   </p>
   <ul>
    <li>
-    <p>
+    <h3 id="_1">
      目录
-    </p>
+    </h3>
     <ul>
      <li>
       <p>
@@ -53,7 +57,7 @@
    </li>
   </ul>
   <hr/>
-  <h3 id="_1">
+  <h3 id="_2">
    <span id="jump为什么要交换图像颜色通道">
     为什么要交换图像颜色通道
    </span>
@@ -90,7 +94,7 @@
    图像作为输入输出”，那么在调用这些函数前需要进行图像颜色通道转换，以满足接口的输入要求。由于图像颜色通道转换比较耗时，甚至可能成为性能瓶颈。因此，研究如何加速图像颜色通道交换就非常有意义了。
   </p>
   <hr/>
-  <h3 id="_2">
+  <h3 id="_3">
    <span id="jump实现一个基本的图像颜色通道交换函数">
     实现一个基本的图像颜色通道交换函数
    </span>
@@ -975,10 +979,37 @@ Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
    </code>
    函数的 0.09375 倍，其他的都是相同的。因此，从 cache 的角度来看，NEON 大大减少了内存读写操作数量，从而改善程序性能。
   </p>
+  <hr/>
   <p>
-   <strong>
-    … 即时查看更多分享见微信公众号StormQ
-   </strong>
+   <font size="4">
+    <strong>
+     下一篇：
+    </strong>
+    <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%885%EF%BC%89%EF%BC%9ANEON%E4%BC%98%E5%8C%96%E6%A1%88%E4%BE%8B%E2%80%94%E2%80%94%E5%9B%BE%E5%83%8F%E8%BD%AC%E6%8D%A2%E4%B9%8BRGBA%E5%88%B0RGB%EF%BC%88aarch64%E7%89%88%EF%BC%89">
+     性能优化篇（5）：NEON优化案例——图像转换之RGBA到RGB（aarch64版）
+    </a>
+   </font>
+  </p>
+  <p>
+   <font size="4">
+    <strong>
+     上一篇：
+    </strong>
+    <a href="https://csstormq.github.io/blog/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AF%87%EF%BC%883%EF%BC%89%EF%BC%9ANEON%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97">
+     性能优化篇（3）：NEON快速入门指南
+    </a>
+   </font>
+  </p>
+  <p>
+  </p>
+  <p align="center">
+   <font size="4">
+    <a href="https://csstormq.github.io">
+     <strong>
+      首页
+     </strong>
+    </a>
+   </font>
   </p>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
   </script>
