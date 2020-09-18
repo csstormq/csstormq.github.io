@@ -1,0 +1,768 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Made with Remarkable!
+  </title>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/github.min.css" rel="stylesheet"/>
+  <style type="text/css">
+   ::selection,a::selection{background:rgba(255,255,0,.3)}a,a::selection{color:#0645ad}hr,img{border:0}a,ins{text-decoration:none}::selection,ins,mark{color:#000}dfn,mark{font-style:italic}hr,ol,p,ul{margin:1em 0}table tr td,table tr th{border:1px solid #ccc;text-align:left;padding:6px 13px;margin:0}hr,pre code,table,table tr{padding:0}pre,pre code{white-space:pre}html{font-size:100%;overflow-y:scroll;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}body{color:#444;font-family:Georgia,Palatino,"Palatino Linotype",Times,"Times New Roman",serif;font-size:12px;line-height:1.5em;padding:1em;margin:auto;max-width:42em;background:#fefefe}a:visited{color:#0b0080}a:hover{color:#06e}a:active{color:#faa700}a:focus{outline:dotted thin}a:active,a:hover{outline:0}::-moz-selection{background:rgba(255,255,0,.3);color:#000}a::-moz-selection{background:rgba(255,255,0,.3);color:#0645ad}img{max-width:100%;-ms-interpolation-mode:bicubic;vertical-align:middle}h1,h2,h3,h4,h5,h6{font-weight:400;color:#111;line-height:1em}b,h4,h5,h6,mark,strong,table tr th{font-weight:700}h1{font-size:2.5em}h2{font-size:2em}h3{font-size:1.5em}h4{font-size:1.2em}h5{font-size:1em}h6{font-size:.9em}blockquote{color:#666;margin:0;padding-left:3em;border-left:.5em #EEE solid}hr{display:block;height:2px;border-top:1px solid #aaa;border-bottom:1px solid #eee}code,kbd,pre,samp{color:#000;font-family:monospace,monospace;font-size:.98em}pre{white-space:pre-wrap;word-wrap:break-word}ins{background:#ff9}mark{background:#ff0}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-.5em}sub{bottom:-.25em}ol,ul{padding:0 0 0 2em}li p:last-child{margin:0}dd{margin:0 0 0 2em}table{border-collapse:collapse;border-spacing:0}td{vertical-align:top}@media only screen and (min-width:480px){body{font-size:14px}}@media only screen and (min-width:768px){body{font-size:16px}}@media print{blockquote,img,pre,tr{page-break-inside:avoid}*{background:0 0!important;color:#000!important;filter:none!important;-ms-filter:none!important}body{font-size:12pt;max-width:100%}a,a:visited{text-decoration:underline}hr{height:1px;border:0;border-bottom:1px solid #000}a[href]:after{content:" (" attr(href) ")"}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}blockquote,pre{border:1px solid #999;padding-right:1em}img{max-width:100%!important}@page :left{margin:15mm 20mm 15mm 10mm}@page :right{margin:15mm 10mm 15mm 20mm}h2,h3,p{orphans:3;widows:3}h2,h3{page-break-after:avoid}}table tr{border-top:1px solid #ccc;background-color:#fff;margin:0}table tr:nth-child(2n){background-color:#aaa}table tr td :first-child,table tr th :first-child{margin-top:0}table tr td:last-child,table tr th :last-child{margin-bottom:0}code,tt{margin:0 2px;padding:0 5px;white-space:nowrap;border:1px solid #eaeaea;background-color:#f8f8f8;border-radius:3px}pre code{margin:0;border:none;background:0 0}.highlight pre,pre{background-color:#f8f8f8;border:1px solid #ccc;font-size:13px;line-height:19px;overflow:auto;padding:6px 10px;border-radius:3px}
+  </style>
+ </head>
+ <body>
+  <h1 id="7-fork-execve-shell">
+  </h1>
+  <p align="center">
+   <strong>
+    <font size="6">
+     计算机系统篇之异常控制流（7）：利用 fork 和 execve 实现一个简易的 shell 程序
+    </font>
+   </strong>
+  </p>
+  <p align="right">
+   Author: stormQ
+  </p>
+  <p align="right">
+   Created: Saturday, 29. August 2020 01:11PM
+  </p>
+  <p align="right">
+   Last Modified: Monday, 31. August 2020 06:39PM
+  </p>
+  <ul>
+   <li>
+    <h3 id="_1">
+     目录
+    </h3>
+    <ul class="checklist">
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump什么是shell">
+       什么是 shell
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump如何在前台执行其他程序">
+       如何在前台执行其他程序
+      </a>
+     </li>
+     <li>
+      <input disabled="" type="checkbox"/>
+      <a href="#jump如何在后台执行其他程序">
+       如何在后台执行其他程序
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="shell">
+   <span id="jump什么是shell">
+    什么是 shell
+   </span>
+  </h3>
+  <p>
+   <code>
+    shell
+   </code>
+   是一个交互型的应用级程序，它代表用户运行其他程序。
+  </p>
+  <p>
+   <code>
+    shell
+   </code>
+   执行一系列的读 / 求值（read / evaluate）步骤，然后终止。读步骤读取自用户的一个命名行。求值步骤解析命令行，并代表用户运行程序。
+  </p>
+  <hr/>
+  <h3 id="_2">
+   <span id="jump如何在前台执行其他程序">
+    如何在前台执行其他程序
+   </span>
+  </h3>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   实现
+   <code>
+    ReadCommand
+   </code>
+   函数
+  </p>
+  <p>
+   <code>
+    ReadCommand
+   </code>
+   函数用于读取用户一整行的输入（以换行符作为结束）。具体实现为：
+  </p>
+  <pre><code>std::string ReadCommand()
+{
+    std::printf("&gt; ");
+    std::string cmd;
+    std::getline(std::cin, cmd);
+    return cmd;
+}
+</code></pre>
+  <p>
+   注：语句
+   <code>
+    std::getline(std::cin, cmd)
+   </code>
+   的作用为：从标准输入流
+   <code>
+    std::cin
+   </code>
+   中提取字符存储到
+   <code>
+    std::string
+   </code>
+   类型的变量
+   <code>
+    cmd
+   </code>
+   中，直到遇到换行符时停止提取。另外，
+   <code>
+    std::getline()
+   </code>
+   函数的其他版本可以通过第三个参数指定界定符。
+  </p>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   <code>
+    std::getline()
+   </code>
+   函数提取的结果不包括界定符。
+  </p>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   实现
+   <code>
+    PraseCommand
+   </code>
+   函数
+  </p>
+  <p>
+   <code>
+    PraseCommand
+   </code>
+   函数用于解析用户输入。即从用户输入中分割参数（以（一个或多个）空格作为参数分隔符），并初始化参数列表。
+  </p>
+  <p>
+   <code>
+    PraseCommand
+   </code>
+   函数的第 1 个参数为用户输入的字符串，第 2 个参数指向参数列表的指针。参数列表为栈对象，并且参数数量限制在 128 个以内。
+  </p>
+  <p>
+   <strong>
+    在初始化参数列表时，为了避免对参数列表中每个参数进行额外的内存分配、释放及拷贝开销，我们将用户输入字符串的所有空格（以空格作为参数的分隔符）都替换为 C 语言中字符串结束符
+    <code>
+     \0
+    </code>
+    。
+   </strong>
+  </p>
+  <p>
+   由于
+   <code>
+    std::string
+   </code>
+   不会自动在字符串末尾插入
+   <code>
+    \0
+   </code>
+   字符。所以，需要我们自己插入一个。
+  </p>
+  <p>
+   <code>
+    PraseCommand
+   </code>
+   函数的具体实现为：
+  </p>
+  <pre><code>bool PraseCommand(std::string&amp; input_cmd, char **output_cmd)
+{
+    if (input_cmd.empty())
+    {
+        return false;
+    }
+    input_cmd.insert(input_cmd.end(), 1, '\0');
+    std::memset(output_cmd, 0, sizeof(*output_cmd) * MAX_AEGS);
+
+    const auto size = input_cmd.size();
+    int first = 0, last = 0, k = 0;
+    while (last &lt; size)
+    {
+        if (DELIMITER == input_cmd[last])
+        {
+            input_cmd[last] = '\0';
+            if ('\0' != input_cmd[first])
+            {
+                output_cmd[k++] = &amp;input_cmd[first];
+            }
+            first = last + 1;
+        }
+        last++;
+    }
+    if (first &lt; last &amp;&amp; first &lt; size &amp;&amp; '\0' != input_cmd[first])
+    {
+        output_cmd[k] = &amp;input_cmd[first];
+    }
+
+    return true;
+}
+</code></pre>
+  <p>
+   注：语句
+   <code>
+    '\0' != input_cmd[first]
+   </code>
+   的作用：如果是空字符串（即用户原有输入中的一个或多个连续空格），则不作为参数。
+  </p>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   实现
+   <code>
+    ExecCommand
+   </code>
+   函数
+  </p>
+  <p>
+   <code>
+    ExecCommand
+   </code>
+   函数用于创建子进程，并在子进程中执行用户命令，最后回收已终止的子进程。从而，达到在前台执行其他程序的效果。具体实现为：
+  </p>
+  <pre><code>void ExecCommand(char **argv, char **envp)
+{
+    const auto pid = fork();
+    if (IS_CHILD(pid))
+    {
+        if (-1 == execve(argv[0], argv, envp))
+        {
+            std::printf("execve failed, args as followed:");
+            PrintArgs(argv);
+            exit(1);
+        }
+    }
+    else
+    {
+        Waitpid(pid, NULL, SUSPEND_CALLER);
+    }
+}
+</code></pre>
+  <p>
+   这里，直接将父进程（即
+   <code>
+    shell
+   </code>
+   程序）的环境变量列表传递给子进程。如果子进程执行用户命令发生错误，则打印参数列表。
+  </p>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   完整程序
+  </p>
+  <p>
+   源码，proc18_main.cpp:
+  </p>
+  <pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+
+#include &lt;errno.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define MAX_AEGS 128
+#define DELIMITER ' '
+#define SUSPEND_CALLER 0
+#define IS_CHILD(pid) (0 == pid)
+
+std::string ReadCommand()
+{
+    std::printf("&gt; ");
+    std::string cmd;
+    std::getline(std::cin, cmd);
+    return cmd;
+}
+
+bool PraseCommand(std::string&amp; input_cmd, char **output_cmd)
+{
+    if (input_cmd.empty())
+    {
+        return false;
+    }
+    input_cmd.insert(input_cmd.end(), 1, '\0');
+    std::memset(output_cmd, 0, sizeof(*output_cmd) * MAX_AEGS);
+
+    const auto size = input_cmd.size();
+    int first = 0, last = 0, k = 0;
+    while (last &lt; size)
+    {
+        if (DELIMITER == input_cmd[last])
+        {
+            input_cmd[last] = '\0';
+            if ('\0' != input_cmd[first])
+            {
+                output_cmd[k++] = &amp;input_cmd[first];
+            }
+            first = last + 1;
+        }
+        last++;
+    }
+    if (first &lt; last &amp;&amp; first &lt; size &amp;&amp; '\0' != input_cmd[first])
+    {
+        output_cmd[k] = &amp;input_cmd[first];
+    }
+
+    return true;
+}
+
+pid_t Waitpid(pid_t pid, int *statusp, int options)
+{
+    pid_t ret = 0;
+    do
+    {
+        ret = waitpid(pid, statusp, options);
+    } while (-1 == ret &amp;&amp; EINTR == errno);
+    return ret;
+}
+
+void PrintArgs(const char* const *argv)
+{
+    if (NULL == argv)
+    {
+        std::printf("no any args\n");
+        return;
+    }
+
+    for (int i = 0; argv[i] != NULL; i++)
+    {
+        std::printf("arg[%d]: %s\n", i, argv[i]);
+    }
+}
+
+void ExecCommand(char **argv, char **envp)
+{
+    const auto pid = fork();
+    if (IS_CHILD(pid))
+    {
+        if (-1 == execve(argv[0], argv, envp))
+        {
+            std::printf("execve failed, args as followed:\n");
+            PrintArgs(argv);
+            exit(1);
+        }
+    }
+    else
+    {
+        Waitpid(pid, NULL, SUSPEND_CALLER);
+    }
+}
+
+int main(int argc, char *argv[], char *envp[])
+{
+    while (true)
+    {
+        auto input_cmd = ReadCommand();
+        char *output_cmd[MAX_AEGS];
+        if (PraseCommand(input_cmd, output_cmd))
+        {
+            ExecCommand(output_cmd, envp);
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+  <p>
+   编译：
+  </p>
+  <pre><code>$ g++ -o proc18_main proc18_main.cpp -g
+</code></pre>
+  <p>
+   运行：
+  </p>
+  <pre><code>$ ./proc18_main
+&gt; ls -lh
+execve failed, args as followed:
+arg[0]: ls
+arg[1]: -lh
+&gt; /bin/ls -lh /usr
+total 168K
+drwxrwxr-x   3 root root 4.0K Nov 29  2018 3rdparty
+drwxr-xr-x   5 root root 4.0K Nov 29  2018 aarch64-linux-gnu
+drwxr-xr-x   2 root root  68K Jul 30 09:22 bin
+drwxr-xr-x   2 root root 4.0K Dec  6  2018 games
+drwxr-xr-x   4 root root 4.0K Mar 31 19:19 i686-w64-mingw32
+drwxr-xr-x  62 root root  12K Jul 28 15:30 include
+drwxr-xr-x 162 root root  20K Jul 28 15:30 lib
+drwxr-xr-x   3 root root 4.0K Apr  2  2019 lib32
+drwxr-xr-x   2 root root 4.0K Nov 29  2018 libx86_64-linux-gnu
+drwxr-xr-x  13 root root 4.0K Sep 30  2019 local
+drwxr-xr-x   3 root root 4.0K Mar  1  2018 locale
+drwxr-xr-x   2 root root  12K Apr 16  2019 sbin
+drwxr-xr-x 338 root root  12K Jul 30 09:22 share
+drwxr-xr-x  20 root root 4.0K Apr 16  2019 src
+drwxr-xr-x   4 root root 4.0K Mar 31 19:19 x86_64-w64-mingw32
+&gt; 
+</code></pre>
+  <p>
+   从上面结果中可以看出，目前实现的
+   <code>
+    shell
+   </code>
+   程序——
+   <code>
+    proc18_main
+   </code>
+   实现了代表用户运行其他程序（这里是
+   <code>
+    /bin/ls -lh /usr
+   </code>
+   ）的基本功能。
+  </p>
+  <hr/>
+  <h3 id="_3">
+   <span id="jump如何在后台执行其他程序">
+    如何在后台执行其他程序
+   </span>
+  </h3>
+  <p>
+   在后台执行其他程序意味着
+   <code>
+    shell
+   </code>
+   不必等待后台子进程运行结束就可以执行下一个用户输入的命令。因此，要求
+   <code>
+    shell
+   </code>
+   能够非堵塞地回收后台子进程，具体原理参考
+   <a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E5%BC%82%E5%B8%B8%E6%8E%A7%E5%88%B6%E6%B5%81%EF%BC%886%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%9C%B0%E5%9B%9E%E6%94%B6%E5%AD%90%E8%BF%9B%E7%A8%8B">
+    计算机系统篇之异常控制流（6）：如何正确地回收子进程
+   </a>
+   。
+  </p>
+  <p>
+   在后台执行其他程序并回收后台子进程的具体实现步骤：
+  </p>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   捕获
+   <code>
+    SIGCHLD
+   </code>
+   信号，从而非堵塞地回收后台子进程
+  </p>
+  <p>
+   1）实现信号处理程序
+   <code>
+    sigchld_hanlder
+   </code>
+  </p>
+  <pre><code>/**
+ * @brief Provide a simple signal handler for the SIGCHLD signal with
+ *        the following behaviors:
+ *        1) Processing only the SIGCHLD signal.
+ *        2) Save and restore errno value to avoid disturbing other parts
+ *           of this program when returns from the signal handler.
+ *        3) Waits for any child process to terminate without blocking.
+ * @param sig Received signal number.
+ */
+void SigchldHanlder(int sig)
+{
+  if (SIGCHLD != sig)
+  {
+    return;
+  }
+
+  const auto old_errno = errno;
+  while (WaitWithoutSuspend(nullptr) &gt; 0)
+  {
+  }
+  errno = old_errno;
+}
+</code></pre>
+  <p>
+   其依赖函数
+   <code>
+    WaitWithoutSuspend
+   </code>
+   的实现为：
+  </p>
+  <pre><code>/**
+ * @brief Waits for any child process to terminate without blocking.
+ *        If no child has terminated, then this call returns immediately.
+ * @param status The exit code of the terminated child. status is valid iff
+ *               the child terminated normally, via a call to exit or returning
+ *               from the main routine.
+ * @return On success, if any child has terminated, returns the process ID of
+ *         a terminated child. Otherwise, returns 0.
+ *         On error, -1 is returned, and errno is set appropriately.
+ */
+int WaitWithoutSuspend(int *status)
+{
+  int pid = 0;
+  do
+  {
+    pid = waitpid(-1, status, WNOHANG);
+  } while (-1 == pid &amp;&amp; EINTR == errno);
+
+  if (nullptr != status &amp;&amp; WIFEXITED(*status))
+  {
+    *status = WEXITSTATUS(*status);
+  }
+  return pid;
+}
+</code></pre>
+  <p>
+   2）实现安装信号处理程序的包裹函数
+   <code>
+    SetSignalHanlder
+   </code>
+  </p>
+  <pre><code>/**
+ * @brief Install a signal handler function (handler) that is called
+ *        asynchronously, interrupting the logical control flow,
+ *        whenever the process receives a signal specified by sig.
+ *        And provide behavior compatible with BSD signal semantics
+ *        by making certain system calls restartable across signals.
+ * @param sig Specifies the signal and can be any valid signal except
+ *            SIGKILL and SIGSTOP.
+ * @param hanlder The address of a user-defined function, called a signal
+ *                handler, that will be called whenever the process receives
+ *                a signal of type sig.
+ * @return On success, return true.
+ *         On error, false is returned, and errno is set appropriately.
+ */
+bool SetSignalHanlder(int sig, void (*hanlder)(int))
+{
+  struct sigaction sa;
+  std::memset(&amp;sa, 0, sizeof(sa));
+  sa.sa_handler = hanlder;
+  sa.sa_flags = SA_RESTART; // restart syscalls if possible
+  return 0 == sigaction(sig, &amp;sa, NULL);
+}
+</code></pre>
+  <p>
+   3）安装
+   <code>
+    SIGCHLD
+   </code>
+   信号处理程序
+  </p>
+  <p>
+   在主程序
+   <code>
+    main
+   </code>
+   函数的第一行，添加如下内容：
+  </p>
+  <pre><code>SetSignalHanlder(SIGCHLD, SigchldHanlder);
+</code></pre>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   修改
+   <code>
+    ExecCommand
+   </code>
+   函数
+  </p>
+  <p>
+   1）实现
+   <code>
+    IsBackground
+   </code>
+   函数
+  </p>
+  <p>
+   <code>
+    IsBackground
+   </code>
+   函数用于判断是否在后台执行用户输入的命令。具体实现为：
+  </p>
+  <pre><code>bool IsBackground(char **argv)
+{
+    char *last = NULL;
+    while (argv &amp;&amp; *argv)
+    {
+        last = *argv;
+        argv++;
+    }
+    if (last &amp;&amp; 0 == std::strcmp(last, BACKGROUND_FLAG))
+    {
+        return true;
+    }
+    return false;
+}
+</code></pre>
+  <p>
+   2）实现
+   <code>
+    DeleteLastArg
+   </code>
+   函数
+  </p>
+  <p>
+   <code>
+    DeleteLastArg
+   </code>
+   函数用于删除用户输入命令中的最后一个参数。该函数只有在后台执行程序时用到，即删除用户输入命令中的
+   <code>
+    &amp;
+   </code>
+   。这里，采用
+   <code>
+    &amp;
+   </code>
+   表示在后台执行。
+  </p>
+  <pre><code>void DeleteLastArg(char **argv)
+{
+    char **last = NULL;
+    while (argv &amp;&amp; *argv)
+    {
+        last = argv;
+        argv++;
+    }
+    if (last)
+    {
+        *last = NULL;
+    }
+}
+</code></pre>
+  <p>
+   3）修改
+   <code>
+    ExecCommand
+   </code>
+   函数
+  </p>
+  <p>
+   修改
+   <code>
+    ExecCommand
+   </code>
+   函数：在执行前先判断用户命令是否要在后台执行。如果是，则将删除
+   <code>
+    &amp;
+   </code>
+   后的参数列表传递给子进程；否则，在前台等待子进程结束。具体实现为：
+  </p>
+  <pre><code>void ExecCommand(char **argv, char **envp)
+{
+    const auto is_bg = IsBackground(argv);
+    std::printf("is background:%s\n", is_bg ? "true" : "false");
+    if (is_bg)
+    {
+        DeleteLastArg(argv);
+    }
+
+    const auto pid = fork();
+    if (IS_CHILD(pid))
+    {
+        if (-1 == execve(argv[0], argv, envp))
+        {
+            std::printf("execve failed, args as followed:\n");
+            PrintArgs(argv);
+            exit(1);
+        }
+    }
+    else
+    {
+        if (!is_bg)
+        {
+            Waitpid(pid, NULL, SUSPEND_CALLER);
+        }
+    }
+}
+</code></pre>
+  <p>
+   4）程序的其他部分保持不变
+  </p>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   运行结果
+  </p>
+  <pre><code>$ ./proc18_main 
+&gt; /bin/ls -lh /usr &amp;
+is background:true
+&gt; total 168K
+drwxrwxr-x   3 root root 4.0K Nov 29  2018 3rdparty
+drwxr-xr-x   5 root root 4.0K Nov 29  2018 aarch64-linux-gnu
+drwxr-xr-x   2 root root  68K Jul 30 09:22 bin
+drwxr-xr-x   2 root root 4.0K Dec  6  2018 games
+drwxr-xr-x   4 root root 4.0K Mar 31 19:19 i686-w64-mingw32
+drwxr-xr-x  62 root root  12K Jul 28 15:30 include
+drwxr-xr-x 162 root root  20K Jul 28 15:30 lib
+drwxr-xr-x   3 root root 4.0K Apr  2  2019 lib32
+drwxr-xr-x   2 root root 4.0K Nov 29  2018 libx86_64-linux-gnu
+drwxr-xr-x  13 root root 4.0K Sep 30  2019 local
+drwxr-xr-x   3 root root 4.0K Mar  1  2018 locale
+drwxr-xr-x   2 root root  12K Apr 16  2019 sbin
+drwxr-xr-x 338 root root  12K Jul 30 09:22 share
+drwxr-xr-x  20 root root 4.0K Apr 16  2019 src
+drwxr-xr-x   4 root root 4.0K Mar 31 19:19 x86_64-w64-mingw32
+
+&gt; 
+
+</code></pre>
+  <hr/>
+  <p>
+   <font size="4">
+    <strong>
+     下一篇：
+    </strong>
+    <a href="https://csstormq.github.io/#jump计算机系统">
+     计算机系统之目录
+    </a>
+   </font>
+  </p>
+  <p>
+   <font size="4">
+    <strong>
+     上一篇：
+    </strong>
+    <a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E5%BC%82%E5%B8%B8%E6%8E%A7%E5%88%B6%E6%B5%81%EF%BC%886%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%9C%B0%E5%9B%9E%E6%94%B6%E5%AD%90%E8%BF%9B%E7%A8%8B">
+     计算机系统篇之异常控制流（6）：如何正确地回收子进程
+    </a>
+   </font>
+  </p>
+  <p>
+  </p>
+  <p align="center">
+   <font size="4">
+    <a href="https://csstormq.github.io">
+     <strong>
+      首页
+     </strong>
+    </a>
+   </font>
+  </p>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
+  </script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+   MathJax.Hub.Config({"showProcessingMessages" : false,"messageStyle" : "none","tex2jax": { inlineMath: [ [ "$", "$" ] ] }});
+  </script>
+ </body>
+</html>
