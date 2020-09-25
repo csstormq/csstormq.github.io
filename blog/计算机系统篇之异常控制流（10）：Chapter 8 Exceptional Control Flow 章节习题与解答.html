@@ -1006,15 +1006,19 @@ hello
    <code>
     fork() == 0
    </code>
-   的求值结果在父进程中为 false。也就是说，父进程执行的语句依次为：wait(NULL);
+   的求值结果在父进程中为 false。也就是说，父进程执行的语句依次为：
    <code>
-    、
+    wait(NULL);
    </code>
-   std::printf(“counter=%d\n”, ++counter);
+   、
    <code>
-    、
+    std::printf("counter=%d\n", ++counter);
    </code>
-   std::exit(0);`。
+   、
+   <code>
+    std::exit(0);
+   </code>
+   。
   </p>
   <p>
    在子进程中，fork() 函数的返回值为 0。因此，条件表达式
@@ -1756,7 +1760,7 @@ int main()
   <p>
    编译：
   </p>
-  <pre><code>
+  <pre><code>$ g++ -o main8_25 main8_25.cpp -g
 </code></pre>
   <p>
    运行（用户在 5 秒内完成输入）：
