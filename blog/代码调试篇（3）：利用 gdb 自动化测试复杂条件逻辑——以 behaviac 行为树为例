@@ -16,7 +16,7 @@
   <p align="center">
    <strong>
     <font size="6">
-     代码调试篇（3）：利用 gdb 自动化测试 behaviac 行为树
+     代码调试篇（3）：利用 gdb 自动化测试复杂条件逻辑——以 behaviac 行为树为例
     </font>
    </strong>
   </p>
@@ -24,7 +24,10 @@
    Author:stormQ
   </p>
   <p align="right">
-   Monday, 25. February 2019 10:31PM
+   Created: Monday, 25. February 2019 10:31PM
+  </p>
+  <p align="right">
+   Last Modified: Monday, 26. October 2020 11:39PM
   </p>
   <ul>
    <li>
