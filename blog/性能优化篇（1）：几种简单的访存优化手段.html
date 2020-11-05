@@ -24,7 +24,10 @@
    Author:stormQ
   </p>
   <p align="right">
-   Sunday, 10. November 2019 11:36AM
+   Created: Sunday, 10. November 2019 11:36AM
+  </p>
+  <p align="right">
+   Last Modified: Wednesday, 28. October 2020 08:17PM
   </p>
   <ul>
    <li>
@@ -320,221 +323,6 @@ Auto-annotation:  off
   </p>
   <hr/>
   <h3 id="_3">
-   <span id="jump按顺序存储同时要访问的数据">
-    按顺序存储同时要访问的数据
-   </span>
-  </h3>
-  <p>
-   示例：
-  </p>
-  <pre><code>void poor(const int *src, int *dest, int n)
-{
-    for (int i = 0; i &lt; n; ++i)
-    {
-        // 同时要访问的数据（src[i]、dest[i]）在两个数组中，即同时要访问的数据不是连续存储的
-        dest[i] = src[i];
-    }
-}
-
-struct Vec2
-{
-    Vec2()
-    {
-        static long long count = 0;
-        a = count++;
-    }
-    int a;
-    int b;
-};
-
-void better(struct Vec2 *data, int n)
-{
-    for (int i = 0; i &lt; n; ++i)
-    {
-        // 同时要访问的数据（data[i].a、data[i].b）存储在同一个结构体中，即同时要访问的数据是连续存储的
-        data[i].b = data[i].a;
-    }
-}
-</code></pre>
-  <p>
-   执行时间统计：
-  </p>
-  <table>
-   <thead>
-    <tr>
-     <th>
-      启动程序方式
-     </th>
-     <th>
-      第一次执行耗时(us)
-     </th>
-     <th>
-      第二次执行耗时(us)
-     </th>
-     <th>
-      第三次执行耗时(us)
-     </th>
-     <th>
-      第四次执行耗时(us)
-     </th>
-     <th>
-      第五次执行耗时(us)
-     </th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr>
-     <td>
-      ./main_Og
-     </td>
-     <td>
-      <li>
-       poor:8591
-      </li>
-      <li>
-       better:2714
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:4657
-      </li>
-      <li>
-       better:1936
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:7424
-      </li>
-      <li>
-       better:3436
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:8976
-      </li>
-      <li>
-       better:1937
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:4866
-      </li>
-      <li>
-       better:1931
-      </li>
-     </td>
-    </tr>
-    <tr>
-     <td>
-      valgrind –tool=cachegrind ./main_Og
-     </td>
-     <td>
-      <li>
-       poor:60573
-      </li>
-      <li>
-       better:52037
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:59379
-      </li>
-      <li>
-       better:51119
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:60963
-      </li>
-      <li>
-       better:51360
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:59742
-      </li>
-      <li>
-       better:51622
-      </li>
-     </td>
-     <td>
-      <li>
-       poor:64674
-      </li>
-      <li>
-       better:52330
-      </li>
-     </td>
-    </tr>
-   </tbody>
-  </table>
-  <p>
-   从统计结果中可以看出，better() 函数的执行速度比 poor() 函数快 2 倍左右。
-  </p>
-  <p>
-   统计 cache 使用情况：
-  </p>
-  <pre><code>--------------------------------------------------------------------------------
-         Ir I1mr ILmr          Dr      D1mr      DLmr          Dw      D1mw      DLmw 
-
-         .    .    .         .       .       .         .       .       .  void poor(const int *src, int *dest, int n)
-         .    .    .         .       .       .         .       .       .  {
- 8,294,404    0    0         1       1       1         0       0       0      for (int i = 0; i &lt; n; ++i)
-         .    .    .         .       .       .         .       .       .      {
- 6,220,800    0    0 2,073,600 129,601 129,601 2,073,600 129,601 129,601          dest[i] = src[i];
-         .    .    .         .       .       .         .       .       .      }
-         .    .    .         .       .       .         .       .       .  }
-         .    .    .         .       .       .         .       .       .  
-         .    .    .         .       .       .         .       .       .  struct Vec2
-         .    .    .         .       .       .         .       .       .  {
-         .    .    .         .       .       .         .       .       .      Vec2()
-         .    .    .         .       .       .         .       .       .      {
-         .    .    .         .       .       .         .       .       .          static long long count = 0;
- 8,294,400    0    0 2,073,600       1       1 4,147,200 259,200 259,200          a = count++;
-         .    .    .         .       .       .         .       .       .      }
-         .    .    .         .       .       .         .       .       .      int a;
-         .    .    .         .       .       .         .       .       .      int b;
-         .    .    .         .       .       .         .       .       .  };
-         .    .    .         .       .       .         .       .       .  
-         .    .    .         .       .       .         .       .       .  void better(struct Vec2 *data, int n)
-         .    .    .         .       .       .         .       .       .  {
- 8,294,404    0    0         1       1       1         0       0       0      for (int i = 0; i &lt; n; ++i)
-         .    .    .         .       .       .         .       .       .      {
- 8,294,400    0    0 2,073,600 259,201 259,201 2,073,600       0       0          data[i].b = data[i].a;
-         .    .    .         .       .       .         .       .       .      }
-         .    .    .         .       .       .         .       .       .  }
-</code></pre>
-  <p>
-   输出结果解析：
-  </p>
-  <ul>
-   <li>
-    <p>
-     poor() 和 better() 函数的内存读操作的数量是相同的，而 better() 函数的 D1mr、DLmr 比 poor() 函数分别多 129600 次、129600 次。
-    </p>
-   </li>
-   <li>
-    <p>
-     poor() 和 better() 函数的内存写操作的数量是相同的，而 poor() 函数的 D1mw、DLmw 比 better() 函数分别多 129601 次、129601 次。
-    </p>
-   </li>
-   <li>
-    <p>
-     <strong>
-      从内存读和写操作的不命中总数量来看，两者是相同的。但为什么 better() 函数的执行速度比 poor() 函数快 2 倍？
-     </strong>
-    </p>
-   </li>
-  </ul>
-  <hr/>
-  <h3 id="_4">
    <span id="jump按顺序访问数据">
     按顺序访问数据
    </span>
@@ -747,6 +535,221 @@ long long better(const int *src, int rows, int cols)
    <li>
     <p>
      poor() 和 better() 函数在 L1 级缓存的读数据操作不命中数量差距很大，前者的读数据操作不命中数量为后者的 16 倍。这正是 better() 函数执行速度快于 poor() 函数的原因。
+    </p>
+   </li>
+  </ul>
+  <hr/>
+  <h3 id="_4">
+   <span id="jump按顺序存储同时要访问的数据">
+    按顺序存储同时要访问的数据
+   </span>
+  </h3>
+  <p>
+   示例：
+  </p>
+  <pre><code>void poor(const int *src, int *dest, int n)
+{
+    for (int i = 0; i &lt; n; ++i)
+    {
+        // 同时要访问的数据（src[i]、dest[i]）在两个数组中，即同时要访问的数据不是连续存储的
+        dest[i] = src[i];
+    }
+}
+
+struct Vec2
+{
+    Vec2()
+    {
+        static long long count = 0;
+        a = count++;
+    }
+    int a;
+    int b;
+};
+
+void better(struct Vec2 *data, int n)
+{
+    for (int i = 0; i &lt; n; ++i)
+    {
+        // 同时要访问的数据（data[i].a、data[i].b）存储在同一个结构体中，即同时要访问的数据是连续存储的
+        data[i].b = data[i].a;
+    }
+}
+</code></pre>
+  <p>
+   执行时间统计：
+  </p>
+  <table>
+   <thead>
+    <tr>
+     <th>
+      启动程序方式
+     </th>
+     <th>
+      第一次执行耗时(us)
+     </th>
+     <th>
+      第二次执行耗时(us)
+     </th>
+     <th>
+      第三次执行耗时(us)
+     </th>
+     <th>
+      第四次执行耗时(us)
+     </th>
+     <th>
+      第五次执行耗时(us)
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ./main_Og
+     </td>
+     <td>
+      <li>
+       poor:8591
+      </li>
+      <li>
+       better:2714
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:4657
+      </li>
+      <li>
+       better:1936
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:7424
+      </li>
+      <li>
+       better:3436
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:8976
+      </li>
+      <li>
+       better:1937
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:4866
+      </li>
+      <li>
+       better:1931
+      </li>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      valgrind –tool=cachegrind ./main_Og
+     </td>
+     <td>
+      <li>
+       poor:60573
+      </li>
+      <li>
+       better:52037
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:59379
+      </li>
+      <li>
+       better:51119
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:60963
+      </li>
+      <li>
+       better:51360
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:59742
+      </li>
+      <li>
+       better:51622
+      </li>
+     </td>
+     <td>
+      <li>
+       poor:64674
+      </li>
+      <li>
+       better:52330
+      </li>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <p>
+   从统计结果中可以看出，better() 函数的执行速度比 poor() 函数快 2 倍左右。
+  </p>
+  <p>
+   统计 cache 使用情况：
+  </p>
+  <pre><code>--------------------------------------------------------------------------------
+         Ir I1mr ILmr          Dr      D1mr      DLmr          Dw      D1mw      DLmw 
+
+         .    .    .         .       .       .         .       .       .  void poor(const int *src, int *dest, int n)
+         .    .    .         .       .       .         .       .       .  {
+ 8,294,404    0    0         1       1       1         0       0       0      for (int i = 0; i &lt; n; ++i)
+         .    .    .         .       .       .         .       .       .      {
+ 6,220,800    0    0 2,073,600 129,601 129,601 2,073,600 129,601 129,601          dest[i] = src[i];
+         .    .    .         .       .       .         .       .       .      }
+         .    .    .         .       .       .         .       .       .  }
+         .    .    .         .       .       .         .       .       .  
+         .    .    .         .       .       .         .       .       .  struct Vec2
+         .    .    .         .       .       .         .       .       .  {
+         .    .    .         .       .       .         .       .       .      Vec2()
+         .    .    .         .       .       .         .       .       .      {
+         .    .    .         .       .       .         .       .       .          static long long count = 0;
+ 8,294,400    0    0 2,073,600       1       1 4,147,200 259,200 259,200          a = count++;
+         .    .    .         .       .       .         .       .       .      }
+         .    .    .         .       .       .         .       .       .      int a;
+         .    .    .         .       .       .         .       .       .      int b;
+         .    .    .         .       .       .         .       .       .  };
+         .    .    .         .       .       .         .       .       .  
+         .    .    .         .       .       .         .       .       .  void better(struct Vec2 *data, int n)
+         .    .    .         .       .       .         .       .       .  {
+ 8,294,404    0    0         1       1       1         0       0       0      for (int i = 0; i &lt; n; ++i)
+         .    .    .         .       .       .         .       .       .      {
+ 8,294,400    0    0 2,073,600 259,201 259,201 2,073,600       0       0          data[i].b = data[i].a;
+         .    .    .         .       .       .         .       .       .      }
+         .    .    .         .       .       .         .       .       .  }
+</code></pre>
+  <p>
+   输出结果解析：
+  </p>
+  <ul>
+   <li>
+    <p>
+     poor() 和 better() 函数的内存读操作的数量是相同的，而 better() 函数的 D1mr、DLmr 比 poor() 函数分别多 129600 次、129600 次。
+    </p>
+   </li>
+   <li>
+    <p>
+     poor() 和 better() 函数的内存写操作的数量是相同的，而 poor() 函数的 D1mw、DLmw 比 better() 函数分别多 129601 次、129601 次。
+    </p>
+   </li>
+   <li>
+    <p>
+     <strong>
+      从内存读和写操作的不命中总数量来看，两者是相同的。但为什么 better() 函数的执行速度比 poor() 函数快 2 倍？
+     </strong>
     </p>
    </li>
   </ul>
