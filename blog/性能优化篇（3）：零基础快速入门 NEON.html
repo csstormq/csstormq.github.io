@@ -11,12 +11,12 @@
   </style>
  </head>
  <body>
-  <h1 id="3neon">
+  <h1 id="3-neon">
   </h1>
   <p align="center">
    <strong>
     <font size="6">
-     性能优化篇（3）：NEON快速入门指南
+     性能优化篇（3）：零基础快速入门 NEON
     </font>
    </strong>
   </p>
@@ -24,7 +24,10 @@
    Author:stormQ
   </p>
   <p align="right">
-   Sunday, 24. November 2019 10:28PM
+   Created: Sunday, 24. November 2019 10:28PM
+  </p>
+  <p align="right">
+   Last Modified: Wednesday, 28. October 2020 08:58PM
   </p>
   <hr/>
   <ul>
@@ -58,13 +61,6 @@
       <p>
        <a href="#jump向量算术逻辑运算">
         向量算术逻辑运算
-       </a>
-      </p>
-     </li>
-     <li>
-      <p>
-       <a href="#jumpReferences">
-        References
        </a>
       </p>
      </li>
@@ -254,7 +250,7 @@
    </li>
    <li>
     <p>
-     代码示例
+     代码示例，assign_uint8x8_t.cpp：
     </p>
    </li>
   </ul>
@@ -282,19 +278,50 @@ int main()
   </p>
   <ul>
    <li>
-    代码调试
+    编译（在 Linux ARM-64 位系统上）
    </li>
   </ul>
-  <pre><code>; 语句 a_uint8x8 = vdup_n_u8(255); 对应的汇编指令：dup    v0.8b, w0
+  <pre><code>$ g++ -std=c++11 -g -o assign_uint8x8_t assign_uint8x8_t.cpp
+</code></pre>
+  <ul>
+   <li>
+    代码调试（完整过程）
+   </li>
+  </ul>
+  <pre><code>$ gdb -q ./assign_uint8x8_t
+Reading symbols from ./assign_uint8x8_t...done.
+(gdb) start
+Temporary breakpoint 1 at 0x4005ac: file assign_uint8x8_t.cpp, line 8.
+Starting program: /home/test/assign_uint8x8_t 
+
+Temporary breakpoint 1, main () at assign_uint8x8_t.cpp:8
+8       a_uint8x8 = vdup_n_u8(255);
 (gdb) disas
-...
-0x0000000000400a18 &lt;+40&gt;:   dup v0.8b, w0
-...
-; 执行 dup    v0.8b, w0 前，打印 w0 寄存器的值
-(gdb) p $w0
-$2 = 255
-...
-; 执行 dup    v0.8b, w0 后，打印 v0 寄存器的值
+Dump of assembler code for function main():
+   0x00000000004005a0 &lt;+0&gt;: sub sp, sp, #0x10
+   0x00000000004005a4 &lt;+4&gt;: mov w0, #0xffffffff             // #-1
+   0x00000000004005a8 &lt;+8&gt;: strb    w0, [sp,#7]
+=&gt; 0x00000000004005ac &lt;+12&gt;:    ldrb    w0, [sp,#7]
+   0x00000000004005b0 &lt;+16&gt;:    dup v0.8b, w0
+   0x00000000004005b4 &lt;+20&gt;:    str d0, [sp,#8]
+   0x00000000004005b8 &lt;+24&gt;:    mov w0, #0x0                    // #0
+   0x00000000004005bc &lt;+28&gt;:    add sp, sp, #0x10
+   0x00000000004005c0 &lt;+32&gt;:    ret
+End of assembler dump.
+; 在语句 dup   v0.8b, w0 的下一条指令处设置断点，以观察 dup   v0.8b, w0 的执行效果
+(gdb) b *0x00000000004005b4
+Breakpoint 1 at 0x4005b4: file assign_uint8x8_t.cpp, line 8.
+; 此时，还未执行 dup   v0.8b, w0。打印 v0 寄存器的值
+(gdb) p $v0.b.u
+$1 = {47 &lt;repeats 16 times&gt;}
+(gdb) p $v0.b.u[0]
+$2 = 47
+(gdb) c
+Continuing.
+
+Breakpoint 2, main () at assign_uint8x8_t.cpp:8
+8       a_uint8x8 = vdup_n_u8(255);
+; 此时，已经执行了 dup  v0.8b, w0。打印 v0 寄存器的值
 (gdb) p $v0.b.u
 $3 = {255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0}
 (gdb) p $v0.b.u[0]
