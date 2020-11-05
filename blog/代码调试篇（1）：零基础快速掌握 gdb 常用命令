@@ -11,12 +11,12 @@
   </style>
  </head>
  <body>
-  <h1 id="1gdb">
+  <h1 id="1-gdb">
   </h1>
   <p align="center">
    <strong>
     <font size="6">
-     代码调试篇（1）：gdb调试快速入门指南
+     代码调试篇（1）：零基础快速掌握 gdb 常用命令
     </font>
    </strong>
   </p>
@@ -24,27 +24,46 @@
    Author:stormQ
   </p>
   <p align="right">
-   Monday, 25. February 2019 10:31PM
+   Created: Monday, 25. February 2019 10:31PM
+  </p>
+  <p align="right">
+   Last Modified: Monday, 26. October 2020 10:30AM
   </p>
   <ul>
    <li>
     <h3 id="_1">
      目录
     </h3>
-    <ul>
+    <ul class="checklist">
      <li>
-      <p>
-       <a href="#jump启动gdb">
-        启动 gdb
-       </a>
-      </p>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump启动gdb">
+       启动 gdb
+      </a>
      </li>
      <li>
-      <p>
-       <a href="#jump调试进程">
-        调试进程
-       </a>
-      </p>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump调试进程">
+       调试进程
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump2">
+       调试 coredump 文件
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump3">
+       如何设置 gdb 日志功能
+      </a>
+     </li>
+     <li>
+      <input checked="" disabled="" type="checkbox"/>
+      <a href="#jump4">
+       其他命令
+      </a>
      </li>
     </ul>
    </li>
@@ -55,34 +74,30 @@
     启动 gdb
    </span>
   </h3>
-  <ul>
+  <ul class="checklist">
    <li>
-    <p>
-     <a href="#jump启动一个不带参数的进程">
-      启动一个不带参数的进程
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump启动一个不带参数的进程">
+     启动一个不带参数的进程
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump启动一个带参数的进程">
-      启动一个带参数的进程
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump启动一个带参数的进程">
+     启动一个带参数的进程
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump调试一个正在运行的进程">
-      调试一个正在运行的进程
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump调试一个正在运行的进程">
+     调试一个正在运行的进程
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump使用命令文件调试进程">
-      使用命令文件调试进程
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump使用命令文件调试进程">
+     使用命令文件调试进程
+    </a>
    </li>
   </ul>
   <hr/>
@@ -200,76 +215,66 @@ c
     调试进程
    </span>
   </h3>
-  <ul>
+  <ul class="checklist">
    <li>
-    <p>
-     <a href="#jump查看进程信息">
-      查看进程信息
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看进程信息">
+     查看进程信息
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看堆栈信息">
-      查看堆栈信息
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看堆栈信息">
+     查看堆栈信息
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看/设置源码的搜索路径">
-      查看/设置源码的搜索路径
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看/设置源码的搜索路径">
+     查看/设置源码的搜索路径
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看源码/汇编">
-      查看源码/汇编
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看源码/汇编">
+     查看源码/汇编
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看/设置/调试断点">
-      查看/设置/调试断点
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看/设置/调试断点">
+     查看/设置/调试断点
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump打印/更改变量的值">
-      打印/更改变量的值
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump打印/更改变量的值">
+     打印/更改变量的值
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump打印函数参数/局部变量的值">
-      打印函数参数/局部变量的值
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump打印函数参数/局部变量的值">
+     打印函数参数/局部变量的值
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看/更改寄存器的值">
-      查看/更改寄存器的值
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看/更改寄存器的值">
+     查看/更改寄存器的值
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump查看内存的值">
-      查看内存的值
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump查看内存的值">
+     查看内存的值
+    </a>
    </li>
    <li>
-    <p>
-     <a href="#jump调用C/C++函数">
-      调用C/C++函数
-     </a>
-    </p>
+    <input checked="" disabled="" type="checkbox"/>
+    <a href="#jump调用C/C++函数">
+     调用C/C++函数
+    </a>
    </li>
   </ul>
   <hr/>
@@ -1506,6 +1511,196 @@ $13 = true
     返回上一级
    </a>
   </p>
+  <hr/>
+  <h3 id="coredump">
+   <span id="jump2">
+    调试 coredump 文件
+   </span>
+  </h3>
+  <p>
+   <strong>
+    step 1：
+   </strong>
+   查看是否开启 coredump
+  </p>
+  <pre><code>$ ulimit -c
+</code></pre>
+  <p>
+   注：如果输出结果为 0，那么未开启 coredump。
+  </p>
+  <p>
+   <strong>
+    step 2：
+   </strong>
+   开启 coredump
+  </p>
+  <p>
+   开启 coredump 并且不限制 core 文件大小（仅对当前会话有效）：
+  </p>
+  <pre><code>$ ulimit -c unlimited
+</code></pre>
+  <p>
+   <strong>
+    step 3：
+   </strong>
+   调试 coredump 文件
+  </p>
+  <pre><code>$ gdb &lt;executable-file&gt; &lt;coredump-file-path&gt;
+</code></pre>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   <code>
+    &lt;executable-file&gt;
+   </code>
+   为发生 coredump 时所使用的可执行文件。
+  </p>
+  <p>
+   <strong>
+    step 4：
+   </strong>
+   查看堆栈信息
+  </p>
+  <p>
+   见本文的
+   <a href="#jump查看堆栈信息">
+    查看堆栈信息
+   </a>
+  </p>
+  <hr/>
+  <h3 id="gdb_1">
+   <span id="jump3">
+    如何设置 gdb 日志功能
+   </span>
+  </h3>
+  <ul>
+   <li>
+    <strong>
+     打开/关闭日志输出功能
+    </strong>
+   </li>
+  </ul>
+  <pre><code># 打开日志输出功能，且默认的日志输出文件名称为 gdb.txt
+(gdb) set logging on
+# 关闭日志输出功能
+(gdb) set logging off
+# 打开日志输出功能，并指定日志输出文件
+# (gdb) set logging on gdb_log.txt
+(gdb) set logging on &lt;log-file&gt;
+</code></pre>
+  <p>
+   注：打开日志输出功能后，gdb的输出会写入指定的日志文件。
+  </p>
+  <ul>
+   <li>
+    <strong>
+     更改日志输出的文件
+    </strong>
+   </li>
+  </ul>
+  <pre><code>(gdb) set logging file &lt;log-file&gt;
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     设置写日志文件的方式：覆盖写/追加写
+    </strong>
+   </li>
+  </ul>
+  <pre><code># 设置写日志文件的方式为：覆盖写
+(gdb) set logging overwrite on
+# 设置写日志文件的方式为：追加写
+(gdb) set logging overwrite off
+</code></pre>
+  <p>
+   注：gdb 的默认方式为追加写。
+  </p>
+  <p>
+   <strong>
+    注意：
+   </strong>
+   设置
+   <code>
+    覆盖写
+   </code>
+   或
+   <code>
+    追加写
+   </code>
+   后，需要再次执行
+   <code>
+    set logging on
+   </code>
+   才会生效。
+  </p>
+  <p>
+   示例：
+  </p>
+  <pre><code>file ./main
+set logging overwrite on
+set logging on test.log
+starrt
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     设置是否重定向 gdb 输出
+    </strong>
+   </li>
+  </ul>
+  <pre><code># gdb的输出只写入日志输出文件，不写入控制台
+(gdb) set logging redirect on
+# gdb的输出都会写入日志输出文件和控制台
+(gdb) set logging redirect off
+</code></pre>
+  <ul>
+   <li>
+    <strong>
+     查看当前的日志输出设置
+    </strong>
+   </li>
+  </ul>
+  <pre><code>(gdb) show logging 
+Currently logging to "debug_navigator.txt".
+Logs will be appended to the log file.
+Output is being logged and displayed.
+</code></pre>
+  <hr/>
+  <h3 id="_16">
+   <span id="jump4">
+    其他命令
+   </span>
+  </h3>
+  <ul>
+   <li>
+    关闭
+    <code>
+     ---Type &lt;return&gt; to continue, or q &lt;return&gt; to quit---
+    </code>
+    的显示
+   </li>
+  </ul>
+  <pre><code>(gdb) set pagination off
+</code></pre>
+  <ul>
+   <li>
+    显示
+    <code>
+     ...
+    </code>
+    的完整内容
+   </li>
+  </ul>
+  <pre><code>(gdb) set print elements 0
+</code></pre>
+  <ul>
+   <li>
+    设置代码显示最大行数为 30
+   </li>
+  </ul>
+  <pre><code>(gdb) set listsize 30
+</code></pre>
   <hr/>
   <p>
    <font size="4">
