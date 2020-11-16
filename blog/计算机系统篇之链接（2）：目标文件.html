@@ -27,7 +27,7 @@
    Created: Saturday, 21. December 2019 11:08AM
   </p>
   <p align="right">
-   Last Modified: Wednesday, 04. November 2020 09:09PM
+   Last Modified: Sunday, 15. November 2020 02:58PM
   </p>
   <hr/>
   <ul>
@@ -82,7 +82,7 @@
    目标文件可以分为三类：可重定位目标文件、可执行目标文件和可共享目标文件（可共享目标文件是一种特殊的可重定位目标文件）。
   </p>
   <p>
-   三者之间的关系：可重定位目标文件和可共享目标文件是用于生成可执行目标文件的。
+   三者之间的关系：可重定位目标文件和可共享目标文件可用于生成可执行目标文件；可重定位目标文件可用于生成可共享目标文件。
   </p>
   <table>
    <thead>
@@ -107,7 +107,7 @@
       可重定位目标文件
      </td>
      <td>
-      编译器+汇编器
+      汇编器
      </td>
      <td>
       不可以
@@ -135,7 +135,7 @@
       可共享目标文件
      </td>
      <td>
-      编译器+汇编器
+      链接器
      </td>
      <td>
       不可以
@@ -147,7 +147,7 @@
    </tbody>
   </table>
   <p>
-   注：对于 Linux 中的目标文件来说，从技术角度讲，文件后缀可以是任意的或无后缀，习惯上的文件后缀只是为了便于区别。
+   注：对于 Linux 中的目标文件来说，从技术角度讲，文件后缀可以是任意的或无后缀，习惯上的文件后缀只是为了便于区别。实际上在 Linux 系统中，目标文件类型被定义在 ELF Header 中的某个字段中（下文详细描述），系统通过这个字段的值来判断目标文件的真正类型，而不是通过目标文件的扩展名。
   </p>
   <p>
    1）如何生成可重定位目标文件（On X86-64 Linux）：
@@ -429,14 +429,21 @@ ELF Header:
        <code>
         objdump -d &lt;object file&gt;
        </code>
-       （只输出汇编）
+       （只输出汇编，输出内容包括：.init、.plt、.plt.got、.text、.fini 等 sections）
       </li>
       <li>
        方式2：
        <code>
         objdump -S &lt;object file&gt;
        </code>
-       （输出汇编和对应的源码。需要编译时加-g选项，才会打印源码。）
+       （输出汇编和对应的源码。需要编译时加 -g 选项，才会打印源码。）
+      </li>
+      <li>
+       方式3：
+       <code>
+        objdump -d --section .text sum.so
+       </code>
+       （只输出汇编，且只打印 .text section）
       </li>
      </td>
     </tr>
@@ -491,6 +498,11 @@ ELF Header:
        </code>
        ）
       </li>
+      （注：删除目标文件中 .symtab section 的命令为：
+      <code>
+       strip &lt;object file&gt;
+      </code>
+      ）
      </td>
     </tr>
     <tr>
@@ -533,6 +545,15 @@ ELF Header:
         objdump -g &lt;object file&gt;
        </code>
       </li>
+      （注：删除目标文件中 .debug 等与调试相关 sections 的命令为：
+      <code>
+       strip --strip-debug &lt;object file&gt;
+      </code>
+      （只删除调试信息相关的 sections）或
+      <code>
+       strip &lt;object file&gt;
+      </code>
+      （除调试信息相关的 sections 以外，还删除 .symtab 和 .strtab） ）
      </td>
     </tr>
     <tr>
@@ -563,6 +584,7 @@ ELF Header:
         readelf -p .shstrtab &lt;object file&gt;
        </code>
       </li>
+      （注：不能通过 strip 命令删除 .shstrtab section ）
      </td>
     </tr>
     <tr>
@@ -729,11 +751,11 @@ ELF Header:
       <p>
        前 4 个字节用于标识该文件是 ELF 格式的目标文件，值（十六进制）固定为：7f（0x7f）、45（ASCII 码中大写字母 E 的十六机制表示）、4c（ASCII 码中大写字母 L 的十六机制表示）、46（ASCII 码中大写字母 F 的十六机制表示）。
        <br/>
-       Magic[4] 表示目标文件类别，可选项：1（ELFCLASS32，32 位的 ELF 文件）、2（ELFCLASS64，64 位的 ELF 文件）。
+       Magic[4] 表示 ELF 目标文件类别，可选项：1（ELFCLASS32，32 位的 ELF 文件）、2（ELFCLASS64，64 位的 ELF 文件）。
        <br/>
-       Magic[5] 表示目标文件采用的字节序，可选项：1（ELFDATA2LSB，小端）、2（ELFDATA2MSB，大端）。
+       Magic[5] 表示 ELF 目标文件采用的字节序，可选项：1（ELFDATA2LSB，小端）、2（ELFDATA2MSB，大端）。
        <br/>
-       Magic[6] 表示目标文件格式的版本，可选项：1（当前版本）。
+       Magic[6] 表示 ELF 目标文件格式的主版本号，可选项：1（当前版本）。
        <br/>
        Magic[7] 表示操作系统及 ABI，可选项：0（ELFOSABI_SYSV，System V ABI）、1（ELFOSABI_HPUX，HP-UX operating system）、255（ELFOSABI_STANDALONE，Embedded application）。
       </p>
@@ -751,7 +773,11 @@ ELF Header:
        <code>
         Machine
        </code>
-       是 ELF Header 结构体中的第 3 个字段，占用 2 字节，表示目标机器的体系结构。
+       是 ELF Header 结构体中的第 3 个字段，占用 2 字节，表示目标机器的体系结构，即该目标文件只能在哪种平台下使用。相关常量以
+       <code>
+        EM_
+       </code>
+       开头，比如：3（EM_386，目标机器是 x86-32）、62（EM_X86_64，目标机器是 x86-64）、64（EM_ARM，目标机器为 ARM）、183（EM_AARCH64，目标机器是 AARCH64）。
       </p>
      </li>
      <li>
@@ -759,7 +785,7 @@ ELF Header:
        <code>
         Version
        </code>
-       是 ELF Header 结构体中的第 4 个字段，占用 4 字节，表示目标文件格式的版本，可选项：1（当前版本）。
+       是 ELF Header 结构体中的第 4 个字段，占用 4 字节，表示 ELF 目标文件格式的版本，可选项：1（当前版本）。
       </p>
      </li>
      <li>
@@ -846,6 +872,16 @@ ELF Header:
    </li>
   </ul>
   <p>
+   <strong>
+    注意：
+   </strong>
+   ELF 目标文件格式（包括 32 位和 64 位的版本）中的 ELF Header 结构、Section Header 结构和相关常数等被定义在
+   <code>
+    /usr/include/elf.h
+   </code>
+   头文件中。
+  </p>
+  <p>
    2）查看可重定位目标文件的
    <code>
     Section header table
@@ -897,7 +933,7 @@ Key to Flags:
        <code>
         There are 12 section headers, starting at offset 0x3a0
        </code>
-       表示 section header table 中有 12 个条目，section header table 的起始位置在目标文件中的偏移量为 0x3a0 字节。
+       表示 section header table 中有 12 个条目，section header table 的起始位置在目标文件中的偏移量为 0x3a0 字节。也就是说，section header table 的内容从第 0x3a1 字节（包括该字节）开始。
       </p>
      </li>
      <li>
@@ -917,7 +953,7 @@ Key to Flags:
        <code>
         Type
        </code>
-       是 Section Header 结构体中的第 2 个字段，占用 4 字节，表示 section 类型。常用可选项：0（SHT_NULL，表示未使用的 section header）、1（SHT_PROGBITS，表示该 section 包含由程序定义的信息）、2（SHT_SYMTAB，表示链接器符号表）、3（SHT_STRTAB，表示字符串表）、4（SHT_RELA，表示 “Rela” 类型的可重定位条目）、6（SHT_DYNAMIC，表示动态链接表）、8（SHT_NOBITS，表示未初始化的空间，不占用目标文件的任何空间）、9（SHT_REL，表示 “Rel” 类型的可重定位条目）、10（SHT_SHLIB，表示保留）、11（SHT_DYNSYM，表示动态加载的符号表）。
+       是 Section Header 结构体中的第 2 个字段，占用 4 字节，表示 section 类型。常用可选项：0（SHT_NULL，表示无效 section）、1（SHT_PROGBITS，表示该 section 包含由程序定义的信息，比如：.text、.data sections）、2（SHT_SYMTAB，表示链接器符号表）、3（SHT_STRTAB，表示字符串表）、4（SHT_RELA，表示 “Rela” 类型的可重定位表）、6（SHT_DYNAMIC，表示动态链接信息）、8（SHT_NOBITS，表示未初始化的空间，不占用目标文件的任何空间，比如：.bss section）、9（SHT_REL，表示 “Rel” 类型的可重定位表）、10（SHT_SHLIB，表示保留）、11（SHT_DYNSYM，表示动态链接的符号表）。
       </p>
      </li>
      <li>
@@ -925,7 +961,7 @@ Key to Flags:
        <code>
         Flags
        </code>
-       是 Section Header 结构体中的第 3 个字段，占用 8 字节，表示 section 的属性。常用可选项：1（SHF_WRITE，简写为 W，表示该 section 中包含可写数据）、2（SHF_ALLOC，简写为 A，表示执行程序时会将该 section 加载到内存中）、4（SHF_EXECINSTR，简写为 X，表示该 section 中包含可执行的指令）。
+       是 Section Header 结构体中的第 3 个字段，占用 8 字节，表示该 section 在进程虚拟地址空间中的属性。常用可选项：1（SHF_WRITE，简写为 W，表示该 section 在进程空间中可写）、2（SHF_ALLOC，简写为 A，表示该 section 在进程空间中需要被分配空间，即执行程序时会将该 section 加载到内存中）、4（SHF_EXECINSTR，简写为 X，表示该 section 在进程空间中可以被执行）。
       </p>
      </li>
      <li>
@@ -933,7 +969,7 @@ Key to Flags:
        <code>
         Address
        </code>
-       是 Section Header 结构体中的第 4 个字段，占用 8 字节，表示该 section 的起始位置所对应的虚拟内存地址。0 表示该 section 不会被加载到内存中。
+       是 Section Header 结构体中的第 4 个字段，占用 8 字节，表示该 section 的起始位置在被加载后所对应的在进程地址空间中的虚拟内存地址。0 表示该 section 不会被加载到内存中。
       </p>
      </li>
      <li>
@@ -949,7 +985,7 @@ Key to Flags:
        <code>
         Size
        </code>
-       是 Section Header 结构体中的第 6 个字段，占用 8 字节，表示该 section 在目标文件中占用的空间大小（字节），除 SHT_NOBITS section 以外。
+       是 Section Header 结构体中的第 6 个字段，占用 8 字节，表示该 section 在目标文件中占用的空间大小（字节），除 SHT_NOBITS section 以外（SHT_NOBITS section 不占用目标文件（被存储在磁盘上）的任何空间）。
       </p>
      </li>
      <li>
@@ -985,7 +1021,7 @@ Key to Flags:
        <code>
         Align
        </code>
-       是 Section Header 结构体中的第 9 个字段，占用 8 字节，表示该 section 的内存对齐要求。这个字段的值必须是 2 的幂。
+       是 Section Header 结构体中的第 9 个字段，占用 8 字节，表示该 section 的内存对齐要求。这个字段的值必须是 2 的幂。如果该字段的值为 0 或 1，那么表示该 section 没有内存对齐要求。
       </p>
      </li>
      <li>
@@ -1016,7 +1052,7 @@ String dump of section '.comment':
    <code>
     .comment
    </code>
-   section 的第一个字节的值为 0x00（
+   section 的第一个字节的值为 0x00（二进制的零，
    <code>
     \0
    </code>
@@ -1461,7 +1497,7 @@ Symbol table '.symtab' contains 19 entries:
        <code>
         Bind
        </code>
-       ，表示符号所关联对象的的绑定属性（即符号的作用范围）。常见可选项：0（STB_LOCAL，仅定义该符号的目标文件可见）、1（STB_GLOBAL，所有目标文件可见）、2（STB_WEAK，全局作用域，但其优先级低于全局符号）。
+       ，表示符号所关联对象的的绑定属性（即符号的作用范围）。常见可选项：0（STB_LOCAL，局部符号，仅定义该符号的目标文件可见）、1（STB_GLOBAL，全局符号，所有目标文件可见）、2（STB_WEAK，弱引用，全局作用域，但其优先级低于全局符号）。
       </p>
       <p>
        <code>
