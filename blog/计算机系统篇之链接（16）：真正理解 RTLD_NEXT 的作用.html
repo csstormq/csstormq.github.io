@@ -802,7 +802,7 @@ Local exec file:
     # 省略 ...
 </code></pre>
   <p>
-   可以看出，可执行目标文件 main 所依赖共享库的加载先后顺序依次为：/lib64/ld-linux-x86-64.so.2、./mymalloc.so、./mymalloc2.so、./mymalloc3.so、/lib/x86_64-linux-gnu/libc.so.6。也就是说，共享库 ./mymalloc2.so 要先于 /lib/x86_64-linux-gnu/libc.so.6 被加载到内存中。因此，共享库 ./mymalloc.so 的
+   可以看出，可执行目标文件 main 所依赖共享库的加载先后顺序依次为：/lib64/ld-linux-x86-64.so.2、./mymalloc.so、./mymalloc2.so、./mymalloc3.so、/lib/x86_64-linux-gnu/libc.so.6。也就是说，共享库 ./mymalloc3.so 要先于 /lib/x86_64-linux-gnu/libc.so.6 被加载到内存中。因此，共享库 ./mymalloc.so 的
    <code>
     malloc()
    </code>
@@ -814,7 +814,7 @@ Local exec file:
    <code>
     下一个共享对象
    </code>
-   为 ./mymalloc2.so。
+   为 ./mymalloc3.so。
   </p>
   <hr/>
   <h3 id="_4">
