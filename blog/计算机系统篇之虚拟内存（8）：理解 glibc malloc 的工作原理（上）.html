@@ -1,1 +1,1106 @@
 
+﻿<!DOCTYPE html>
+<html>
+<head>  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0">
+  <meta name="author" content="微信公众号：颜家大少">
+  <meta name="email" content="3056432@qq.com">
+  <meta name="description" content="一个Markdown在线转换工具，让Markdown内容，不需作任何调整就能同时在微信公众号、博客园、掘金、csdn等平台正确显示当前预览的效果">
+  <title>Md2All export document</title>  
+  <style type="text/css" id="markdown_preview_css"> 
+ .output_wrapper pre code{font-family: Consolas, Inconsolata, Courier, monospace; display: block !important; white-space: pre !important; word-wrap: normal !important; word-break: normal !important;  overflow: auto !important;}  
+.output_wrapper a:hover { text-decoration: underline; color: rgb(0, 96, 100); }
+.output_wrapper figcaption { margin-top: 10px; text-align: center; color: rgb(153, 153, 153); font-size: 0.7em; }
+.output_wrapper pre code .linenum { padding-right: 20px; word-spacing: 0px; }
+.task-list-list { list-style-type: none; }
+.task-list-list.checked { color: rgb(62, 62, 62); }
+.task-list-list.uncheck { color: rgb(191, 193, 191); }
+.task-list-list .icon_uncheck, .task-list-list .icon_check { display: inline-block; vertical-align: middle; margin-right: 10px; }
+.task-list-list .icon_check::before { content: "√"; border: 2px solid rgb(62, 62, 62); color: red; }
+.task-list-list .icon_uncheck::before { content: "x"; border: 2px solid rgb(191, 193, 191); color: rgb(191, 193, 191); }
+.task-list-list .icon_check::before, .task-list-list .icon_uncheck::before { padding: 2px 8px 2px 5px; border-radius: 5px; }
+@font-face { font-family: "KaTeX_AMS"; src: url("fonts/KaTeX_AMS-Regular.woff2") format("woff2"), url("fonts/KaTeX_AMS-Regular.woff") format("woff"), url("fonts/KaTeX_AMS-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Caligraphic"; src: url("fonts/KaTeX_Caligraphic-Bold.woff2") format("woff2"), url("fonts/KaTeX_Caligraphic-Bold.woff") format("woff"), url("fonts/KaTeX_Caligraphic-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Caligraphic"; src: url("fonts/KaTeX_Caligraphic-Regular.woff2") format("woff2"), url("fonts/KaTeX_Caligraphic-Regular.woff") format("woff"), url("fonts/KaTeX_Caligraphic-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Fraktur"; src: url("fonts/KaTeX_Fraktur-Bold.woff2") format("woff2"), url("fonts/KaTeX_Fraktur-Bold.woff") format("woff"), url("fonts/KaTeX_Fraktur-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Fraktur"; src: url("fonts/KaTeX_Fraktur-Regular.woff2") format("woff2"), url("fonts/KaTeX_Fraktur-Regular.woff") format("woff"), url("fonts/KaTeX_Fraktur-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Bold.woff2") format("woff2"), url("fonts/KaTeX_Main-Bold.woff") format("woff"), url("fonts/KaTeX_Main-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-BoldItalic.woff2") format("woff2"), url("fonts/KaTeX_Main-BoldItalic.woff") format("woff"), url("fonts/KaTeX_Main-BoldItalic.ttf") format("truetype"); font-style: italic; font-weight: bold; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Italic.woff2") format("woff2"), url("fonts/KaTeX_Main-Italic.woff") format("woff"), url("fonts/KaTeX_Main-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Regular.woff2") format("woff2"), url("fonts/KaTeX_Main-Regular.woff") format("woff"), url("fonts/KaTeX_Main-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Math"; src: url("fonts/KaTeX_Math-BoldItalic.woff2") format("woff2"), url("fonts/KaTeX_Math-BoldItalic.woff") format("woff"), url("fonts/KaTeX_Math-BoldItalic.ttf") format("truetype"); font-style: italic; font-weight: bold; }
+@font-face { font-family: "KaTeX_Math"; src: url("fonts/KaTeX_Math-Italic.woff2") format("woff2"), url("fonts/KaTeX_Math-Italic.woff") format("woff"), url("fonts/KaTeX_Math-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Bold.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Bold.woff") format("woff"), url("fonts/KaTeX_SansSerif-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Italic.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Italic.woff") format("woff"), url("fonts/KaTeX_SansSerif-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Regular.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Regular.woff") format("woff"), url("fonts/KaTeX_SansSerif-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Script"; src: url("fonts/KaTeX_Script-Regular.woff2") format("woff2"), url("fonts/KaTeX_Script-Regular.woff") format("woff"), url("fonts/KaTeX_Script-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size1"; src: url("fonts/KaTeX_Size1-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size1-Regular.woff") format("woff"), url("fonts/KaTeX_Size1-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size2"; src: url("fonts/KaTeX_Size2-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size2-Regular.woff") format("woff"), url("fonts/KaTeX_Size2-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size3"; src: url("fonts/KaTeX_Size3-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size3-Regular.woff") format("woff"), url("fonts/KaTeX_Size3-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size4"; src: url("fonts/KaTeX_Size4-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size4-Regular.woff") format("woff"), url("fonts/KaTeX_Size4-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Typewriter"; src: url("fonts/KaTeX_Typewriter-Regular.woff2") format("woff2"), url("fonts/KaTeX_Typewriter-Regular.woff") format("woff"), url("fonts/KaTeX_Typewriter-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@media screen {
+  .katex .mtable .vertical-separator { min-width: 1px; }
+  .katex .mfrac .frac-line, .katex .overline .overline-line, .katex .underline .underline-line, .katex .hline, .katex .hdashline, .katex .rule { min-height: 1px; }
+}
+.katex-display { display: block; margin: 1em 0px; text-align: center; }
+.katex-display > .katex { display: block; text-align: center; white-space: nowrap; }
+.katex-display > .katex > .katex-html { display: block; }
+.katex-display > .katex > .katex-html > .tag { position: absolute; right: 0px; }
+.katex { font: 1.21em / 1.2 KaTeX_Main, Times New Roman, serif; text-indent: 0px; text-rendering: auto; }
+.katex * { }
+.katex .katex-mathml { position: absolute; clip: rect(1px, 1px, 1px, 1px); padding: 0px; border: 0px none; height: 1px; width: 1px; overflow: hidden; }
+.katex .katex-html { }
+.katex .katex-html > .newline { display: block; }
+.katex .base { position: relative; display: inline-block; white-space: nowrap; width: min-content; }
+.katex .strut { display: inline-block; }
+.katex .textbf { font-weight: bold; }
+.katex .textit { font-style: italic; }
+.katex .textrm { font-family: KaTeX_Main; }
+.katex .textsf { font-family: KaTeX_SansSerif; }
+.katex .texttt { font-family: KaTeX_Typewriter; }
+.katex .mathit { font-family: KaTeX_Math; font-style: italic; }
+.katex .mathrm { font-style: normal; }
+.katex .mathbf { font-family: KaTeX_Main; font-weight: bold; }
+.katex .boldsymbol { font-family: KaTeX_Math; font-weight: bold; font-style: italic; }
+.katex .amsrm { font-family: KaTeX_AMS; }
+.katex .mathbb, .katex .textbb { font-family: KaTeX_AMS; }
+.katex .mathcal { font-family: KaTeX_Caligraphic; }
+.katex .mathfrak, .katex .textfrak { font-family: KaTeX_Fraktur; }
+.katex .mathtt { font-family: KaTeX_Typewriter; }
+.katex .mathscr, .katex .textscr { font-family: KaTeX_Script; }
+.katex .mathsf, .katex .textsf { font-family: KaTeX_SansSerif; }
+.katex .mainit { font-family: KaTeX_Main; font-style: italic; }
+.katex .mainrm { font-family: KaTeX_Main; font-style: normal; }
+.katex .vlist-t { display: inline-table; table-layout: fixed; }
+.katex .vlist-r { display: table-row; }
+.katex .vlist { display: table-cell; vertical-align: bottom; position: relative; }
+.katex .vlist > span { display: block; height: 0px; position: relative; }
+.katex .vlist > span > span { display: inline-block; }
+.katex .vlist > span > .pstrut { overflow: hidden; width: 0px; }
+.katex .vlist-t2 { margin-right: -2px; }
+.katex .vlist-s { display: table-cell; vertical-align: bottom; font-size: 1px; width: 2px; min-width: 2px; }
+.katex .msupsub { text-align: left; }
+.katex .mfrac > span > span { text-align: center; }
+.katex .mfrac .frac-line { display: inline-block; width: 100%; border-bottom-style: solid; }
+.katex .mspace { display: inline-block; }
+.katex .llap, .katex .rlap, .katex .clap { width: 0px; position: relative; }
+.katex .llap > .inner, .katex .rlap > .inner, .katex .clap > .inner { position: absolute; }
+.katex .llap > .fix, .katex .rlap > .fix, .katex .clap > .fix { display: inline-block; }
+.katex .llap > .inner { right: 0px; }
+.katex .rlap > .inner, .katex .clap > .inner { left: 0px; }
+.katex .clap > .inner > span { margin-left: -50%; margin-right: 50%; }
+.katex .rule { display: inline-block; border: 0px solid; position: relative; }
+.katex .overline .overline-line, .katex .underline .underline-line, .katex .hline { display: inline-block; width: 100%; border-bottom-style: solid; }
+.katex .hdashline { display: inline-block; width: 100%; border-bottom-style: dashed; }
+.katex .sqrt > .root { margin-left: 0.277778em; margin-right: -0.555556em; }
+.katex .sizing, .katex .fontsize-ensurer { display: inline-block; }
+.katex .sizing.reset-size1.size1, .katex .fontsize-ensurer.reset-size1.size1 { font-size: 1em; }
+.katex .sizing.reset-size1.size2, .katex .fontsize-ensurer.reset-size1.size2 { font-size: 1.2em; }
+.katex .sizing.reset-size1.size3, .katex .fontsize-ensurer.reset-size1.size3 { font-size: 1.4em; }
+.katex .sizing.reset-size1.size4, .katex .fontsize-ensurer.reset-size1.size4 { font-size: 1.6em; }
+.katex .sizing.reset-size1.size5, .katex .fontsize-ensurer.reset-size1.size5 { font-size: 1.8em; }
+.katex .sizing.reset-size1.size6, .katex .fontsize-ensurer.reset-size1.size6 { font-size: 2em; }
+.katex .sizing.reset-size1.size7, .katex .fontsize-ensurer.reset-size1.size7 { font-size: 2.4em; }
+.katex .sizing.reset-size1.size8, .katex .fontsize-ensurer.reset-size1.size8 { font-size: 2.88em; }
+.katex .sizing.reset-size1.size9, .katex .fontsize-ensurer.reset-size1.size9 { font-size: 3.456em; }
+.katex .sizing.reset-size1.size10, .katex .fontsize-ensurer.reset-size1.size10 { font-size: 4.148em; }
+.katex .sizing.reset-size1.size11, .katex .fontsize-ensurer.reset-size1.size11 { font-size: 4.976em; }
+.katex .sizing.reset-size2.size1, .katex .fontsize-ensurer.reset-size2.size1 { font-size: 0.833333em; }
+.katex .sizing.reset-size2.size2, .katex .fontsize-ensurer.reset-size2.size2 { font-size: 1em; }
+.katex .sizing.reset-size2.size3, .katex .fontsize-ensurer.reset-size2.size3 { font-size: 1.16667em; }
+.katex .sizing.reset-size2.size4, .katex .fontsize-ensurer.reset-size2.size4 { font-size: 1.33333em; }
+.katex .sizing.reset-size2.size5, .katex .fontsize-ensurer.reset-size2.size5 { font-size: 1.5em; }
+.katex .sizing.reset-size2.size6, .katex .fontsize-ensurer.reset-size2.size6 { font-size: 1.66667em; }
+.katex .sizing.reset-size2.size7, .katex .fontsize-ensurer.reset-size2.size7 { font-size: 2em; }
+.katex .sizing.reset-size2.size8, .katex .fontsize-ensurer.reset-size2.size8 { font-size: 2.4em; }
+.katex .sizing.reset-size2.size9, .katex .fontsize-ensurer.reset-size2.size9 { font-size: 2.88em; }
+.katex .sizing.reset-size2.size10, .katex .fontsize-ensurer.reset-size2.size10 { font-size: 3.45667em; }
+.katex .sizing.reset-size2.size11, .katex .fontsize-ensurer.reset-size2.size11 { font-size: 4.14667em; }
+.katex .sizing.reset-size3.size1, .katex .fontsize-ensurer.reset-size3.size1 { font-size: 0.714286em; }
+.katex .sizing.reset-size3.size2, .katex .fontsize-ensurer.reset-size3.size2 { font-size: 0.857143em; }
+.katex .sizing.reset-size3.size3, .katex .fontsize-ensurer.reset-size3.size3 { font-size: 1em; }
+.katex .sizing.reset-size3.size4, .katex .fontsize-ensurer.reset-size3.size4 { font-size: 1.14286em; }
+.katex .sizing.reset-size3.size5, .katex .fontsize-ensurer.reset-size3.size5 { font-size: 1.28571em; }
+.katex .sizing.reset-size3.size6, .katex .fontsize-ensurer.reset-size3.size6 { font-size: 1.42857em; }
+.katex .sizing.reset-size3.size7, .katex .fontsize-ensurer.reset-size3.size7 { font-size: 1.71429em; }
+.katex .sizing.reset-size3.size8, .katex .fontsize-ensurer.reset-size3.size8 { font-size: 2.05714em; }
+.katex .sizing.reset-size3.size9, .katex .fontsize-ensurer.reset-size3.size9 { font-size: 2.46857em; }
+.katex .sizing.reset-size3.size10, .katex .fontsize-ensurer.reset-size3.size10 { font-size: 2.96286em; }
+.katex .sizing.reset-size3.size11, .katex .fontsize-ensurer.reset-size3.size11 { font-size: 3.55429em; }
+.katex .sizing.reset-size4.size1, .katex .fontsize-ensurer.reset-size4.size1 { font-size: 0.625em; }
+.katex .sizing.reset-size4.size2, .katex .fontsize-ensurer.reset-size4.size2 { font-size: 0.75em; }
+.katex .sizing.reset-size4.size3, .katex .fontsize-ensurer.reset-size4.size3 { font-size: 0.875em; }
+.katex .sizing.reset-size4.size4, .katex .fontsize-ensurer.reset-size4.size4 { font-size: 1em; }
+.katex .sizing.reset-size4.size5, .katex .fontsize-ensurer.reset-size4.size5 { font-size: 1.125em; }
+.katex .sizing.reset-size4.size6, .katex .fontsize-ensurer.reset-size4.size6 { font-size: 1.25em; }
+.katex .sizing.reset-size4.size7, .katex .fontsize-ensurer.reset-size4.size7 { font-size: 1.5em; }
+.katex .sizing.reset-size4.size8, .katex .fontsize-ensurer.reset-size4.size8 { font-size: 1.8em; }
+.katex .sizing.reset-size4.size9, .katex .fontsize-ensurer.reset-size4.size9 { font-size: 2.16em; }
+.katex .sizing.reset-size4.size10, .katex .fontsize-ensurer.reset-size4.size10 { font-size: 2.5925em; }
+.katex .sizing.reset-size4.size11, .katex .fontsize-ensurer.reset-size4.size11 { font-size: 3.11em; }
+.katex .sizing.reset-size5.size1, .katex .fontsize-ensurer.reset-size5.size1 { font-size: 0.555556em; }
+.katex .sizing.reset-size5.size2, .katex .fontsize-ensurer.reset-size5.size2 { font-size: 0.666667em; }
+.katex .sizing.reset-size5.size3, .katex .fontsize-ensurer.reset-size5.size3 { font-size: 0.777778em; }
+.katex .sizing.reset-size5.size4, .katex .fontsize-ensurer.reset-size5.size4 { font-size: 0.888889em; }
+.katex .sizing.reset-size5.size5, .katex .fontsize-ensurer.reset-size5.size5 { font-size: 1em; }
+.katex .sizing.reset-size5.size6, .katex .fontsize-ensurer.reset-size5.size6 { font-size: 1.11111em; }
+.katex .sizing.reset-size5.size7, .katex .fontsize-ensurer.reset-size5.size7 { font-size: 1.33333em; }
+.katex .sizing.reset-size5.size8, .katex .fontsize-ensurer.reset-size5.size8 { font-size: 1.6em; }
+.katex .sizing.reset-size5.size9, .katex .fontsize-ensurer.reset-size5.size9 { font-size: 1.92em; }
+.katex .sizing.reset-size5.size10, .katex .fontsize-ensurer.reset-size5.size10 { font-size: 2.30444em; }
+.katex .sizing.reset-size5.size11, .katex .fontsize-ensurer.reset-size5.size11 { font-size: 2.76444em; }
+.katex .sizing.reset-size6.size1, .katex .fontsize-ensurer.reset-size6.size1 { font-size: 0.5em; }
+.katex .sizing.reset-size6.size2, .katex .fontsize-ensurer.reset-size6.size2 { font-size: 0.6em; }
+.katex .sizing.reset-size6.size3, .katex .fontsize-ensurer.reset-size6.size3 { font-size: 0.7em; }
+.katex .sizing.reset-size6.size4, .katex .fontsize-ensurer.reset-size6.size4 { font-size: 0.8em; }
+.katex .sizing.reset-size6.size5, .katex .fontsize-ensurer.reset-size6.size5 { font-size: 0.9em; }
+.katex .sizing.reset-size6.size6, .katex .fontsize-ensurer.reset-size6.size6 { font-size: 1em; }
+.katex .sizing.reset-size6.size7, .katex .fontsize-ensurer.reset-size6.size7 { font-size: 1.2em; }
+.katex .sizing.reset-size6.size8, .katex .fontsize-ensurer.reset-size6.size8 { font-size: 1.44em; }
+.katex .sizing.reset-size6.size9, .katex .fontsize-ensurer.reset-size6.size9 { font-size: 1.728em; }
+.katex .sizing.reset-size6.size10, .katex .fontsize-ensurer.reset-size6.size10 { font-size: 2.074em; }
+.katex .sizing.reset-size6.size11, .katex .fontsize-ensurer.reset-size6.size11 { font-size: 2.488em; }
+.katex .sizing.reset-size7.size1, .katex .fontsize-ensurer.reset-size7.size1 { font-size: 0.416667em; }
+.katex .sizing.reset-size7.size2, .katex .fontsize-ensurer.reset-size7.size2 { font-size: 0.5em; }
+.katex .sizing.reset-size7.size3, .katex .fontsize-ensurer.reset-size7.size3 { font-size: 0.583333em; }
+.katex .sizing.reset-size7.size4, .katex .fontsize-ensurer.reset-size7.size4 { font-size: 0.666667em; }
+.katex .sizing.reset-size7.size5, .katex .fontsize-ensurer.reset-size7.size5 { font-size: 0.75em; }
+.katex .sizing.reset-size7.size6, .katex .fontsize-ensurer.reset-size7.size6 { font-size: 0.833333em; }
+.katex .sizing.reset-size7.size7, .katex .fontsize-ensurer.reset-size7.size7 { font-size: 1em; }
+.katex .sizing.reset-size7.size8, .katex .fontsize-ensurer.reset-size7.size8 { font-size: 1.2em; }
+.katex .sizing.reset-size7.size9, .katex .fontsize-ensurer.reset-size7.size9 { font-size: 1.44em; }
+.katex .sizing.reset-size7.size10, .katex .fontsize-ensurer.reset-size7.size10 { font-size: 1.72833em; }
+.katex .sizing.reset-size7.size11, .katex .fontsize-ensurer.reset-size7.size11 { font-size: 2.07333em; }
+.katex .sizing.reset-size8.size1, .katex .fontsize-ensurer.reset-size8.size1 { font-size: 0.347222em; }
+.katex .sizing.reset-size8.size2, .katex .fontsize-ensurer.reset-size8.size2 { font-size: 0.416667em; }
+.katex .sizing.reset-size8.size3, .katex .fontsize-ensurer.reset-size8.size3 { font-size: 0.486111em; }
+.katex .sizing.reset-size8.size4, .katex .fontsize-ensurer.reset-size8.size4 { font-size: 0.555556em; }
+.katex .sizing.reset-size8.size5, .katex .fontsize-ensurer.reset-size8.size5 { font-size: 0.625em; }
+.katex .sizing.reset-size8.size6, .katex .fontsize-ensurer.reset-size8.size6 { font-size: 0.694444em; }
+.katex .sizing.reset-size8.size7, .katex .fontsize-ensurer.reset-size8.size7 { font-size: 0.833333em; }
+.katex .sizing.reset-size8.size8, .katex .fontsize-ensurer.reset-size8.size8 { font-size: 1em; }
+.katex .sizing.reset-size8.size9, .katex .fontsize-ensurer.reset-size8.size9 { font-size: 1.2em; }
+.katex .sizing.reset-size8.size10, .katex .fontsize-ensurer.reset-size8.size10 { font-size: 1.44028em; }
+.katex .sizing.reset-size8.size11, .katex .fontsize-ensurer.reset-size8.size11 { font-size: 1.72778em; }
+.katex .sizing.reset-size9.size1, .katex .fontsize-ensurer.reset-size9.size1 { font-size: 0.289352em; }
+.katex .sizing.reset-size9.size2, .katex .fontsize-ensurer.reset-size9.size2 { font-size: 0.347222em; }
+.katex .sizing.reset-size9.size3, .katex .fontsize-ensurer.reset-size9.size3 { font-size: 0.405093em; }
+.katex .sizing.reset-size9.size4, .katex .fontsize-ensurer.reset-size9.size4 { font-size: 0.462963em; }
+.katex .sizing.reset-size9.size5, .katex .fontsize-ensurer.reset-size9.size5 { font-size: 0.520833em; }
+.katex .sizing.reset-size9.size6, .katex .fontsize-ensurer.reset-size9.size6 { font-size: 0.578704em; }
+.katex .sizing.reset-size9.size7, .katex .fontsize-ensurer.reset-size9.size7 { font-size: 0.694444em; }
+.katex .sizing.reset-size9.size8, .katex .fontsize-ensurer.reset-size9.size8 { font-size: 0.833333em; }
+.katex .sizing.reset-size9.size9, .katex .fontsize-ensurer.reset-size9.size9 { font-size: 1em; }
+.katex .sizing.reset-size9.size10, .katex .fontsize-ensurer.reset-size9.size10 { font-size: 1.20023em; }
+.katex .sizing.reset-size9.size11, .katex .fontsize-ensurer.reset-size9.size11 { font-size: 1.43981em; }
+.katex .sizing.reset-size10.size1, .katex .fontsize-ensurer.reset-size10.size1 { font-size: 0.24108em; }
+.katex .sizing.reset-size10.size2, .katex .fontsize-ensurer.reset-size10.size2 { font-size: 0.289296em; }
+.katex .sizing.reset-size10.size3, .katex .fontsize-ensurer.reset-size10.size3 { font-size: 0.337512em; }
+.katex .sizing.reset-size10.size4, .katex .fontsize-ensurer.reset-size10.size4 { font-size: 0.385728em; }
+.katex .sizing.reset-size10.size5, .katex .fontsize-ensurer.reset-size10.size5 { font-size: 0.433944em; }
+.katex .sizing.reset-size10.size6, .katex .fontsize-ensurer.reset-size10.size6 { font-size: 0.48216em; }
+.katex .sizing.reset-size10.size7, .katex .fontsize-ensurer.reset-size10.size7 { font-size: 0.578592em; }
+.katex .sizing.reset-size10.size8, .katex .fontsize-ensurer.reset-size10.size8 { font-size: 0.694311em; }
+.katex .sizing.reset-size10.size9, .katex .fontsize-ensurer.reset-size10.size9 { font-size: 0.833173em; }
+.katex .sizing.reset-size10.size10, .katex .fontsize-ensurer.reset-size10.size10 { font-size: 1em; }
+.katex .sizing.reset-size10.size11, .katex .fontsize-ensurer.reset-size10.size11 { font-size: 1.19961em; }
+.katex .sizing.reset-size11.size1, .katex .fontsize-ensurer.reset-size11.size1 { font-size: 0.200965em; }
+.katex .sizing.reset-size11.size2, .katex .fontsize-ensurer.reset-size11.size2 { font-size: 0.241158em; }
+.katex .sizing.reset-size11.size3, .katex .fontsize-ensurer.reset-size11.size3 { font-size: 0.281351em; }
+.katex .sizing.reset-size11.size4, .katex .fontsize-ensurer.reset-size11.size4 { font-size: 0.321543em; }
+.katex .sizing.reset-size11.size5, .katex .fontsize-ensurer.reset-size11.size5 { font-size: 0.361736em; }
+.katex .sizing.reset-size11.size6, .katex .fontsize-ensurer.reset-size11.size6 { font-size: 0.401929em; }
+.katex .sizing.reset-size11.size7, .katex .fontsize-ensurer.reset-size11.size7 { font-size: 0.482315em; }
+.katex .sizing.reset-size11.size8, .katex .fontsize-ensurer.reset-size11.size8 { font-size: 0.578778em; }
+.katex .sizing.reset-size11.size9, .katex .fontsize-ensurer.reset-size11.size9 { font-size: 0.694534em; }
+.katex .sizing.reset-size11.size10, .katex .fontsize-ensurer.reset-size11.size10 { font-size: 0.833601em; }
+.katex .sizing.reset-size11.size11, .katex .fontsize-ensurer.reset-size11.size11 { font-size: 1em; }
+.katex .delimsizing.size1 { font-family: KaTeX_Size1; }
+.katex .delimsizing.size2 { font-family: KaTeX_Size2; }
+.katex .delimsizing.size3 { font-family: KaTeX_Size3; }
+.katex .delimsizing.size4 { font-family: KaTeX_Size4; }
+.katex .delimsizing.mult .delim-size1 > span { font-family: KaTeX_Size1; }
+.katex .delimsizing.mult .delim-size4 > span { font-family: KaTeX_Size4; }
+.katex .nulldelimiter { display: inline-block; width: 0.12em; }
+.katex .delimcenter { position: relative; }
+.katex .op-symbol { position: relative; }
+.katex .op-symbol.small-op { font-family: KaTeX_Size1; }
+.katex .op-symbol.large-op { font-family: KaTeX_Size2; }
+.katex .op-limits > .vlist-t { text-align: center; }
+.katex .accent > .vlist-t { text-align: center; }
+.katex .accent .accent-body:not(.accent-full) { width: 0px; }
+.katex .accent .accent-body { position: relative; }
+.katex .overlay { display: block; }
+.katex .mtable .vertical-separator { display: inline-block; margin: 0px -0.025em; border-right: 0.05em solid; }
+.katex .mtable .vs-dashed { border-right: 0.05em dashed; }
+.katex .mtable .arraycolsep { display: inline-block; }
+.katex .mtable .col-align-c > .vlist-t { text-align: center; }
+.katex .mtable .col-align-l > .vlist-t { text-align: left; }
+.katex .mtable .col-align-r > .vlist-t { text-align: right; }
+.katex .svg-align { text-align: left; }
+.katex svg, .screenShotTempCanvas { display: block; position: absolute; width: 100%; height: inherit; fill: currentcolor; stroke: currentcolor; fill-rule: nonzero; fill-opacity: 1; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-opacity: 1; }
+.katex svg path { stroke: none; }
+.katex .stretchy { width: 100%; display: block; position: relative; overflow: hidden; }
+.katex .stretchy::before, .katex .stretchy::after { content: ""; }
+.katex .hide-tail { width: 100%; position: relative; overflow: hidden; }
+.katex .halfarrow-left { position: absolute; left: 0px; width: 50.2%; overflow: hidden; }
+.katex .halfarrow-right { position: absolute; right: 0px; width: 50.2%; overflow: hidden; }
+.katex .brace-left { position: absolute; left: 0px; width: 25.1%; overflow: hidden; }
+.katex .brace-center { position: absolute; left: 25%; width: 50%; overflow: hidden; }
+.katex .brace-right { position: absolute; right: 0px; width: 25.1%; overflow: hidden; }
+.katex .x-arrow-pad { padding: 0px 0.5em; }
+.katex .x-arrow, .katex .mover, .katex .munder { text-align: center; }
+.katex .boxpad { padding: 0px 0.3em; }
+.katex .fbox { box-sizing: border-box; border: 0.04em solid black; }
+.katex .fcolorbox { box-sizing: border-box; border: 0.04em solid; }
+.katex .cancel-pad { padding: 0px 0.2em; }
+.katex .cancel-lap { margin-left: -0.2em; margin-right: -0.2em; }
+.katex .sout { border-bottom-style: solid; border-bottom-width: 0.08em; }
+.output_wrapper pre code { display: -webkit-box !important; } 
+.output_wrapper .hljs{color: rgb(169, 183, 198); background: rgb(40, 43, 46) none repeat scroll 0% 0%; display: block; overflow-x: auto; padding: 0.5em;}
+
+.output_wrapper .hljs-params{color: rgb(255, 152, 35);}
+
+.output_wrapper .hljs-number,.output_wrapper  .hljs-literal,.output_wrapper  .hljs-symbol,.output_wrapper  .hljs-bullet{color: rgb(174, 135, 250);}
+
+.output_wrapper .hljs-function,.output_wrapper  .hljs-built_in,.output_wrapper  .hljs-name,.output_wrapper  .hljs-keyword,.output_wrapper  .hljs-selector-tag,.output_wrapper  .hljs-deletion{color: rgb(248, 35, 117);}
+
+.output_wrapper .hljs-variable,.output_wrapper  .hljs-template-variable,.output_wrapper  .hljs-link{color: rgb(98, 151, 85);}
+
+.output_wrapper .hljs-comment,.output_wrapper  .hljs-quote{color: rgb(128, 128, 128);}
+
+.output_wrapper .hljs-meta{color: rgb(91, 218, 237);}
+
+.output_wrapper .hljs-string,.output_wrapper  .hljs-attribute,.output_wrapper  .hljs-addition{color: rgb(238, 220, 112);}
+
+.output_wrapper .hljs-attr,.output_wrapper  .hljs-section,.output_wrapper  .hljs-title,.output_wrapper  .hljs-type{color: rgb(165, 218, 45);}
+
+.output_wrapper .hljs-selector-class{color: rgb(165, 218, 45);}
+
+.output_wrapper .hljs-emphasis{font-style: italic;}
+
+.output_wrapper .hljs-strong{font-weight: bold;}
+ 
+.output_wrapper pre code {line-height: 18px; font-size: 14px; font-weight: normal; word-spacing: 0px; letter-spacing: 0px;} 
+.output_wrapper{font-size: 16px; color: rgb(62, 62, 62); line-height: 1.6; word-spacing: 0px; letter-spacing: 0px; font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;}
+
+.output_wrapper *{font-size: inherit; color: inherit; line-height: inherit; margin: 0px; padding: 0px;}
+
+.output_wrapper p{margin: 1.5em 0px;}
+
+.output_wrapper h1,.output_wrapper  h2,.output_wrapper  h3,.output_wrapper  h4,.output_wrapper  h5,.output_wrapper  h6{margin: 1.5em 0px; font-weight: bold;}
+
+.output_wrapper h1{font-size: 1.6em;}
+
+.output_wrapper h2{font-size: 1.4em;}
+
+.output_wrapper h3{font-size: 1.3em;}
+
+.output_wrapper h4{font-size: 1.2em;}
+
+.output_wrapper h5{font-size: 1em;}
+
+.output_wrapper h6{font-size: 1em;}
+
+.output_wrapper h3{margin-bottom: 2em; margin-right: 5px; padding: 8px 15px; letter-spacing: 2px; background-image: linear-gradient(to right bottom, rgb(0, 188, 212), rgb(63, 81, 181)); background-color: rgb(63, 81, 181); color: rgb(255, 255, 255); border-left: 10px solid rgb(51, 51, 51); border-radius: 5px; text-shadow: rgb(102, 102, 102) 1px 1px 1px; box-shadow: rgb(102, 102, 102) 1px 1px 2px;}
+
+.output_wrapper ul,.output_wrapper  ol{padding-left: 32px;}
+
+.output_wrapper ul{list-style-type: disc;}
+
+.output_wrapper ol{list-style-type: decimal;}
+
+.output_wrapper li *{}
+
+.output_wrapper li{margin-bottom: 0.5em;}
+
+.output_wrapper .code_size_default{line-height: 18px; font-size: 14px; font-weight: normal; word-spacing: 0px; letter-spacing: 0px;}
+
+.output_wrapper .code_size_tight{line-height: 15px; font-size: 11px; font-weight: normal; word-spacing: -3px; letter-spacing: 0px;}
+
+.output_wrapper pre code{font-family: Consolas, Inconsolata, Courier, monospace; border-radius: 0px;}
+
+.output_wrapper blockquote{display: block; padding: 15px 15px 15px 1rem; font-size: 0.9em; margin: 1em 0px; color: rgb(129, 145, 152); border-left: 6px solid rgb(220, 230, 240); background: rgb(242, 247, 251) none repeat scroll 0% 0%; overflow: auto; overflow-wrap: normal; word-break: normal;}
+
+.output_wrapper blockquote p{margin: 0px;}
+
+.output_wrapper a{text-decoration: none; color: rgb(30, 107, 184); overflow-wrap: break-word;}
+
+.output_wrapper strong{font-weight: bold;}
+
+.output_wrapper em{font-style: italic;}
+
+.output_wrapper del{font-style: italic;}
+
+.output_wrapper strong em{font-weight: bold;}
+
+.output_wrapper hr{height: 1px; margin: 1.5rem 0px; border-color: rgb(165, 165, 165) currentcolor currentcolor; border-style: dashed none none; border-width: 1px medium medium; border-image: none 100% / 1 / 0 stretch;}
+
+.output_wrapper code{overflow-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0px 2px; color: rgb(233, 105, 0); background: rgb(248, 248, 248) none repeat scroll 0% 0%;}
+
+.output_wrapper img{display: block; margin: 0px auto; max-width: 100%;}
+
+.output_wrapper figcaption{margin-top: 10px; text-align: center; color: rgb(153, 153, 153); font-size: 0.7em;}
+
+.output_wrapper table{display: table; width: 100%; text-align: left;}
+
+.output_wrapper tbody{border: 0px none;}
+
+.output_wrapper table tr{border-color: rgb(204, 204, 204) currentcolor currentcolor; border-style: solid none none; border-width: 1px 0px 0px; border-image: none 100% / 1 / 0 stretch; background-color: white;}
+
+.output_wrapper table tr th,.output_wrapper  table tr td{font-size: 1em; border: 1px solid rgb(204, 204, 204); padding: 0.5em 1em; text-align: left;}
+
+.output_wrapper table tr th{font-weight: bold; background-color: rgb(240, 240, 240);}
+
+.output_wrapper .katex-display{font-size: 1.22em;}
+
+.output_wrapper .katex{padding: 8px 3px;}
+
+.output_wrapper .katex-display > .katex{display: inline-block; text-align: center; padding: 3px;}
+
+.output_wrapper .katex img{display: inline-block; vertical-align: middle;}
+
+.output_wrapper a[href^="#"] sup{vertical-align: super; margin: 0px 2px; padding: 1px 3px; color: rgb(255, 255, 255); background: rgb(102, 102, 102) none repeat scroll 0% 0%; font-size: 0.7em;}
+
+.output_wrapper .task-list-list{list-style-type: none;}
+
+.output_wrapper .task-list-list.checked{color: rgb(62, 62, 62);}
+
+.output_wrapper .task-list-list.uncheck{color: rgb(191, 193, 191);}
+
+.output_wrapper .task-list-list .icon_uncheck,.output_wrapper  .task-list-list .icon_check{display: inline-block; vertical-align: middle; margin-right: 10px;}
+
+.output_wrapper .task-list-list .icon_check::before{content: "√"; border: 2px solid rgb(62, 62, 62); color: red;}
+
+.output_wrapper .task-list-list .icon_uncheck::before{content: "x"; border: 2px solid rgb(191, 193, 191); color: rgb(191, 193, 191);}
+
+.output_wrapper .task-list-list .icon_check::before,.output_wrapper  .task-list-list .icon_uncheck::before{padding: 2px 8px 2px 5px; border-radius: 5px;}
+
+.output_wrapper .toc{margin-left: 25px;}
+
+.output_wrapper .toc_item{display: block;}
+
+.output_wrapper .toc_left{margin-left: 25px;}
+ 
+</style>  
+  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(81, 154, 178) none repeat scroll 0% 0%; }
+#export_content { margin: 40px 20%; padding: 20px; border: 1px solid rgb(149, 155, 111); background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
+
+</head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize68glibcmallocfontp"><span><p align="center"><strong><font size="6">计算机系统篇之虚拟内存（8）：理解 glibc malloc 的工作原理（上）</font></strong></p></span></h1>
+<p align="right">Author: stormQ</p>
+<p align="right">Created: Wednesday, 18. November 2020 07:50PM</p>
+<p align="right">Last Modified: Wednesday, 25. November 2020 10:49PM</p>
+<hr>
+<ul>
+<li><h3 id="h"><span>目录</span></h3>
+<ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump0">动态内存分配简介</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">堆在进程虚拟地址空间中的分布</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump2">堆顶可以“顶”到哪</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump3">初探 malloc 中已分配块和空闲块的内存布局</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jumpReferences">References</a></p></ul><p></p>
+</li></ul>
+<hr>
+<h3 id="hspanidjump0span"><span><span id="jump0">动态内存分配简介</span></span></h3>
+<p><strong><font size="4">为什么要使用动态内存分配？</font></strong></p>
+<p>程序使用动态内存分配的最重要原因是经常直到程序实际运行时，才知道某些数据结构的大小。</p>
+<p><strong><font size="4">什么是动态内存分配器？</font></strong></p>
+<p>动态内存分配器（dynamic memory allocator）维护着一个进程的虚拟内存区域，称为堆（heap）。</p>
+<p>动态内存分配器将堆看作一组不同大小的块（block）的集合来维护。每个块就是一个连续的虚拟内存片（chunk），要么是已分配的，要么是空闲的。</p>
+<p>已分配的块显式地保留以供应用程序使用，空闲块可用来分配。空闲块保持空闲，直到它显示地被应用程序所分配。一个已分配的块保持已分配状态，直到它被释放。</p>
+<p><strong><font size="4">动态内存分配器的类型？</font></strong></p>
+<p>根据负责释放已分配块的实体不同，动态内存分配器可以分为以下两种：</p>
+<ul>
+<li><p>显式分配器（explicit allocator）</p>
+<p>要求应用程序显式地释放任何已分配的块。比如：C 标准库提供一种叫做 malloc 程序包的显式分配器。C 程序通过调用<code>malloc</code>函数来分配一个块，并通过调用<code>free</code>函数来释放一个块。</p></li>
+<li><p>隐式分配器（explicit allocator）或垃圾回收（garbage collector）</p>
+<p>要求分配器检测一个已分配块何时不再被应用程序所使用，那么就释放这个块。比如：Lisp、ML、Java 等高级语言依赖于垃圾回收来释放已分配的块。</p></li>
+</ul>
+<p><strong><font size="4">malloc 简介</font></strong></p>
+<p>C 语言中，<code>malloc</code>函数的实现因系统不同差异很大。本文以 glibc 2.31 版本为例，研究 glibc 中<code>malloc</code>的工作原理。</p>
+<p>glibc 中的<code>malloc</code>用于分配堆内存。这里所说的“堆”是指广义上的堆，包括通过<code>sbrk</code>函数和<code>mmap</code>函数从操作系统申请的虚拟内存区域。</p>
+<p>注：严格地讲，通过<code>sbrk</code>函数申请的虚拟内存区域称为堆，通过<code>mmap</code>函数申请的虚拟内存区域称为内存映射区域。</p>
+<hr>
+<h3 id="hspanidjump1span"><span><span id="jump1">堆在进程虚拟地址空间中的分布</span></span></h3>
+<p>在查看堆在进程虚拟地址空间中的分布之前，我们先看下可执行目标文件中这些全局符号：<code>_start</code>、<code>_end</code>、<code>__data_start</code>、<code>_edata</code>和<code>__bss_start</code> 的意义。</p>
+<p>首先，通过 gdb 启动可执行目标文件后，查看<code>i files</code>命令的输出（部分）：</p>
+<pre><code class="hljs vbnet">(gdb)&nbsp;i&nbsp;files<br>Symbols&nbsp;<span class="hljs-keyword">from</span>&nbsp;<span class="hljs-string">"/home/test/vm/vm3_main"</span>.<br>Native&nbsp;process:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">Using</span>&nbsp;the&nbsp;running&nbsp;image&nbsp;<span class="hljs-keyword">of</span>&nbsp;child&nbsp;process&nbsp;<span class="hljs-number">101968.</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">While</span>&nbsp;running&nbsp;this,&nbsp;GDB&nbsp;does&nbsp;<span class="hljs-keyword">not</span>&nbsp;access&nbsp;memory&nbsp;<span class="hljs-keyword">from</span>...<br>Local&nbsp;exec&nbsp;file:<br>&nbsp;&nbsp;&nbsp;&nbsp;`/home/test/vm/vm3_main<span class="hljs-comment">',&nbsp;file&nbsp;type&nbsp;elf64-x86-64.</span><br>&nbsp;&nbsp;&nbsp;&nbsp;Entry&nbsp;point:&nbsp;<span class="hljs-number">0x555555555180</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554318</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554334</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.interp<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554338</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554358</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.note.gnu.<span class="hljs-keyword">property</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554358</span>&nbsp;-&nbsp;<span class="hljs-number">0x000055555555437c</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.note.gnu.build-id<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x000055555555437c</span>&nbsp;-&nbsp;<span class="hljs-number">0x000055555555439c</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.note.ABI-tag<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00005555555543a0</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555543c4</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.gnu.hash<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00005555555543c8</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554548</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.dynsym<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554548</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554603</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.dynstr<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554604</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554624</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.gnu.version<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554628</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554648</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.gnu.version_r<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554648</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555554708</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.rela.dyn<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555554708</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555547f8</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.rela.plt<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555555000</span>&nbsp;-&nbsp;<span class="hljs-number">0x000055555555501b</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.init<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555555020</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555550d0</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.plt<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00005555555550d0</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555550e0</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.plt.got<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00005555555550e0</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555555180</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.plt.sec<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555555180</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555555455</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.<span class="hljs-keyword">text</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555555458</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555555465</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.fini<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555556000</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555556075</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.rodata<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555556078</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555560bc</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.eh_frame_hdr<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00005555555560c0</span>&nbsp;-&nbsp;<span class="hljs-number">0x00005555555561c8</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.eh_frame<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555557d70</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555557d78</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.init_array<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555557d78</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555557d80</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.fini_array<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555557d80</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555557f70</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.dynamic<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555557f70</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555558000</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.got<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555558000</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555558010</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.data<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000555555558010</span>&nbsp;-&nbsp;<span class="hljs-number">0x0000555555558018</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.bss<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00007ffff7fcf2a8</span>&nbsp;-&nbsp;<span class="hljs-number">0x00007ffff7fcf2c8</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;.note.gnu.<span class="hljs-keyword">property</span>&nbsp;<span class="hljs-keyword">in</span>&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br><span class="hljs-meta">#&nbsp;省略...</span><br></code></pre>
+<p>接下来，分别打印上述全局符号的地址：</p>
+<pre><code class="hljs bash">(gdb)&nbsp;p/x&nbsp;&amp;_start<br><span class="hljs-variable">$1</span>&nbsp;=&nbsp;0x555555555180<br>(gdb)&nbsp;p/x&nbsp;&amp;_end<br><span class="hljs-variable">$2</span>&nbsp;=&nbsp;0x555555558018<br>(gdb)&nbsp;p/x&nbsp;&amp;__data_start<br><span class="hljs-variable">$3</span>&nbsp;=&nbsp;0x555555558000<br>(gdb)&nbsp;p/x&nbsp;&amp;_edata<br><span class="hljs-variable">$4</span>&nbsp;=&nbsp;0x555555558010<br>(gdb)&nbsp;p/x&nbsp;&amp;__bss_start<br><span class="hljs-variable">$5</span>&nbsp;=&nbsp;0x555555558010<br></code></pre>
+<p>结合以上两个输出结果，我们可以得出以下结论：</p>
+<table>
+<thead>
+<tr>
+<th>可执行目标文件中的全局符号名称</th>
+<th>该符号的地址的意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_start</td>
+<td>该符号的地址表示 .text section 的起始地址，即 .text section 中第一个字节的地址</td>
+</tr>
+<tr>
+<td>__data_start</td>
+<td>该符号的地址表示 .data section 的起始地址，即 .data section 中第一个字节的地址</td>
+</tr>
+<tr>
+<td>_edata</td>
+<td>该符号的地址表示 .data section 的结束地址，即 .data section 中最后一个字节后的第一个字节的地址</td>
+</tr>
+<tr>
+<td>__bss_start</td>
+<td>该符号的地址表示 .bss section 的起始地址，即 .bss section 中第一个字节的地址</td>
+</tr>
+<tr>
+<td>_end</td>
+<td>该符号的地址表示 .bss section 的结束地址，即 .bss section 中最后一个字节后的第一个字节的地址</td>
+</tr>
+</tbody>
+</table>
+<p>最后，查看进程的内存映射情况：</p>
+<pre><code class="hljs go">(gdb)&nbsp;i&nbsp;proc&nbsp;mappings&nbsp;<br>process&nbsp;<span class="hljs-number">101968</span><br>Mapped&nbsp;address&nbsp;spaces:<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Offset&nbsp;objfile<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555554000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/home/test/vm/vm3_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;/home/test/vm/vm3_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/test/vm/vm3_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/test/vm/vm3_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555559000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;/home/test/vm/vm3_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555559000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x55555557a000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x21000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[heap]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>c4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>e9000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x25000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>e9000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>61000&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x178000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x25000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>61000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ab000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x4a000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x19d</span>000&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ab000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ac000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1e7000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ac000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7faf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1e7000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7faf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1ea000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b8000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x6000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>cb000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ce000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vvar]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ce000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fcf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vdso]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fcf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fd</span>0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fd</span>0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>3000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x23000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>3000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>b000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x8000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x24000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>b000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>c000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/home/test/vm/a.txt<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>c000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ffd</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2c000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ffd</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2d</span>000&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fff</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffffffd</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffffffff</span>000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x21000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[stack]<br>&nbsp;&nbsp;<span class="hljs-number">0xffffffffff</span>600000&nbsp;<span class="hljs-number">0xffffffffff</span>601000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vsyscall]<br></code></pre>
+<p>上面结果中，<code>objfile</code>列中值为<code>[heap]</code>的虚拟内存区域就是我们经常所说的堆，其起始地址为 0x555555559000，大小为 0x21000 字节。</p>
+<p>结合全局符号<code>_end</code>的地址的意义，我们可以发现：<strong>在 Linux 系统中，堆紧接在未初始化的数据区域（即<code>.bss</code> section）后开始，并向上生长（向更高的地址）。</strong></p>
+<p>需要注意的是，由于页对齐要求，堆实际上是从<code>.bss</code> section 所处页面的下一个页面开始的，而不是从<code>.bss</code> section 最后一个字节后的第一个字节开始的。</p>
+<hr>
+<h3 id="hspanidjump2span"><span><span id="jump2">堆顶可以“顶”到哪</span></span></h3>
+<p>在 Linux 系统中，内核为每个进程维护着一个变量<code>brk</code>，它指向堆的顶部。我们可以通过<code>sbrk</code>函数来扩展和收缩堆。</p>
+<p><code>sbrk</code>函数原型（定义在<code>#include &lt;unistd.h&gt;</code>头文件中）：</p>
+<pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;*<span class="hljs-title">sbrk</span>&nbsp;<span class="hljs-params">(<span class="hljs-keyword">intptr_t</span>&nbsp;__delta)</span></span>;<br></code></pre>
+<p>注：</p>
+<ul>
+<li><p>参数<code>__delta</code>，表示将堆扩展或收缩多少字节。在 64-bit 系统上，该参数是一个占用八字节的有符号整型。</p>
+<p><code>__delta</code> &lt; 0 时，表示将堆收缩<code>abs(__delta)</code>字节。</p>
+<p><code>__delta</code> = 0 时，表示获取当前堆顶。即<code>sbrk</code>函数直接返回变量<code>brk</code>的当前值。</p>
+<p><code>__delta</code> &gt; 0 时，表示将堆扩展<code>__delta</code>字节。</p></li>
+<li><p>返回值，如果<code>sbrk</code>函数执行成功，则返回<code>brk</code>的旧值；否则，返回 -1，并将全局变量<code>errno</code>设置为<code>ENOMEM</code>（值为 12）。</p></li>
+</ul>
+<p>下面通过一个简单的程序来测试笔者机器上，一个进程的堆顶的实际上限。</p>
+<p>源码，vm5_main.cpp：</p>
+<pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">&lt;errno.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span>&nbsp;argc,&nbsp;<span class="hljs-keyword">char</span>&nbsp;*argv[])</span><br></span>{<br>&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(argc&nbsp;&lt;&nbsp;<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">printf</span>(<span class="hljs-string">"Usage,&nbsp;needed&nbsp;args:&nbsp;heap-size-bytes\n"</span>);<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;EXIT_FAILURE;<br>&nbsp;&nbsp;}<br><br>&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">auto</span>&nbsp;size&nbsp;=&nbsp;atoll(argv[<span class="hljs-number">1</span>]);<br>&nbsp;&nbsp;<span class="hljs-keyword">auto</span>&nbsp;old_top&nbsp;=&nbsp;sbrk(size);<br>&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;((<span class="hljs-keyword">void</span>&nbsp;*)<span class="hljs-number">-1</span>&nbsp;==&nbsp;old_top)<br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;perror(<span class="hljs-string">"sbrk&nbsp;failed,&nbsp;reason"</span>);<br>&nbsp;&nbsp;}<br>&nbsp;&nbsp;<span class="hljs-keyword">else</span><br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">printf</span>(<span class="hljs-string">"sbrk&nbsp;ok,&nbsp;size:%lld&nbsp;bytes\n"</span>,&nbsp;size);<br>&nbsp;&nbsp;}<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br>}<br></code></pre>
+<p>编译：</p>
+<pre><code class="hljs php">$&nbsp;g++&nbsp;-o&nbsp;vm5_main&nbsp;vm5_main.cpp&nbsp;-g<br></code></pre>
+<p>首先，观察此刻物理内存和交换空间的大小：</p>
+<pre><code class="hljs makefile">$&nbsp;cat&nbsp;/proc/meminfo<br><span class="hljs-section">MemTotal:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8033464&nbsp;kB</span><br><span class="hljs-section">MemFree:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;189324&nbsp;kB</span><br><span class="hljs-section">MemAvailable:&nbsp;&nbsp;&nbsp;&nbsp;3283572&nbsp;kB</span><br>//&nbsp;省略...<br><span class="hljs-section">SwapTotal:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2097148&nbsp;kB</span><br><span class="hljs-section">SwapFree:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2074848&nbsp;kB</span><br>//&nbsp;省略...<br></code></pre>
+<p>从上面可以看出，在笔者机器上，物理内存和交换空间的大小之和为 10373746688 字节（10373746688 = (8033464 + 2097148) * 1024）。此刻，空闲的物理内存和空闲的交换空间大小之和为 2318512128 字节（2318512128 = (189324 + 2074848) * 1024）。</p>
+<p>接下来，尝试运行以下命令：</p>
+<pre><code class="hljs php">$&nbsp;./vm5_main&nbsp;<span class="hljs-number">10373746688</span><br>sbrk&nbsp;ok,&nbsp;size:<span class="hljs-number">10373746688</span>&nbsp;bytes<br>$&nbsp;./vm5_main&nbsp;<span class="hljs-number">10373746689</span><br>sbrk&nbsp;failed,&nbsp;reason:&nbsp;Cannot&nbsp;allocate&nbsp;memory<br></code></pre>
+<p>从上面的结果可以看出，一个进程实际可以分配的堆大小不会超过物理内存和交换空间的大小之和。</p>
+<hr>
+<h3 id="hspanidjump3mallocspan"><span><span id="jump3">初探 malloc 中已分配块和空闲块的内存布局</span></span></h3>
+<p>我们通过示例研究下<code>malloc</code>中已分配块和空闲块的内存布局是否如其注释所描述的那样，以 glibc 2.31 版本为例。</p>
+<p><code>malloc.c</code>中对已分配块的内存布局描述如下：</p>
+<pre><code class="hljs ruby">&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;allocated&nbsp;chunk&nbsp;looks&nbsp;like&nbsp;<span class="hljs-symbol">this:</span><br><br><br>&nbsp;&nbsp;&nbsp;&nbsp;chunk-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-params">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;of&nbsp;previous&nbsp;chunk,&nbsp;<span class="hljs-keyword">if</span>&nbsp;unallocated&nbsp;(P&nbsp;clear)&nbsp;&nbsp;|</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-params">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;of&nbsp;chunk,&nbsp;<span class="hljs-keyword">in</span>&nbsp;bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>A<span class="hljs-params">|M|</span>P<span class="hljs-params">|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mem-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User&nbsp;data&nbsp;starts&nbsp;here...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(malloc_usable_size()&nbsp;bytes)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-params">|<br>nextchunk-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(size&nbsp;of&nbsp;chunk,&nbsp;but&nbsp;used&nbsp;<span class="hljs-keyword">for</span>&nbsp;application&nbsp;data)&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-params">|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;of&nbsp;<span class="hljs-keyword">next</span>&nbsp;chunk,&nbsp;<span class="hljs-keyword">in</span>&nbsp;bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-params">|A|</span><span class="hljs-number">0</span><span class="hljs-params">|1|</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br></code></pre>
+<p><code>malloc.c</code>中对空闲块的内存布局描述如下：</p>
+<pre><code class="hljs vbnet">&nbsp;&nbsp;&nbsp;&nbsp;Free&nbsp;chunks&nbsp;are&nbsp;stored&nbsp;<span class="hljs-keyword">in</span>&nbsp;circular&nbsp;doubly-linked&nbsp;lists,&nbsp;<span class="hljs-keyword">and</span>&nbsp;look&nbsp;<span class="hljs-keyword">like</span>&nbsp;this:<br><br>&nbsp;&nbsp;&nbsp;&nbsp;chunk-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;<span class="hljs-keyword">of</span>&nbsp;previous&nbsp;chunk,&nbsp;<span class="hljs-keyword">if</span>&nbsp;unallocated&nbsp;(P&nbsp;clear)&nbsp;&nbsp;|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;`head:<span class="hljs-comment">'&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;of&nbsp;chunk,&nbsp;in&nbsp;bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|A|0|P|</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mem-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward&nbsp;pointer&nbsp;<span class="hljs-keyword">to</span>&nbsp;<span class="hljs-keyword">next</span>&nbsp;chunk&nbsp;<span class="hljs-keyword">in</span>&nbsp;list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Back&nbsp;pointer&nbsp;<span class="hljs-keyword">to</span>&nbsp;previous&nbsp;chunk&nbsp;<span class="hljs-keyword">in</span>&nbsp;list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unused&nbsp;space&nbsp;(may&nbsp;be&nbsp;<span class="hljs-number">0</span>&nbsp;bytes&nbsp;<span class="hljs-built_in">long</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>nextchunk-&gt;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;`foot:<span class="hljs-comment">'&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;of&nbsp;chunk,&nbsp;in&nbsp;bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">next</span>&nbsp;chunk,&nbsp;<span class="hljs-keyword">in</span>&nbsp;bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|A|<span class="hljs-number">0</span>|<span class="hljs-number">0</span>|<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+<br></code></pre>
+<p><strong><font size="4">研究过程：</font></strong></p>
+<p><strong>step 1：</strong> 准备示例程序</p>
+<p>源码，vm4_main.cpp：</p>
+<pre><code class="hljs objectivec"><span class="hljs-meta">#include&nbsp;<span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#include&nbsp;<span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#include&nbsp;<span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><br><span class="hljs-keyword">class</span>&nbsp;HeapObject<br>{<br>public:<br>&nbsp;&nbsp;<span class="hljs-keyword">explicit</span>&nbsp;HeapObject(std::size_t&nbsp;size)<br>&nbsp;&nbsp;:&nbsp;data_(nullptr),&nbsp;size_(<span class="hljs-number">0</span>)<br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;data_&nbsp;=&nbsp;malloc(size);<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(data_)<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_&nbsp;=&nbsp;size;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(data_,&nbsp;<span class="hljs-number">1</span>,&nbsp;size);<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br><br>&nbsp;&nbsp;~HeapObject()<br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;Free();<br>&nbsp;&nbsp;}<br><br>&nbsp;&nbsp;<span class="hljs-keyword">void</span>&nbsp;Free()<br>&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;free(data_);<br>&nbsp;&nbsp;&nbsp;&nbsp;data_&nbsp;=&nbsp;nullptr;<br>&nbsp;&nbsp;&nbsp;&nbsp;size_&nbsp;=&nbsp;<span class="hljs-number">0</span>;<br>&nbsp;&nbsp;}<br><br>private:<br>&nbsp;&nbsp;<span class="hljs-keyword">void</span>&nbsp;*data_;<br>&nbsp;&nbsp;std::size_t&nbsp;size_;<br>};<br><br><span class="hljs-keyword">int</span>&nbsp;main(<span class="hljs-keyword">int</span>&nbsp;argc,&nbsp;<span class="hljs-keyword">char</span>&nbsp;*argv[])<br>{<br>&nbsp;&nbsp;HeapObject&nbsp;obj1(<span class="hljs-number">8</span>);<br>&nbsp;&nbsp;HeapObject&nbsp;obj2(<span class="hljs-number">4</span>);<br>&nbsp;&nbsp;HeapObject&nbsp;obj3(<span class="hljs-number">64</span>);<br>&nbsp;&nbsp;HeapObject&nbsp;obj4(<span class="hljs-number">4</span>);<br><br>&nbsp;&nbsp;obj2.Free();<br>&nbsp;&nbsp;obj4.Free();<br>&nbsp;&nbsp;obj3.Free();<br>&nbsp;&nbsp;obj1.Free();<br><br>&nbsp;&nbsp;HeapObject&nbsp;obj5(<span class="hljs-number">32</span>);<br>&nbsp;&nbsp;obj5.Free();<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br>}<br></code></pre>
+<p>如何编译：</p>
+<pre><code class="hljs php">$&nbsp;g++&nbsp;-o&nbsp;vm4_main&nbsp;vm4_main.cpp&nbsp;-g<br></code></pre>
+<p><strong>step 2：</strong> 分配一块大小为 8 字节的内存，并将该内存的起始地址赋给 obj1.data_</p>
+<p>1）启动程序</p>
+<pre><code class="hljs sql">$&nbsp;gdb&nbsp;-q&nbsp;./vm4_main<br>Reading&nbsp;symbols&nbsp;from&nbsp;./vm4_main...<br>(gdb)&nbsp;<span class="hljs-keyword">start</span><br><span class="hljs-keyword">Temporary</span>&nbsp;breakpoint&nbsp;<span class="hljs-number">1</span>&nbsp;<span class="hljs-keyword">at</span>&nbsp;<span class="hljs-number">0x11a9</span>:&nbsp;<span class="hljs-keyword">file</span>&nbsp;vm4_main.cpp,&nbsp;line&nbsp;<span class="hljs-number">37.</span><br><span class="hljs-keyword">Starting</span>&nbsp;program:&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main&nbsp;<br><br><span class="hljs-keyword">Temporary</span>&nbsp;breakpoint&nbsp;<span class="hljs-number">1</span>,&nbsp;<span class="hljs-keyword">main</span>&nbsp;(argc=<span class="hljs-number">0</span>,&nbsp;argv=<span class="hljs-number">0x0</span>)&nbsp;<span class="hljs-keyword">at</span>&nbsp;vm4_main.cpp:<span class="hljs-number">37</span><br><span class="hljs-number">37</span>&nbsp;&nbsp;&nbsp;&nbsp;{<br></code></pre>
+<p>2）在刚进入<code>main</code>函数后，查看进程的内存映射情况</p>
+<pre><code class="hljs go">(gdb)&nbsp;i&nbsp;proc&nbsp;mappings&nbsp;<br>process&nbsp;<span class="hljs-number">23479</span><br>Mapped&nbsp;address&nbsp;spaces:<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Offset&nbsp;objfile<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555554000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/home/test/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;/home/test/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/test/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/test/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555559000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;/home/test/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>c4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>e9000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x25000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7d</span>e9000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>61000&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x178000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x25000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>61000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ab000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x4a000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x19d</span>000&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ab000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ac000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1e7000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ac000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7faf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1e7000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7faf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1ea000</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b2000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>b8000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x6000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>cb000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ce000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vvar]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7f</span>ce000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fcf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vdso]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fcf</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fd</span>0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fd</span>0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>3000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x23000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>3000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>b000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x8000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x24000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>c000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ffd</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2c000</span>&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ffd</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2d</span>000&nbsp;/usr/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7ff</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7fff</span>000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffffffd</span>e000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffffffff</span>000&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x21000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[stack]<br>&nbsp;&nbsp;<span class="hljs-number">0xffffffffff</span>600000&nbsp;<span class="hljs-number">0xffffffffff</span>601000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[vsyscall]<br></code></pre>
+<p>从上面结果中可以看出，在刚进入<code>main</code>函数后，进程还未创建堆这一虚拟内存区域。</p>
+<p>3）继续执行</p>
+<pre><code class="hljs cpp">(gdb)&nbsp;n<br><span class="hljs-number">38</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-function">HeapObject&nbsp;<span class="hljs-title">obj1</span><span class="hljs-params">(<span class="hljs-number">8</span>)</span></span>;<br>(gdb)&nbsp;n<br><span class="hljs-number">39</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-function">HeapObject&nbsp;<span class="hljs-title">obj2</span><span class="hljs-params">(<span class="hljs-number">4</span>)</span></span>;<br>(gdb)&nbsp;p&nbsp;obj1.data_<br>$<span class="hljs-number">1</span>&nbsp;=&nbsp;(<span class="hljs-keyword">void</span>&nbsp;*)&nbsp;<span class="hljs-number">0x5555555592a0</span><br>(gdb)&nbsp;x/<span class="hljs-number">8b</span>x&nbsp;obj1.data_<br><span class="hljs-number">0x5555555592a0</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span><br></code></pre>
+<p>此时（即在执行完语句<code>HeapObject obj1(8);</code>后），<code>malloc</code>为应用程序在堆上分配了一块起始地址为 0x5555555592a0、大小为 8 字节的内存。并且，这块内存中的每个字节的值都被初始化为 0x01。</p>
+<p>4）再次查看进程的内存映射情况</p>
+<pre><code class="hljs sql">(gdb)&nbsp;i&nbsp;proc&nbsp;mappings&nbsp;<br>process&nbsp;23479<br>Mapped&nbsp;address&nbsp;spaces:<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">Start</span>&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">End</span>&nbsp;Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">Offset</span>&nbsp;objfile<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555554000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555555000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555556000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555557000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x2000</span>&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555558000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555559000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3000</span>&nbsp;/home/<span class="hljs-keyword">test</span>/vm/vm4_main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x555555559000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x55555557a000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x21000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;[<span class="hljs-keyword">heap</span>]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7dc4000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x7ffff7de9000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x25000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>&nbsp;/usr/lib/x86_64-linux-gnu/libc<span class="hljs-number">-2.31</span>.so<br>//&nbsp;省略...<br></code></pre>
+<p>从上面结果中可以看出，<code>malloc</code>创建了起始地址为 0x555555559000、初始大小为 0x21000 字节的堆。</p>
+<p>5）查看 obj1.data_ 附近的内存数据</p>
+<p>obj1.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x5555555592a0-8*4<br><span class="hljs-section">0x555555559280:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559290:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020d51</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br></code></pre>
+<p>在分析<code>obj1.data_</code>附近的内存数据之前，我们先看下<code>chunk</code>以及相关的定义。</p>
+<p><code>malloc.c</code>中关于<code>chunk</code>的结构体定义为：</p>
+<pre><code class="hljs cpp"><span class="hljs-class"><span class="hljs-keyword">struct</span>&nbsp;<span class="hljs-title">malloc_chunk</span>&nbsp;{</span><br><br>&nbsp;&nbsp;INTERNAL_SIZE_T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mchunk_prev_size;&nbsp;&nbsp;<span class="hljs-comment">/*&nbsp;Size&nbsp;of&nbsp;previous&nbsp;chunk&nbsp;(if&nbsp;free).&nbsp;&nbsp;*/</span><br>&nbsp;&nbsp;INTERNAL_SIZE_T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mchunk_size;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">/*&nbsp;Size&nbsp;in&nbsp;bytes,&nbsp;including&nbsp;overhead.&nbsp;*/</span><br><br>&nbsp;&nbsp;<span class="hljs-class"><span class="hljs-keyword">struct</span>&nbsp;<span class="hljs-title">malloc_chunk</span>*&nbsp;<span class="hljs-title">fd</span>;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">/*&nbsp;double&nbsp;links&nbsp;--&nbsp;used&nbsp;only&nbsp;if&nbsp;free.&nbsp;*/</span><br>&nbsp;&nbsp;<span class="hljs-class"><span class="hljs-keyword">struct</span>&nbsp;<span class="hljs-title">malloc_chunk</span>*&nbsp;<span class="hljs-title">bk</span>;</span><br><br>&nbsp;&nbsp;<span class="hljs-comment">/*&nbsp;Only&nbsp;used&nbsp;for&nbsp;large&nbsp;blocks:&nbsp;pointer&nbsp;to&nbsp;next&nbsp;larger&nbsp;size.&nbsp;&nbsp;*/</span><br>&nbsp;&nbsp;<span class="hljs-class"><span class="hljs-keyword">struct</span>&nbsp;<span class="hljs-title">malloc_chunk</span>*&nbsp;<span class="hljs-title">fd_nextsize</span>;</span>&nbsp;<span class="hljs-comment">/*&nbsp;double&nbsp;links&nbsp;--&nbsp;used&nbsp;only&nbsp;if&nbsp;free.&nbsp;*/</span><br>&nbsp;&nbsp;<span class="hljs-class"><span class="hljs-keyword">struct</span>&nbsp;<span class="hljs-title">malloc_chunk</span>*&nbsp;<span class="hljs-title">bk_nextsize</span>;</span><br>};<br></code></pre>
+<p>注：<code>chunk</code>就是<code>malloc</code>程序包管理的内存块（包括空闲块和已分配块），<code>malloc</code>函数为应用程序分配的内存（即用户数据）就内嵌在<code>chunk</code>中。</p>
+<p>关于<code>chunk</code>中<code>P</code>标志位的注释为：</p>
+<pre><code class="hljs sql">The&nbsp;P&nbsp;(PREV_INUSE)&nbsp;bit,&nbsp;stored&nbsp;in&nbsp;the&nbsp;unused&nbsp;low-order&nbsp;bit&nbsp;of&nbsp;the<br>chunk&nbsp;size&nbsp;(which&nbsp;is&nbsp;always&nbsp;a&nbsp;multiple&nbsp;of&nbsp;two&nbsp;words),&nbsp;is&nbsp;an&nbsp;in-<span class="hljs-keyword">use</span><br><span class="hljs-built_in">bit</span>&nbsp;<span class="hljs-keyword">for</span>&nbsp;the&nbsp;*previous*&nbsp;chunk.&nbsp;&nbsp;<span class="hljs-keyword">If</span>&nbsp;that&nbsp;<span class="hljs-built_in">bit</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;*<span class="hljs-keyword">clear</span>*,&nbsp;<span class="hljs-keyword">then</span>&nbsp;the<br>word&nbsp;<span class="hljs-keyword">before</span>&nbsp;the&nbsp;<span class="hljs-keyword">current</span>&nbsp;<span class="hljs-keyword">chunk</span>&nbsp;<span class="hljs-keyword">size</span>&nbsp;contains&nbsp;the&nbsp;previous&nbsp;<span class="hljs-keyword">chunk</span><br><span class="hljs-keyword">size</span>,&nbsp;<span class="hljs-keyword">and</span>&nbsp;can&nbsp;be&nbsp;used&nbsp;<span class="hljs-keyword">to</span>&nbsp;find&nbsp;the&nbsp;front&nbsp;<span class="hljs-keyword">of</span>&nbsp;the&nbsp;previous&nbsp;chunk.<br>The&nbsp;very&nbsp;<span class="hljs-keyword">first</span>&nbsp;<span class="hljs-keyword">chunk</span>&nbsp;allocated&nbsp;<span class="hljs-keyword">always</span>&nbsp;has&nbsp;this&nbsp;<span class="hljs-built_in">bit</span>&nbsp;<span class="hljs-keyword">set</span>,<br>preventing&nbsp;<span class="hljs-keyword">access</span>&nbsp;<span class="hljs-keyword">to</span>&nbsp;non-existent&nbsp;(<span class="hljs-keyword">or</span>&nbsp;non-owned)&nbsp;memory.&nbsp;<span class="hljs-keyword">If</span><br>prev_inuse&nbsp;<span class="hljs-keyword">is</span>&nbsp;<span class="hljs-keyword">set</span>&nbsp;<span class="hljs-keyword">for</span>&nbsp;<span class="hljs-keyword">any</span>&nbsp;given&nbsp;<span class="hljs-keyword">chunk</span>,&nbsp;<span class="hljs-keyword">then</span>&nbsp;you&nbsp;CANNOT&nbsp;determine<br>the&nbsp;<span class="hljs-keyword">size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;the&nbsp;previous&nbsp;<span class="hljs-keyword">chunk</span>,&nbsp;<span class="hljs-keyword">and</span>&nbsp;might&nbsp;even&nbsp;<span class="hljs-keyword">get</span>&nbsp;a&nbsp;<span class="hljs-keyword">memory</span><br>addressing&nbsp;fault&nbsp;<span class="hljs-keyword">when</span>&nbsp;trying&nbsp;<span class="hljs-keyword">to</span>&nbsp;<span class="hljs-keyword">do</span>&nbsp;so.<br></code></pre>
+<p>从上述注释中，我们可以得出：</p>
+<ul>
+<li><p><code>P</code>标志位位于<code>malloc_chunk</code>结构体中<code>mchunk_size</code>字段的最低位，表示上一个<code>chunk</code>是已分配块还是空闲块。这里，<code>上一个</code>的含义为：在内存中紧挨着的上一个。如果下文不加特别说明，所谓的<code>上一个</code>都是该含义。</p></li>
+<li><p><code>P</code>标志位的值为 1 时，表示上一个<code>chunk</code>是已分配块。但不能通过本<code>chunk</code>中的<code>mchunk_prev_size</code>字段确定上一个<code>chunk</code>的起始位置。</p></li>
+<li><p><code>P</code>标志位的值为 0 时，表示上一个<code>chunk</code>是空闲块。同时，可以通过本<code>chunk</code>中的<code>mchunk_prev_size</code>字段确定上一个<code>chunk</code>的起始位置。从而，在释放本<code>chunk</code>后，可以在常数时间内完成与上一个<code>chunk</code>的合并。</p></li>
+<li><p><code>malloc</code>函数分配的第一个<code>chunk</code>（位于堆底）中<code>P</code>标志位的值总是 1，从而避免非法内存访问。</p></li>
+</ul>
+<p>判断上一个<code>chunk</code>是已分配块还是空闲块的宏定义为<code>prev_inuse</code>，如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-comment">/*&nbsp;size&nbsp;field&nbsp;is&nbsp;or'ed&nbsp;with&nbsp;PREV_INUSE&nbsp;when&nbsp;previous&nbsp;adjacent&nbsp;chunk&nbsp;in&nbsp;use&nbsp;*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span>&nbsp;PREV_INUSE&nbsp;0x1</span><br><br><span class="hljs-comment">/*&nbsp;extract&nbsp;inuse&nbsp;bit&nbsp;of&nbsp;previous&nbsp;chunk&nbsp;*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span>&nbsp;prev_inuse(p)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((p)-&gt;mchunk_size&nbsp;&amp;&nbsp;PREV_INUSE)</span><br></code></pre>
+<p>从上述宏定义可以看出，<code>prev_inuse(p)</code>的求值结果为 1 表示上一个<code>chunk</code>是已分配块；求值结果为 0 表示上一个<code>chunk</code>是空闲块。</p>
+<p>获取一个<code>chunk</code>大小的宏定义为<code>chunksize</code>，如下：</p>
+<pre><code class="hljs vbnet">/*&nbsp;size&nbsp;field&nbsp;<span class="hljs-keyword">is</span>&nbsp;<span class="hljs-keyword">or</span><span class="hljs-comment">'ed&nbsp;with&nbsp;IS_MMAPPED&nbsp;if&nbsp;the&nbsp;chunk&nbsp;was&nbsp;obtained&nbsp;with&nbsp;mmap()&nbsp;*/</span><br><span class="hljs-meta">#define&nbsp;IS_MMAPPED&nbsp;0x2</span><br><br>/*&nbsp;size&nbsp;field&nbsp;<span class="hljs-keyword">is</span>&nbsp;<span class="hljs-keyword">or</span><span class="hljs-comment">'ed&nbsp;with&nbsp;NON_MAIN_ARENA&nbsp;if&nbsp;the&nbsp;chunk&nbsp;was&nbsp;obtained</span><br>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">from</span>&nbsp;a&nbsp;non-main&nbsp;arena.&nbsp;&nbsp;This&nbsp;<span class="hljs-keyword">is</span>&nbsp;only&nbsp;<span class="hljs-keyword">set</span>&nbsp;immediately&nbsp;before&nbsp;handing<br>&nbsp;&nbsp;&nbsp;the&nbsp;chunk&nbsp;<span class="hljs-keyword">to</span>&nbsp;the&nbsp;user,&nbsp;<span class="hljs-keyword">if</span>&nbsp;necessary.&nbsp;&nbsp;*/<br><span class="hljs-meta">#define&nbsp;NON_MAIN_ARENA&nbsp;0x4</span><br><br>/*<br>&nbsp;&nbsp;&nbsp;Bits&nbsp;<span class="hljs-keyword">to</span>&nbsp;mask&nbsp;<span class="hljs-keyword">off</span>&nbsp;<span class="hljs-keyword">when</span>&nbsp;extracting&nbsp;size<br><br>&nbsp;&nbsp;&nbsp;Note:&nbsp;IS_MMAPPED&nbsp;<span class="hljs-keyword">is</span>&nbsp;intentionally&nbsp;<span class="hljs-keyword">not</span>&nbsp;masked&nbsp;<span class="hljs-keyword">off</span>&nbsp;<span class="hljs-keyword">from</span>&nbsp;size&nbsp;field&nbsp;<span class="hljs-keyword">in</span><br>&nbsp;&nbsp;&nbsp;macros&nbsp;<span class="hljs-keyword">for</span>&nbsp;which&nbsp;mmapped&nbsp;chunks&nbsp;should&nbsp;never&nbsp;be&nbsp;seen.&nbsp;This&nbsp;should<br>&nbsp;&nbsp;&nbsp;cause&nbsp;helpful&nbsp;core&nbsp;dumps&nbsp;<span class="hljs-keyword">to</span>&nbsp;occur&nbsp;<span class="hljs-keyword">if</span>&nbsp;it&nbsp;<span class="hljs-keyword">is</span>&nbsp;tried&nbsp;<span class="hljs-keyword">by</span>&nbsp;accident&nbsp;<span class="hljs-keyword">by</span><br>&nbsp;&nbsp;&nbsp;people&nbsp;extending&nbsp;<span class="hljs-keyword">or</span>&nbsp;adapting&nbsp;this&nbsp;malloc.<br>&nbsp;*/<br><span class="hljs-meta">#define&nbsp;SIZE_BITS&nbsp;(PREV_INUSE&nbsp;|&nbsp;IS_MMAPPED&nbsp;|&nbsp;NON_MAIN_ARENA)</span><br><br>/*&nbsp;<span class="hljs-keyword">Get</span>&nbsp;size,&nbsp;ignoring&nbsp;use&nbsp;bits&nbsp;*/<br><span class="hljs-meta">#define&nbsp;chunksize(p)&nbsp;(chunksize_nomask&nbsp;(p)&nbsp;&amp;&nbsp;~(SIZE_BITS))</span><br></code></pre>
+<p>从上述宏定义可以看出，<code>malloc_chunk</code>结构体中<code>mchunk_size</code>字段的最低三位用于携带额外信息，其余位表示整个<code>chunk</code>的大小（包括有效负载和<code>chunk</code>头部等开销，单位：Bytes）。</p>
+<p>通过用户数据指针确定其所在<code>chunk</code>的起始位置的宏定义为<code>mem2chunk</code>，如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-comment">/*&nbsp;The&nbsp;corresponding&nbsp;word&nbsp;size.&nbsp;&nbsp;*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span>&nbsp;SIZE_SZ&nbsp;(sizeof&nbsp;(INTERNAL_SIZE_T))</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span>&nbsp;mem2chunk(mem)&nbsp;((mchunkptr)((char*)(mem)&nbsp;-&nbsp;2*SIZE_SZ))</span><br></code></pre>
+<p>从上述宏定义中，我们可以得出：用户数据所在<code>chunk</code>的起始位置距离用户数据的起始处为 2 个字的长度。在 32-bit 系统中，一个字占用 4 字节；在 64-bit 系统中，一个字占用 8 字节。</p>
+<p>综合以上内容，我们可以推断：</p>
+<ul>
+<li><p>地址 0x555555559290 后面 16 字节的内容分别对应<code>malloc_chunk</code>结构体中<code>mchunk_prev_size</code>和<code>mchunk_size</code>字段的值，即这 16 个字节是该<code>chunk</code>的头部。</p></li>
+<li><p>由于该<code>chunk</code>中<code>mchunk_size</code>字段的值为 0x21。因此，该<code>chunk</code>的大小为 0x20 字节，上一个<code>chunk</code>是已分配块。<strong>令人疑惑的是，目前我们只从堆上申请了一块内存，但为什么已分配块有 2 个？</strong>（这里先作为遗留问题）</p></li>
+</ul>
+<p>因此，我们可以推断<code>obj1.data_</code>所在<code>chunk</code>（已分配块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559290</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个<code>chunk</code>是已分配块）</td>
+</tr>
+<tr>
+<td>0x555555559298</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x5555555592a0</td>
+<td>8</td>
+<td>用于存储用户数据，即 obj1.data_ 所指向的对象</td>
+</tr>
+<tr>
+<td>0x5555555592a8</td>
+<td>8</td>
+<td><strong>暂时未知？</strong></td>
+</tr>
+</tbody>
+</table>
+<p>另外，我们可以推断：由于下一个<code>chunk</code>中<code>mchunk_size</code>字段的值为 0x20d51，其中<code>P</code>标志位的值为 1。因此，该<code>chunk</code>的大小为 0x20d50 字节，其上一个<code>chunk</code>（即<code>obj1.data_</code>所在的<code>chunk</code>）是一个已分配块，与实际情况符合。由于这个<code>chunk</code>位于堆顶，在<code>malloc</code>中被称为<code>Top Chunk</code>。</p>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br></code></pre>
+<p>从上面的输出结果中可以推断，另一个已分配块位于堆底，该<code>chunk</code>中<code>mchunk_size</code>字段的值为 0x291，其中<code>P</code>标志位的值为 1。因此，该<code>chunk</code>的大小为 0x290 字节。另外，由于该<code>chunk</code>是堆中的第一个已分配块，也就是说其上一个<code>chunk</code>是不存在的。所以，该<code>chunk</code>的<code>P</code>标志位的值始终是 1，从而避免非法内存访问，符合<code>P</code>标志位注释所描述的。</p>
+<p>上述 3 个<code>chunk</code>的大小之和为 0x21000（0x21000 = 0x290 + 0x20 + 0x20d50），正好是堆的大小。</p>
+<p><strong>step 3：</strong> 继续分配一块大小为 4 字节的内存，并将该内存的起始地址赋给 obj2.data_</p>
+<p>1）继续执行</p>
+<pre><code class="hljs cpp">(gdb)&nbsp;n<br><span class="hljs-number">40</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-function">HeapObject&nbsp;<span class="hljs-title">obj3</span><span class="hljs-params">(<span class="hljs-number">64</span>)</span></span>;<br>(gdb)&nbsp;p&nbsp;obj2.data_<br>$<span class="hljs-number">6</span>&nbsp;=&nbsp;(<span class="hljs-keyword">void</span>&nbsp;*)&nbsp;<span class="hljs-number">0x5555555592c0</span><br>(gdb)&nbsp;x/<span class="hljs-number">8b</span>x&nbsp;obj2.data_<br><span class="hljs-number">0x5555555592c0</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x01</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x00</span><br></code></pre>
+<p>此时（即在执行完语句<code>HeapObject obj2(4);</code>后），<code>malloc</code>为应用程序在堆上分配了一块起始地址为 0x5555555592c0、大小为 4 字节的内存。并且，这块内存中的每个字节的值都被初始化为 0x01。</p>
+<p>2）查看 obj2.data_ 附近的内存数据</p>
+<p>obj2.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x5555555592c0-8*6<br><span class="hljs-section">0x555555559290:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000001010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555592d0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020d31</span><br></code></pre>
+<p>按照上述分析思路，我们可以推断<code>obj2.data_</code>所在<code>chunk</code>（已分配块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x5555555592b0</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个 chunk 是已分配块）</td>
+</tr>
+<tr>
+<td>0x5555555592b8</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x5555555592c0</td>
+<td>4</td>
+<td>用于存储用户数据，即 obj2.data_ 所指向的对象</td>
+</tr>
+<tr>
+<td>0x5555555592c4</td>
+<td>4</td>
+<td>对齐填充数据（alignment padding bytes）</td>
+</tr>
+<tr>
+<td>0x5555555592c8</td>
+<td>8</td>
+<td><strong>暂时未知？</strong></td>
+</tr>
+</tbody>
+</table>
+<p>另外，我们可以发现，<code>obj2.data_</code>所在的<code>chunk</code>是从<code>Top Chunk</code>分割而来的。</p>
+<p><strong>step 4：</strong> 继续分配一块大小为 64 字节的内存，并将该内存的起始地址赋给 obj3.data_</p>
+<p>1）继续执行</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;n<br>41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HeapObject&nbsp;obj4(4);<br>(gdb)&nbsp;p&nbsp;obj3.data_<br>$7&nbsp;=&nbsp;(void&nbsp;*)&nbsp;0x5555555592e0<br>(gdb)&nbsp;x/64bx&nbsp;obj3.data_<br><span class="hljs-section">0x5555555592e0:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x5555555592e8:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x5555555592f0:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x5555555592f8:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x555555559300:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x555555559308:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x555555559310:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br><span class="hljs-section">0x555555559318:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01</span><br></code></pre>
+<p>此时（即在执行完语句<code>HeapObject obj3(64);</code>后），<code>malloc</code>为应用程序在堆上分配了一块起始地址为 0x5555555592e0、大小为 64 字节的内存。并且，这块内存中的每个字节的值都被初始化为 0x01。</p>
+<p>2）查看 obj3.data_ 附近的内存数据</p>
+<p>obj3.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/16gx&nbsp;0x5555555592e0-8*6<br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000001010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555592d0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000051</span><br><span class="hljs-section">0x5555555592e0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x5555555592f0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559300:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559310:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559320:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020ce1</span><br></code></pre>
+<p>按照上述分析思路，我们可以推断<code>obj3.data_</code>所在<code>chunk</code>（已分配块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x5555555592d0</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个 chunk 是已分配块）</td>
+</tr>
+<tr>
+<td>0x5555555592d8</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x5555555592e0</td>
+<td>64</td>
+<td>用于存储用户数据，即 obj3.data_ 所指向的对象</td>
+</tr>
+</tbody>
+</table>
+<p>需要注意的是，<code>obj3.data_</code>所在的<code>chunk</code>除了头部以外，其余都是有效负载，即没有对齐填充数据。</p>
+<p>另外，我们可以发现，<code>obj3.data_</code>所在的<code>chunk</code>也是从<code>Top Chunk</code>分割而来的。</p>
+<p><strong>step 5：</strong> 继续分配一块大小为 4 字节的内存，并将该内存的起始地址赋给 obj4.data_</p>
+<p>1）继续执行</p>
+<pre><code class="hljs bash">(gdb)&nbsp;n<br>43&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obj2.Free();<br>(gdb)&nbsp;p&nbsp;obj4.data_<br><span class="hljs-variable">$8</span>&nbsp;=&nbsp;(void&nbsp;*)&nbsp;0x555555559330<br>(gdb)&nbsp;x/8bx&nbsp;obj4.data_<br>0x555555559330:&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x01&nbsp;&nbsp;&nbsp;&nbsp;0x00&nbsp;&nbsp;&nbsp;&nbsp;0x00&nbsp;&nbsp;&nbsp;&nbsp;0x00&nbsp;&nbsp;&nbsp;&nbsp;0x00<br></code></pre>
+<p>此时（即在执行完语句<code>HeapObject obj4(4);</code>后），<code>malloc</code>为应用程序在堆上分配了一块起始地址为 0x555555559330、大小为 4 字节的内存。并且，这块内存中的每个字节的值都被初始化为 0x01。</p>
+<p>2）查看 obj4.data_ 附近的内存数据</p>
+<p>obj4.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x555555559330-8*6<br><span class="hljs-section">0x555555559300:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559310:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559320:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x555555559330:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000001010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559340:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020cc1</span><br></code></pre>
+<p>按照上述分析思路，我们可以推断<code>obj4.data_</code>所在<code>chunk</code>（已分配块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559320</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个 chunk 是已分配块）</td>
+</tr>
+<tr>
+<td>0x555555559328</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x555555559330</td>
+<td>4</td>
+<td>用于存储用户数据，即 obj4.data_ 所指向的对象</td>
+</tr>
+<tr>
+<td>0x555555559334</td>
+<td>4</td>
+<td>对齐填充数据（alignment padding bytes）</td>
+</tr>
+<tr>
+<td>0x555555559338</td>
+<td>8</td>
+<td><strong>暂时未知？</strong></td>
+</tr>
+</tbody>
+</table>
+<p>另外，我们可以发现，<code>obj4.data_</code>所在的<code>chunk</code>也是从<code>Top Chunk</code>分割而来的。</p>
+<p><strong>step 6：</strong> 释放 obj2.data_ 所在的 chunk</p>
+<p>1）继续执行</p>
+<pre><code class="hljs css">(<span class="hljs-selector-tag">gdb</span>)&nbsp;<span class="hljs-selector-tag">n</span><br>44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-selector-tag">obj4</span><span class="hljs-selector-class">.Free</span>();<br></code></pre>
+<p>此时（即在执行完语句<code>obj2.Free();</code>后），应用程序显式地释放了<code>obj2.data_</code>所在的<code>chunk</code>。</p>
+<p>2）查看 obj2.data_ 附近的内存数据</p>
+<p>obj2.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x5555555592c0-8*6<br><span class="hljs-section">0x555555559290:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x5555555592d0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000051</span><br></code></pre>
+<p>从上面的结果中可以看出：</p>
+<ul>
+<li><p><code>obj2.data_</code>所指向对象的数据全部被清零了。</p></li>
+<li><p><code>obj2.data_</code>所在的<code>chunk</code>现在是一个空闲块，并且<code>mchunk_size</code>字段中<code>P</code>标志位的值仍为 1，表示上一个<code>chunk</code>是一个已分配块，与实际情况符合。</p></li>
+<li><p>对于下一个<code>chunk</code>而言，<code>obj2.data_</code>所在的<code>chunk</code>是一个空闲块。因此，下一个<code>chunk</code>里面<code>mchunk_size</code>字段中<code>P</code>标志位的值应该为 0。但实际上，下一个<code>chunk</code>里面<code>mchunk_size</code>字段为 0x51，即<code>P</code>标志位的值是 1，<strong>不符合预期结果</strong>。</p></li>
+<li><p>另外，下一个<code>chunk</code>里面<code>mchunk_prev_size</code>字段的值应该为 0x20，从而表示上一个<code>chunk</code>（是一个空闲块）的大小。但实际上，该字段的值是 0x0，<strong>也不符合预期结果</strong>。</p></li>
+</ul>
+<p>我们可以推断<code>obj2.data_</code>所在<code>chunk</code>（空闲块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x5555555592b0</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个 chunk 是已分配块）</td>
+</tr>
+<tr>
+<td>0x5555555592b8</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x5555555592c0</td>
+<td>8</td>
+<td>用于存储 fd 字段的值，值为 0x0，表示该空闲块位于空闲块链表的末尾</td>
+</tr>
+<tr>
+<td>0x5555555592c8</td>
+<td>8</td>
+<td>用于存储 bk 字段的值，值为 0x555555559010，指向空闲块链表中的上一个空闲块（chunk 的起始地址为 0x555555559010 - 2*SIZE_SZ）</td>
+</tr>
+</tbody>
+</table>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/100gx&nbsp;0x0000555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000001&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559050:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559060:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559070:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559080:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559090:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592c0&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555590a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br>//&nbsp;省略<br></code></pre>
+<p>从上面的结果中可以发现，在释放 obj2.data_ 所在的<code>chunk</code>后，第一个<code>chunk</code>有如下两个变化：1）起始地址为 0x555555559010 后面的 8 字节内容从 0x0 变成了 0x1；2）起始地址为 0x555555559090 后面的 8 字节内容从 0x0 变成了 0x05555555592c0，即指向了<code>obj2.data_</code>所在<code>chunk</code>（空闲块）的“用户数据”起始处。</p>
+<p><strong>step 7：</strong> 释放 obj4.data_ 所在的 chunk</p>
+<p>1）继续执行</p>
+<pre><code class="hljs css">(<span class="hljs-selector-tag">gdb</span>)&nbsp;<span class="hljs-selector-tag">n</span><br>45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-selector-tag">obj3</span><span class="hljs-selector-class">.Free</span>();<br></code></pre>
+<p>此时（即在执行完语句<code>obj4.Free();</code>后），应用程序显式地释放了<code>obj4.data_</code>所在的<code>chunk</code>。</p>
+<p>2）查看 obj4.data_ 附近的内存数据</p>
+<p>obj4.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x555555559330-8*6<br><span class="hljs-section">0x555555559300:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559310:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559320:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x555555559330:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592c0&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x555555559340:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020cc1</span><br></code></pre>
+<p>从上面的结果中可以看出：</p>
+<ul>
+<li><p><code>obj4.data_</code>所在的<code>chunk</code>现在是一个空闲块，并且<code>mchunk_size</code>字段中<code>P</code>标志位的值仍为 1，表示上一个<code>chunk</code>是一个已分配块，与实际情况符合。</p></li>
+<li><p>对于下一个<code>chunk</code>而言，<code>obj4.data_</code>所在的<code>chunk</code>是一个空闲块。因此，下一个<code>chunk</code>里面<code>mchunk_size</code>字段中<code>P</code>标志位的值应该为 0。但实际上，下一个<code>chunk</code>里面<code>mchunk_size</code>字段为 0x20cc1，即<code>P</code>标志位的值是 1，<strong>不符合预期结果</strong>。</p></li>
+</ul>
+<p>我们可以推断<code>obj4.data_</code>所在<code>chunk</code>（空闲块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559320</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，无意义（由于上一个 chunk 是已分配块）</td>
+</tr>
+<tr>
+<td>0x555555559328</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等</td>
+</tr>
+<tr>
+<td>0x555555559330</td>
+<td>8</td>
+<td>用于存储 fd 字段的值，值为 0x5555555592c0，指向空闲块链表中的下一个空闲块（chunk 的起始地址为 0x5555555592c0 - 2*SIZE_SZ，<strong>即已经释放了的 obj2.data_ 所在的 chunk</strong>）</td>
+</tr>
+<tr>
+<td>0x555555559338</td>
+<td>8</td>
+<td>用于存储 bk 字段的值，值为 0x555555559010，指向空闲块链表中的上一个空闲块（chunk 的起始地址为 0x555555559010 - 2*SIZE_SZ）</td>
+</tr>
+</tbody>
+</table>
+<p>需要注意的是，从内存数据来看，已释放的<code>obj4.data_</code>和<code>obj2.data_</code>所在的<code>chunk</code>（都是空闲块）属于同一个空闲块链表。</p>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/100gx&nbsp;0x0000555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000002&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559050:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559060:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559070:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559080:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559090:&nbsp;&nbsp;&nbsp;&nbsp;0x0000555555559330&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555590a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br>//&nbsp;省略<br></code></pre>
+<p>从上面的结果中可以发现，在释放 obj4.data_ 所在的<code>chunk</code>后，第一个<code>chunk</code>有如下两个变化：1）起始地址为 0x555555559010 后面的 8 字节内容从 0x1 变成了 0x2；2）起始地址为 0x555555559090 后面的 8 字节内容从 0x5555555592c0 变成了 0x555555559330，即指向了<code>obj4.data_</code>所在<code>chunk</code>（空闲块）的“用户数据”起始处。</p>
+<p><strong>step 8：</strong> 释放 obj3.data_ 所在的 chunk</p>
+<p>1）继续执行</p>
+<pre><code class="hljs css">(<span class="hljs-selector-tag">gdb</span>)&nbsp;<span class="hljs-selector-tag">n</span><br>46&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-selector-tag">obj1</span><span class="hljs-selector-class">.Free</span>();<br></code></pre>
+<p>此时（即在执行完语句<code>obj3.Free();</code>后），应用程序显式地释放了<code>obj3.data_</code>所在的<code>chunk</code>。</p>
+<p>2）查看 obj3.data_ 附近的内存数据</p>
+<p>obj3.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/16gx&nbsp;0x5555555592e0-8*6<br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x5555555592d0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000051</span><br><span class="hljs-section">0x5555555592e0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x5555555592f0:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559300:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559310:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559320:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br></code></pre>
+<p>从上面的结果中可以看出：</p>
+<ul>
+<li><p><code>obj3.data_</code>所在的<code>chunk</code>现在是一个空闲块，并且<code>mchunk_size</code>字段中<code>P</code>标志位的值仍为 1，表示上一个<code>chunk</code>（即<code>obj4.data_</code>所在的<code>chunk</code>，已经被释放了）是一个已分配块，<strong>不符合实际情况</strong>。</p></li>
+<li><p>对于下一个<code>chunk</code>而言，<code>obj3.data_</code>所在的<code>chunk</code>是一个空闲块。因此，下一个<code>chunk</code>里面<code>mchunk_size</code>字段中<code>P</code>标志位的值应该为 0。但实际上，下一个<code>chunk</code>里面<code>mchunk_size</code>字段为 0x21，即<code>P</code>标志位的值是 1，<strong>不符合预期结果</strong>。</p></li>
+<li><p>另外，下一个<code>chunk</code>里面<code>mchunk_prev_size</code>字段的值应该为 0x50，从而表示上一个<code>chunk</code>（是一个空闲块）的大小。但实际上，该字段的值是 0x0，<strong>也不符合预期结果</strong>。</p></li>
+</ul>
+<p>我们可以推断<code>obj3.data_</code>所在<code>chunk</code>（空闲块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x5555555592d0</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，<strong>实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x5555555592d8</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等，<strong>“P”标志位的实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x5555555592e0</td>
+<td>8</td>
+<td>用于存储 fd 字段的值，值为 0x0，表示该空闲块位于空闲块链表的末尾</td>
+</tr>
+<tr>
+<td>0x5555555592e8</td>
+<td>8</td>
+<td>用于存储 bk 字段的值，值为 0x555555559010，指向空闲块链表中的上一个空闲块（chunk 的起始地址为 0x555555559010 - 2*SIZE_SZ）</td>
+</tr>
+<tr>
+<td>0x5555555592f0</td>
+<td>48</td>
+<td>未使用</td>
+</tr>
+</tbody>
+</table>
+<p>需要注意的是，从内存数据来看，已释放的<code>obj3.data_</code>所在<code>chunk</code>（空闲块）属于另一个空闲块链表。</p>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/100gx&nbsp;0x0000555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0001000000000002&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559050:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559060:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559070:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559080:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559090:&nbsp;&nbsp;&nbsp;&nbsp;0x0000555555559330&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555590a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x00005555555592e0</span><br><span class="hljs-section">0x5555555590b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br>//&nbsp;省略<br></code></pre>
+<p>从上面的结果中可以发现，在释放 obj3.data_ 所在的<code>chunk</code>后，第一个<code>chunk</code>有如下两个变化：1）起始地址为 0x555555559010 后面的 8 字节内容从 0x2 变成了 0x0001000000000002；2）起始地址为 0x5555555590a8 后面的 8 字节内容从 0x0 变成了 0x5555555592e0，即指向了<code>obj3.data_</code>所在<code>chunk</code>（空闲块）的“用户数据”起始处。</p>
+<p><strong>step 9：</strong> 释放 obj1.data_ 所在的 chunk</p>
+<p>1）继续执行</p>
+<pre><code class="hljs cpp">(gdb)&nbsp;n<br><span class="hljs-number">48</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-function">HeapObject&nbsp;<span class="hljs-title">obj5</span><span class="hljs-params">(<span class="hljs-number">32</span>)</span></span>;<br></code></pre>
+<p>此时（即在执行完语句<code>obj1.Free();</code>后），应用程序显式地释放<code>obj1.data_</code>所在的<code>chunk</code>。</p>
+<p>2）查看 obj1.data_ 附近的内存数据</p>
+<p>obj1.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x5555555592a0-8*4<br><span class="hljs-section">0x555555559280:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559290:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000555555559330&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x5555555592b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000021</span><br><span class="hljs-section">0x5555555592c0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000555555559010</span><br></code></pre>
+<p>从上面的结果中可以看出：</p>
+<ul>
+<li><p><code>obj1.data_</code>所在的<code>chunk</code>现在是一个空闲块，并且<code>mchunk_size</code>字段中<code>P</code>标志位的值仍为 1。</p></li>
+<li><p>对于下一个<code>chunk</code>而言，<code>obj1.data_</code>所在的<code>chunk</code>是一个空闲块。因此，下一个<code>chunk</code>里面<code>mchunk_size</code>字段中<code>P</code>标志位的值应该为 0。但实际上，下一个<code>chunk</code>里面<code>mchunk_size</code>字段为 0x21，即<code>P</code>标志位的值是 1，<strong>不符合预期结果</strong>。</p></li>
+<li><p>另外，下一个<code>chunk</code>里面<code>mchunk_prev_size</code>字段的值应该为 0x20，从而表示上一个<code>chunk</code>（是一个空闲块）的大小。但实际上，该字段的值是 0x0，<strong>也不符合预期结果</strong>。</p></li>
+</ul>
+<p>我们可以推断<code>obj1.data_</code>所在<code>chunk</code>（空闲块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559290</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，<strong>实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x555555559298</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等，<strong>“P”标志位的实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x5555555592a0</td>
+<td>8</td>
+<td>用于存储 fd 字段的值，值为 0x555555559330，，指向空闲块链表中的下一个空闲块（chunk 的起始地址为 0x555555559330 - 2*SIZE_SZ，<strong>即已经释放了到 obj4.data_ 所在的 chunk</strong>）</td>
+</tr>
+<tr>
+<td>0x5555555592a8</td>
+<td>8</td>
+<td>用于存储 bk 字段的值，值为 0x555555559010，指向空闲块链表中的上一个空闲块（chunk 的起始地址为 0x555555559010 - 2*SIZE_SZ）</td>
+</tr>
+</tbody>
+</table>
+<p>需要注意的是，从内存数据来看，已释放的<code>obj1.data_</code>、<code>obj4.data_</code>和<code>obj2.data_</code>所在的<code>chunk</code>（都是空闲块）属于同一个空闲块链表。并且，这 3 个空闲块的大小相等，都是 0x20 字节。</p>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/100gx&nbsp;0x0000555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0001000000000003&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559050:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559060:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559070:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559080:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559090:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592a0&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x5555555590a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x00005555555592e0</span><br><span class="hljs-section">0x5555555590b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br>//&nbsp;省略<br></code></pre>
+<p>从上面的结果中可以发现，在释放 obj1.data_ 所在的<code>chunk</code>后，第一个<code>chunk</code>有如下两个变化：1）起始地址为 0x555555559010 后面的 8 字节内容从 0x0001000000000002 变成了 0x0001000000000003；2）起始地址为 0x555555559090 后面的 8 字节内容从 0x555555559330变成了 0x5555555592a0，即指向了<code>obj1.data_</code>所在<code>chunk</code>（空闲块）的“用户数据”起始处。</p>
+<p><strong>step 10：</strong> 继续分配一块大小为 32 字节的内存，并将该内存的起始地址赋给 obj5.data_</p>
+<p>1）继续执行</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;n<br>49&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obj5.Free();<br>(gdb)&nbsp;p&nbsp;obj5.data_<br>$9&nbsp;=&nbsp;(void&nbsp;*)&nbsp;0x555555559350<br>(gdb)&nbsp;x/4gx&nbsp;0x555555559350<br><span class="hljs-section">0x555555559350:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559360:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br></code></pre>
+<p>此时（即在执行完语句<code>HeapObject obj5(32);</code>后），<code>malloc</code>为应用程序在堆上分配了一块起始地址为 0x555555559350、大小为 32 字节的内存。并且，这块内存中的每个字节的值都被初始化为 0x01。</p>
+<p>2）查看 obj5.data_ 附近的内存数据</p>
+<p>obj5.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x555555559350-8*4<br><span class="hljs-section">0x555555559330:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592c0&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x555555559340:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000031</span><br><span class="hljs-section">0x555555559350:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559360:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559370:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020c91</span><br></code></pre>
+<p>我们可以推断<code>obj5.data_</code>所在<code>chunk</code>（已分配块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559340</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，<strong>实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x555555559348</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等，<strong>“P”标志位的实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x555555559350</td>
+<td>32</td>
+<td>用于存储用户数据，即 obj5.data_ 所指向的对象</td>
+</tr>
+</tbody>
+</table>
+<p>另外，我们可以发现，<code>obj5.data_</code>所在的<code>chunk</code>也是从<code>Top Chunk</code>分割而来的。</p>
+<p><strong>step 11：</strong> 释放 obj5.data_ 所在的 chunk</p>
+<p>1）继续执行</p>
+<pre><code class="hljs kotlin">(gdb)&nbsp;n<br><span class="hljs-number">50</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br></code></pre>
+<p>此时（即在执行完语句<code>obj5.Free();</code>后），应用程序显式地释放<code>obj5.data_</code>所在的<code>chunk</code>。</p>
+<p>2）查看 obj5.data_ 附近的内存数据</p>
+<p>obj5.data_ 附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/10gx&nbsp;0x555555559350-8*4<br><span class="hljs-section">0x555555559330:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592c0&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x555555559340:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000031</span><br><span class="hljs-section">0x555555559350:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000555555559010</span><br><span class="hljs-section">0x555555559360:&nbsp;&nbsp;&nbsp;&nbsp;0x0101010101010101&nbsp;&nbsp;0x0101010101010101</span><br><span class="hljs-section">0x555555559370:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000020c91</span><br></code></pre>
+<p>我们可以推断<code>obj5.data_</code>所在<code>chunk</code>（空闲块）的内存布局为：</p>
+<table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>大小（字节）</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x555555559340</td>
+<td>8</td>
+<td>用于存储 mchunk_prev_size 字段的值，<strong>实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x555555559348</td>
+<td>8</td>
+<td>用于存储 size 字段的值，包括该 chunk 的大小和“P”标志位等，<strong>“P”标志位的实际值不符合预期结果</strong></td>
+</tr>
+<tr>
+<td>0x555555559350</td>
+<td>8</td>
+<td>用于存储 fd 字段的值，值为 0x0，表示该空闲块位于空闲块链表的末尾</td>
+</tr>
+<tr>
+<td>0x555555559358</td>
+<td>8</td>
+<td>用于存储 bk 字段的值，值为 0x555555559010，指向空闲块链表中的上一个空闲块（chunk 的起始地址为 0x555555559010 - 2*SIZE_SZ）</td>
+</tr>
+<tr>
+<td>0x555555559360</td>
+<td>16</td>
+<td>未使用</td>
+</tr>
+</tbody>
+</table>
+<p>需要注意的是，从内存数据来看，已释放的<code>obj5.data_</code>所在<code>chunk</code>（空闲块）属于第三个空闲块链表。</p>
+<p>查看堆底附近的内存数据：</p>
+<pre><code class="hljs makefile">(gdb)&nbsp;x/100gx&nbsp;0x0000555555559000<br><span class="hljs-section">0x555555559000:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000291</span><br><span class="hljs-section">0x555555559010:&nbsp;&nbsp;&nbsp;&nbsp;0x0001000000010003&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559020:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559030:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559040:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559050:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559060:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559070:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559080:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br><span class="hljs-section">0x555555559090:&nbsp;&nbsp;&nbsp;&nbsp;0x00005555555592a0&nbsp;&nbsp;0x0000555555559350</span><br><span class="hljs-section">0x5555555590a0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x00005555555592e0</span><br><span class="hljs-section">0x5555555590b0:&nbsp;&nbsp;&nbsp;&nbsp;0x0000000000000000&nbsp;&nbsp;0x0000000000000000</span><br>//&nbsp;省略<br></code></pre>
+<p>从上面的结果中可以发现，在释放 obj5.data_ 所在的<code>chunk</code>后，第一个<code>chunk</code>有如下两个变化：1）起始地址为 0x555555559010 后面的 8 字节内容从 0x0001000000000003 变成了 0x0001000000010003；1）起始地址为 0x555555559098 后面的 8 字节内容从 0x0变成了 0x555555559350，即指向了<code>obj5.data_</code>所在<code>chunk</code>（空闲块）的“用户数据”起始处。</p>
+<p><strong><font size="4">研究结论：</font></strong></p>
+<p>对于 glibc-2.31 版本且在 64-bit 系统上，<code>malloc</code>中已分配块的内存布局为（从低地址到高地址）：</p>
+<table>
+<thead>
+<tr>
+<th>相对于 chunk 起始位置的偏移量</th>
+<th>对应的 malloc_chunk 结构体中的字段名</th>
+<th>字段大小（字节）</th>
+<th>作用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>mchunk_prev_size</td>
+<td>8</td>
+<td>表示上一个 chunk 的大小</td>
+<td>该字段仅在上一个 chunk 是一个空闲块时有效</td>
+</tr>
+<tr>
+<td>8</td>
+<td>mchunk_size</td>
+<td>8</td>
+<td>表示本 chunk 的大小</td>
+<td><li><span>chunk 的大小包括有效负载（即用户数据）和 chunk 头部等开销</span></li> <li><span>该字段的最低位为“P”标志位，用于表示上一个 chunk 是否是已分配块（1，是；0，不是）。</span></li></td>
+</tr>
+<tr>
+<td>16</td>
+<td>fd</td>
+<td>8</td>
+<td>表示用户数据的起始位置，即 malloc 等函数的返回值</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<p>对于 glibc-2.31 版本且在 64-bit 系统上，<code>malloc</code>中空闲块的内存布局为（从低地址到高地址）：</p>
+<table>
+<thead>
+<tr>
+<th>相对于 chunk 起始位置的偏移量</th>
+<th>对应的 malloc_chunk 结构体中的字段名</th>
+<th>字段大小（字节）</th>
+<th>作用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>mchunk_prev_size</td>
+<td>8</td>
+<td>表示上一个 chunk 的大小</td>
+<td>该字段仅在上一个 chunk 是一个空闲块时有效</td>
+</tr>
+<tr>
+<td>8</td>
+<td>mchunk_size</td>
+<td>8</td>
+<td>表示本 chunk 的大小</td>
+<td><li><span>chunk 的大小包括有效负载（即用户数据）和 chunk 头部等开销</span></li> <li><span>该字段的最低位为“P”标志位，用于表示上一个 chunk 是否是已分配块（1，是；0，不是）。</span></li></td>
+</tr>
+<tr>
+<td>16</td>
+<td>fd</td>
+<td>8</td>
+<td>表示空闲块链表中的下一个 chunk</td>
+<td>无</td>
+</tr>
+<tr>
+<td>24</td>
+<td>bk</td>
+<td>8</td>
+<td>表示空闲块链表中的上一个 chunk</td>
+<td>无</td>
+</tr>
+<tr>
+<td>32</td>
+<td>fd_nextsize</td>
+<td>大于等于 0</td>
+<td>未使用</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<p><strong><font size="4">遗留问题：</font></strong></p>
+<ul>
+<li><p>第一个<code>chunk</code>的来龙去脉？</p></li>
+<li><p>为什么在调用<code>free()</code>函数后，被释放的<code>chunk</code>从内存数据来看仍是一个已分配块？</p></li>
+<li><p>空闲块是如何被划分到不同的空闲块链表中来维护的？</p></li>
+<li><p><code>malloc_chunk</code>结构体中<code>mchunk_size</code>字段里面的<code>A</code>标志位是如何运用的？（见下一篇）</p></li>
+<li><p><code>malloc_chunk</code>结构体中<code>mchunk_size</code>字段里面的<code>M</code>标志位是如何运用的？</p></li>
+<li><p><code>malloc_chunk</code>结构体中<code>fd_nextsize</code>和<code>bk_nextsize</code>字段在<code>large blocks</code>中是如何运用的？</p></li>
+</ul>
+<p>下一篇我们结合<code>malloc</code>的实现源码来分析上述可执行目标文件<code>vm4_main</code>动态申请和释放堆内存的过程。</p>
+<hr>
+<h3 id="hspanidjumpreferencesreferencesspan"><span><span id="jumpReferences">References</span></span></h3>
+<ul>
+<li><p><a href="https://sourceware.org/pipermail/libc-announce/2020/000025.html"><font size="4">glibc-2.31</font></a></p></li>
+<li><p><a href="http://gee.cs.oswego.edu/dl/html/malloc.html#:~:text=A%20Memory%20Allocator%201%20Introduction.%20Malloc%2C%20or%20dlmallocfor,are%20maintained%20in%20bins%2C%20grouped%20by%20size.%20"><font size="4">Doug Lea. A Memory Allocator.</font></a></p></li>
+<li><p><a href="https://b-ok.global/dl/2714421/a9cc57?dsource=recommend"><font size="4">D.Knuth. The Art of Computer Programming, Volume 1: Fundamental Algorithms, Third Edition.</font></a></p></li>
+<li><p><a href="ftp://ftp.cs.utexas.edu/pub/garbage/allocsrv.ps"><font size="4">P.Wilson, M.Johnstone, M.Neely, and D.Boles. Dynamic Storage Allocation: A Survey and Critical Review.</font></a></p></li>
+<li><p><a href="https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/"><font size="4">Part 1: Understanding the Glibc Heap Implementation</font></a></p></li>
+<li><p><a href="https://azeria-labs.com/heap-exploitation-part-2-glibc-heap-free-bins/"><font size="4">Part 2: Understanding the GLIBC Heap Implementation</font></a></p></li>
+<li><p><a href="https://www.blackhat.com/presentations/bh-usa-07/Ferguson/Whitepaper/bh-usa-07-ferguson-WP.pdf"><font size="4">Understanding the heap by breaking it</font></a></p></li>
+<li><p><a href="https://heap-exploitation.dhavalkapil.com/"><font size="4">heap-exploitation</font></a></p></li>
+<li><p><a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/"><font size="4">Understanding glibc malloc</font></a></p></li>
+</ul>
+<hr>
+<p><font size="4"><strong>下一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%EF%BC%889%EF%BC%89%EF%BC%9A%E7%90%86%E8%A7%A3%20glibc%20malloc%20%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%EF%BC%88%E4%B8%AD%EF%BC%89">计算机系统篇之虚拟内存（9）：理解 glibc malloc 的工作原理（中）</a>
+</font></p>
+<p><font size="4"><strong>上一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%EF%BC%884%EF%BC%89%EF%BC%9A%E5%86%8D%E6%8E%A2%20mmap">计算机系统篇之虚拟内存（4）：再探 mmap</a>
+</font></p>
+<p><font size="4"></font></p><p align="center"><font size="4"><a href="https://csstormq.github.io"><strong>首页</strong></a> </font></p><p></p></div></div></body>
+</html>
