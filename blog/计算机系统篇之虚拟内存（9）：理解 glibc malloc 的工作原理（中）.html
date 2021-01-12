@@ -1,4 +1,3 @@
-
 ﻿<!DOCTYPE html>
 <html>
 <head>  <meta charset="utf-8">
@@ -384,8 +383,8 @@
 .output_wrapper .toc_left{margin-left: 25px;}
  
 </style>  
-  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(81, 154, 178) none repeat scroll 0% 0%; }
-#export_content { margin: 40px 20%; padding: 20px; border: 1px solid rgb(149, 155, 111); background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
+  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }
+#export_content { margin: 40px 20%; padding: 20px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
 
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize69glibcmallocfontp"><span><p align="center"><strong><font size="6">计算机系统篇之虚拟内存（9）：理解 glibc malloc 的工作原理（中）</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
@@ -395,6 +394,7 @@
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
 <ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump摘要">摘要</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump0">再探 malloc 中已分配块和空闲块的内部布局</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">如何在链接期拦截标准库的 malloc</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_2">chunk 的大小有哪些讲究</a></p>
@@ -405,6 +405,8 @@
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jumpReferences">References</a></p></ul><p></p>
 </li></ul>
 <hr>
+<h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
+<p>本文结合 glibc-2.31 版本中的 malloc 的实现源码来分析上一篇中可执行目标文件 vm4_main 动态申请和释放堆内存的过程，并重点分析了 tcache 机制。</p>
 <h3 id="hspanidjump0mallocspan"><span><span id="jump0">再探 malloc 中已分配块和空闲块的内部布局</span></span></h3>
 <p>本文我们结合 glibc-2.31 版本中的<code>malloc</code>的实现源码来分析上一篇中可执行目标文件<code>vm4_main</code>动态申请和释放堆内存的过程。</p>
 <p><strong>step 0：</strong> 启动 vm4_main 并挂载 glibc-2.31 版本的源码</p>
