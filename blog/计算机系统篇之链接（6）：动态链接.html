@@ -394,6 +394,7 @@
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
 <ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump摘要">摘要</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump引入共享库的动机">引入共享库的动机</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump静态链接与动态链接的区别">静态链接与动态链接的区别</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump如何生成共享库">如何生成和使用共享库</a></p>
@@ -401,10 +402,12 @@
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">-fpic 和 -fPIC 的区别</a></p></ul><p></p>
 </li></ul>
 <hr>
-<h3 id="hspanidjumpspan"><span><span id="jump引入共享库的动机">引入共享库的动机</span></span></h3>
+<h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
+<p>本文描述了引入动态链接库的动机，并提供了 Linux 系统中生成和使用动态链接库的示例。</p>
+<h3 id="hspanidjumpspan-1"><span><span id="jump引入共享库的动机">引入共享库的动机</span></span></h3>
 <p>共享库，也被称为可共享目标文件，可以被动态链接器在加载期或运行期加载到任意的内存地址，并和一个内存中的程序链接起来。</p>
 <p>引入共享库的目的是为了解决静态库的缺点。相比于静态库的三个缺点，共享库对应的优点为：1）可以在加载期或运行期进行链接过程。因此，共享库更新后不用像静态库那样，可执行目标文件必须显式地重新链接。2）节省磁盘空间。共享库的代码和数据被所有引用该共享库的可执行目标文件共享。3）节省内存空间。共享库的代码在内存中的一份拷贝被所有引用该共享库的进程共享。</p>
-<h3 id="hspanidjumpspan-1"><span><span id="jump静态链接与动态链接的区别">静态链接与动态链接的区别</span></span></h3>
+<h3 id="hspanidjumpspan-2"><span><span id="jump静态链接与动态链接的区别">静态链接与动态链接的区别</span></span></h3>
 <table>
 <thead>
 <tr>
@@ -435,7 +438,7 @@
 <li><p>Linux 中的静态链接器<code>ld</code>是可执行目标文件，而动态链接器（如<code>ld-linux-x86-64.so.2</code>）是可共享目标文件。</p></li>
 <li><p>Linux 中的静态链接器<code>ld</code>的输入文件可以是共享库，但只是拷贝了重定位信息和符号表并解析符号，但未重定位。也就是说，即便共享库可以作为Linux 中的静态链接器<code>ld</code>的输入文件，但实际上没有完全链接。</p></li></ul></li>
 </ul>
-<h3 id="hspanidjumpspan-2"><span><span id="jump如何生成共享库">如何生成共享库</span></span></h3>
+<h3 id="hspanidjumpspan-3"><span><span id="jump如何生成共享库">如何生成共享库</span></span></h3>
 <p><strong>1）</strong> 生成共享库（On x86-64 Linux）</p>
 <pre><code class="hljs php">$&nbsp;g++&nbsp;-o&nbsp;libtest.so&nbsp;test.cpp&nbsp;-shared&nbsp;-fPIC<br></code></pre>
 <ul>
@@ -455,7 +458,7 @@
 <pre><code class="hljs go">$&nbsp;ldd&nbsp;main<br>&nbsp;&nbsp;&nbsp;&nbsp;linux-vdso.so<span class="hljs-number">.1</span>&nbsp;=&gt;&nbsp;&nbsp;(<span class="hljs-number">0x00007ff</span>c8e793000)<br>&nbsp;&nbsp;&nbsp;&nbsp;./libtest.so&nbsp;(<span class="hljs-number">0x00007f21de5ed</span>000)<br>&nbsp;&nbsp;&nbsp;&nbsp;libc.so<span class="hljs-number">.6</span>&nbsp;=&gt;&nbsp;/lib/x86_64-linux-gnu/libc.so<span class="hljs-number">.6</span>&nbsp;(<span class="hljs-number">0x00007f21d</span>e223000)<br>&nbsp;&nbsp;&nbsp;&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.s</span>o<span class="hljs-number">.2</span>&nbsp;(<span class="hljs-number">0x00007f21de7ef</span>000)<br></code></pre>
 <p>查看可执行目标文件 main 的<code>.interp</code>section：</p>
 <pre><code class="hljs javascript">$&nbsp;readelf&nbsp;-p&nbsp;.interp&nbsp;main<br><br><span class="hljs-built_in">String</span>&nbsp;dump&nbsp;<span class="hljs-keyword">of</span>&nbsp;section&nbsp;<span class="hljs-string">'.interp'</span>:<br>&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>]&nbsp;&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br></code></pre>
-<h3 id="hspanidjumpspan-3"><span><span id="jump运行期加载和链接共享库">运行期加载和链接共享库</span></span></h3>
+<h3 id="hspanidjumpspan-4"><span><span id="jump运行期加载和链接共享库">运行期加载和链接共享库</span></span></h3>
 <p><strong>共享库常用函数：</strong></p>
 <table>
 <thead>
