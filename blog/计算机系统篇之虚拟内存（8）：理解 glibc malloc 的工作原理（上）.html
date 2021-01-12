@@ -1,4 +1,3 @@
-
 ﻿<!DOCTYPE html>
 <html>
 <head>  <meta charset="utf-8">
@@ -384,8 +383,8 @@
 .output_wrapper .toc_left{margin-left: 25px;}
  
 </style>  
-  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(81, 154, 178) none repeat scroll 0% 0%; }
-#export_content { margin: 40px 20%; padding: 20px; border: 1px solid rgb(149, 155, 111); background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
+  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }
+#export_content { margin: 40px 20%; padding: 20px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
 
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize68glibcmallocfontp"><span><p align="center"><strong><font size="6">计算机系统篇之虚拟内存（8）：理解 glibc malloc 的工作原理（上）</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
@@ -395,6 +394,7 @@
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
 <ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump摘要">摘要</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump0">动态内存分配简介</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">堆在进程虚拟地址空间中的分布</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump2">堆顶可以“顶”到哪</a></p>
@@ -402,6 +402,8 @@
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jumpReferences">References</a></p></ul><p></p>
 </li></ul>
 <hr>
+<h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
+<p>本文简单介绍了动态内存分配和 malloc 的基础知识，并通过示例初步研究了 glibc malloc 中 chunk 的内存布局，从而为更深入地探索其工作原理做好准备。</p>
 <h3 id="hspanidjump0span"><span><span id="jump0">动态内存分配简介</span></span></h3>
 <p><strong><font size="4">为什么要使用动态内存分配？</font></strong></p>
 <p>程序使用动态内存分配的最重要原因是经常直到程序实际运行时，才知道某些数据结构的大小。</p>
