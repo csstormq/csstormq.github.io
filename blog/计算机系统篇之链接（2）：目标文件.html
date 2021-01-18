@@ -383,13 +383,13 @@
 .output_wrapper .toc_left{margin-left: 25px;}
  
 </style>  
-  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }
-#export_content { margin: 40px 20%; padding: 20px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
+  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(81, 154, 178) none repeat scroll 0% 0%; }
+#export_content { margin: 40px 20%; padding: 20px; border: 1px solid rgb(149, 155, 111); background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
 
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize62fontp"><span><p align="center"><strong><font size="6">计算机系统篇之链接（2）：目标文件</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
 <p align="right">Created: Saturday, 21. December 2019 11:08AM</p>
-<p align="right">Last Modified: Saturday, 09. January 2021 03:50PM</p>
+<p align="right">Last Modified: Monday, 18. January 2021 09:33PM</p>
 <hr>
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
@@ -412,7 +412,7 @@
 <thead>
 <tr>
 <th>目标文件类型</th>
-<th>生成者</th>
+<th>生成者（特指直接参与者）</th>
 <th>是否可以直接加载到内存中执行</th>
 <th>Linux 中的目标文件后缀（习惯上）</th>
 </tr>
@@ -438,7 +438,14 @@
 </tr>
 </tbody>
 </table>
-<p>注：对于 Linux 中的目标文件来说，从技术角度讲，文件后缀可以是任意的或无后缀，习惯上的文件后缀只是为了便于区别。实际上在 Linux 系统中，目标文件类型被定义在 ELF Header 中的某个字段中（下文详细描述），系统通过这个字段的值来判断目标文件的真正类型，而不是通过目标文件的扩展名。</p>
+<p>注：</p>
+<ul>
+<li><p>对于 Linux 中的目标文件来说，从技术角度讲，文件后缀可以是任意的或无后缀，习惯上的文件后缀只是为了便于区别。实际上在 Linux 系统中，目标文件类型被定义在 ELF Header 中的某个字段中（下文详细描述），系统通过这个字段的值来判断目标文件的真正类型，而不是通过目标文件的扩展名。</p></li>
+<li><p>上述表格中的<code>生成者</code>特指与生成目标文件的过程直接相关的部分。比如：可执行目标文件的生成者为链接器，当然编译器和汇编器也参与了这一过程，但后两者属于间接参与。</p></li>
+</ul>
+<p><strong>注意：</strong> CS:APP 中，可共享目标文件的生成者为编译器和汇编器。其原文为：</p>
+<pre><code class="text language-text">Compilers&nbsp;and&nbsp;assemblers&nbsp;generate&nbsp;relocatable&nbsp;object&nbsp;files&nbsp;(including&nbsp;shared&nbsp;object&nbsp;files).&nbsp;Linkers&nbsp;generate&nbsp;executable&nbsp;object&nbsp;files.<br></code></pre>
+<p>但经过实际验证（验证方法见上一篇：《计算机系统篇之链接（1）：gcc / g++的编译流程》），链接器参与了生成可共享目标文件的过程。</p>
 <p><strong>1）</strong> 如何生成可重定位目标文件（On X86-64 Linux）：</p>
 <pre><code class="hljs php">$&nbsp;g++&nbsp;-c&nbsp;main.cpp&nbsp;-o&nbsp;main.o<br><span class="hljs-comment">#&nbsp;或&nbsp;g++&nbsp;-c&nbsp;main.cpp</span><br><span class="hljs-comment">#&nbsp;这两个命令都会生成名称为&nbsp;main.o&nbsp;的可重定位目标文件</span><br></code></pre>
 <p>注：<code>-c</code>选项表示只执行编译和汇编过程，但不执行链接过程（Compile or assemble the source files, but do not link.）。</p>
@@ -448,7 +455,7 @@
 <pre><code class="hljs php"><span class="hljs-comment">#&nbsp;默认生成的可执行目标文件为&nbsp;a.out</span><br>$&nbsp;g++&nbsp;main.cpp<br><span class="hljs-comment">#&nbsp;指定生成的可执行目标文件为&nbsp;main</span><br>$&nbsp;g++&nbsp;main.cpp&nbsp;-o&nbsp;main<br></code></pre>
 <p><strong>3）</strong> 如何生成可共享目标文件（On X86-64 Linux）：</p>
 <pre><code class="hljs php"><span class="hljs-comment">#&nbsp;默认生成的可共享目标文件为&nbsp;a.out</span><br>$&nbsp;g++&nbsp;-shared&nbsp;sum.cpp<br><span class="hljs-comment">#&nbsp;指定生成的可共享目标文件为&nbsp;sum.so</span><br>$&nbsp;g++&nbsp;-shared&nbsp;sum.cpp&nbsp;-o&nbsp;sum.so<br></code></pre>
-<p>注：<code>-shared</code>选项表示生成可共享目标文件，默认名称也为 a.out。</p>
+<p>注：<code>-shared</code>选项表示生成可共享目标文件，<strong>属于链接器选项</strong>，默认名称也为 a.out。</p>
 <p><strong>注意：</strong></p>
 <ul>
 <li><p>含有<code>main</code>函数的源文件不能用于生成可共享目标文件，但可以用于生成可重定位目标文件（即 .o 文件）。</p></li>
@@ -793,6 +800,13 @@
 <td>是</td>
 </tr>
 <tr>
+<td>.dynamic</td>
+<td>该 section 中保存了动态链接的基本信息。</td>
+<td><li>方式1：<code>readelf -d &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
+<td>Data Segment</td>
+<td>是</td>
+</tr>
+<tr>
 <td>.data</td>
 <td>已初始化的且初始值非0的全局变量和静态变量。</td>
 <td>无</td>
@@ -853,7 +867,7 @@
 <ul>
 <li><p>注：</p>
 <ul>
-<li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-l</code>为<code>--program-headers</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
+<li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-l</code>为<code>--program-headers</code>的缩写，<code>-d</code>为<code>--dynamic</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
 <li><p>objdump 命令中缩写含义：<code>-p</code>为<code>--private-headers</code>的缩写，<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写。</p></li></ul></li>
 </ul>
 <p><strong>注意：</strong></p>
@@ -892,6 +906,8 @@
 <pre><code class="hljs php">$&nbsp;ll&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br>lrwxrwxrwx&nbsp;<span class="hljs-number">1</span>&nbsp;root&nbsp;root&nbsp;<span class="hljs-number">32</span>&nbsp;Aug&nbsp;<span class="hljs-number">18</span>&nbsp;<span class="hljs-number">04</span>:<span class="hljs-number">02</span>&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span>&nbsp;-&gt;&nbsp;/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so*<br></code></pre>
 <p><strong>4）</strong> 查看可执行目标文件的<code>.dynsym</code>section</p>
 <pre><code class="hljs php">$&nbsp;readelf&nbsp;--dyn-syms&nbsp;main<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.dynsym'</span>&nbsp;contains&nbsp;<span class="hljs-number">7</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;Name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;LOCAL&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_deregisterTMCloneTab<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;printf@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__libc_start_main@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__gmon_start__<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_registerTMCloneTable<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__cxa_finalize@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br></code></pre>
+<p><strong>5）</strong> 查看可执行目标文件的<code>.dynamic</code>section</p>
+<pre><code class="hljs go">$&nbsp;readelf&nbsp;-d&nbsp;main<br><br>Dynamic&nbsp;section&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">0x2d</span>c8&nbsp;contains&nbsp;<span class="hljs-number">27</span>&nbsp;entries:<br>&nbsp;&nbsp;Tag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name/Value<br>&nbsp;<span class="hljs-number">0x0000000000000001</span>&nbsp;(NEEDED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shared&nbsp;library:&nbsp;[libc.so<span class="hljs-number">.6</span>]<br>&nbsp;<span class="hljs-number">0x000000000000000c</span>&nbsp;(INIT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span><br>&nbsp;<span class="hljs-number">0x000000000000000d</span>&nbsp;(FINI)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x11f</span>8<br>&nbsp;<span class="hljs-number">0x0000000000000019</span>&nbsp;(INIT_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>b8<br>&nbsp;<span class="hljs-number">0x000000000000001b</span>&nbsp;(INIT_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001a</span>&nbsp;(FINI_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>c0<br>&nbsp;<span class="hljs-number">0x000000000000001c</span>&nbsp;(FINI_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000006ffffef</span>5&nbsp;(GNU_HASH)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3a0</span><br>&nbsp;<span class="hljs-number">0x0000000000000005</span>&nbsp;(STRTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x470</span><br>&nbsp;<span class="hljs-number">0x0000000000000006</span>&nbsp;(SYMTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3c8</span><br>&nbsp;<span class="hljs-number">0x000000000000000a</span>&nbsp;(STRSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">132</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000000b</span>&nbsp;(SYMENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000015</span>&nbsp;(DEBUG)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br>&nbsp;<span class="hljs-number">0x0000000000000003</span>&nbsp;(PLTGOT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3f</span>b8<br>&nbsp;<span class="hljs-number">0x0000000000000002</span>&nbsp;(PLTRELSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000014</span>&nbsp;(PLTREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELA<br>&nbsp;<span class="hljs-number">0x0000000000000017</span>&nbsp;(JMPREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x5e8</span><br>&nbsp;<span class="hljs-number">0x0000000000000007</span>&nbsp;(RELA)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x528</span><br>&nbsp;<span class="hljs-number">0x0000000000000008</span>&nbsp;(RELASZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">192</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000009</span>&nbsp;(RELAENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001e</span>&nbsp;(FLAGS)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BIND_NOW<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>b&nbsp;(FLAGS_1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags:&nbsp;NOW&nbsp;PIE<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>e&nbsp;(VERNEED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x508</span><br>&nbsp;<span class="hljs-number">0x000000006fffffff</span>&nbsp;(VERNEEDNUM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>0&nbsp;(VERSYM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x4f</span>4<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>9&nbsp;(RELACOUNT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span><br>&nbsp;<span class="hljs-number">0x0000000000000000</span>&nbsp;(NULL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br></code></pre>
 <hr>
 <p><font size="4"><strong>下一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E9%93%BE%E6%8E%A5%EF%BC%883%EF%BC%89%EF%BC%9A%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%EF%BC%88%E4%B8%8A%EF%BC%89">计算机系统篇之链接（3）：静态链接（上）</a></font></p>
 <p><font size="4"><strong>上一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E9%93%BE%E6%8E%A5%EF%BC%881%EF%BC%89%EF%BC%9Agcc%E6%88%96g++%E7%9A%84%E7%BC%96%E8%AF%91%E6%B5%81%E7%A8%8B">计算机系统篇之链接（1）：gcc / g++的编译流程 </a></font></p>
