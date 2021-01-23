@@ -389,7 +389,7 @@
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize62fontp"><span><p align="center"><strong><font size="6">计算机系统篇之链接（2）：目标文件</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
 <p align="right">Created: Saturday, 21. December 2019 11:08AM</p>
-<p align="right">Last Modified: Monday, 18. January 2021 09:33PM</p>
+<p align="right">Last Modified: Wednesday, 20. January 2021 08:09PM</p>
 <hr>
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
@@ -403,7 +403,7 @@
 </li></ul>
 <hr>
 <h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
-<p>本文描述了目标文件的基础知识，其中详细介绍了 ELF-64 目标文件格式，并提供了 Linux 系统中目标文件处理工具——READELF 和 OBJDUMP 的常见用法。</p>
+<p>本文描述了目标文件的基础知识，其中详细介绍了<code>ELF-64</code>目标文件格式，并提供了 Linux 系统中目标文件处理工具——<code>readelf</code>和<code>objdump</code>的常见用法。</p>
 <h3 id="hspanidjumpspan-1"><span><span id="jump目标文件类型">目标文件类型</span></span></h3>
 <p>从技术角度来看，目标文件就是一个字节序列（Technically, object file is a sequence of bytes）。</p>
 <p>目标文件可以分为三类：可重定位目标文件、可执行目标文件和可共享目标文件（可共享目标文件是一种特殊的可重定位目标文件）。</p>
@@ -443,9 +443,9 @@
 <li><p>对于 Linux 中的目标文件来说，从技术角度讲，文件后缀可以是任意的或无后缀，习惯上的文件后缀只是为了便于区别。实际上在 Linux 系统中，目标文件类型被定义在 ELF Header 中的某个字段中（下文详细描述），系统通过这个字段的值来判断目标文件的真正类型，而不是通过目标文件的扩展名。</p></li>
 <li><p>上述表格中的<code>生成者</code>特指与生成目标文件的过程直接相关的部分。比如：可执行目标文件的生成者为链接器，当然编译器和汇编器也参与了这一过程，但后两者属于间接参与。</p></li>
 </ul>
-<p><strong>注意：</strong> CS:APP 中，可共享目标文件的生成者为编译器和汇编器。其原文为：</p>
-<pre><code class="text language-text">Compilers&nbsp;and&nbsp;assemblers&nbsp;generate&nbsp;relocatable&nbsp;object&nbsp;files&nbsp;(including&nbsp;shared&nbsp;object&nbsp;files).&nbsp;Linkers&nbsp;generate&nbsp;executable&nbsp;object&nbsp;files.<br></code></pre>
-<p>但经过实际验证（验证方法见上一篇：《计算机系统篇之链接（1）：gcc / g++的编译流程》），链接器参与了生成可共享目标文件的过程。</p>
+<p><strong>注意：</strong> CS:APP(Third Edition) 7.3 节中所描述的是，可共享目标文件的生成者为编译器和汇编器。其原文为：</p>
+<pre><code class="text language-text">Compilers&nbsp;and&nbsp;assemblers&nbsp;generate&nbsp;relocatable&nbsp;object&nbsp;files&nbsp;(including&nbsp;shared&nbsp;object&nbsp;files).&nbsp;Linkers&nbsp;generate<br>executable&nbsp;object&nbsp;files.<br></code></pre>
+<p>但经过实际验证（验证方法见上一篇：《计算机系统篇之链接（1）：gcc / g++的编译流程》），链接器参与了生成可共享目标文件的过程，这一点需要注意。</p>
 <p><strong>1）</strong> 如何生成可重定位目标文件（On X86-64 Linux）：</p>
 <pre><code class="hljs php">$&nbsp;g++&nbsp;-c&nbsp;main.cpp&nbsp;-o&nbsp;main.o<br><span class="hljs-comment">#&nbsp;或&nbsp;g++&nbsp;-c&nbsp;main.cpp</span><br><span class="hljs-comment">#&nbsp;这两个命令都会生成名称为&nbsp;main.o&nbsp;的可重定位目标文件</span><br></code></pre>
 <p>注：<code>-c</code>选项表示只执行编译和汇编过程，但不执行链接过程（Compile or assemble the source files, but do not link.）。</p>
@@ -587,6 +587,9 @@
 <li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-r</code>为<code>--relocs</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
 <li><p>objdump 命令中缩写含义：<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写。</p></li></ul></li>
 </ul>
+<p><strong>注意：</strong> CS:APP(Third Edition) 7.4 节中所描述的是，节头表名称包含在<code>.strtab</code>section 中。其原文为：</p>
+<pre><code class="text language-text">.strtab:&nbsp;A&nbsp;string&nbsp;table&nbsp;for&nbsp;the&nbsp;symbol&nbsp;tables&nbsp;in&nbsp;the&nbsp;.symtab&nbsp;and&nbsp;.debug&nbsp;sections,&nbsp;and&nbsp;for&nbsp;the&nbsp;section<br>names&nbsp;in&nbsp;the&nbsp;section&nbsp;headers.<br></code></pre>
+<p>但经过实际验证，在 X86-64 Linux（Ubuntu 20.04）中，节头表名称包含在<code>.shstrtab</code>section 中，而不是<code>.strtab</code>section 中。</p>
 <p><strong>1）</strong> 查看可重定位目标文件的<code>ELF Header</code></p>
 <pre><code class="hljs sql">$&nbsp;readelf&nbsp;-h&nbsp;sum.o<br>ELF&nbsp;Header:<br>&nbsp;&nbsp;Magic:&nbsp;&nbsp;&nbsp;7f&nbsp;45&nbsp;4c&nbsp;46&nbsp;02&nbsp;01&nbsp;01&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;<br>&nbsp;&nbsp;Class:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELF64<br>&nbsp;&nbsp;Data:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2's&nbsp;complement,&nbsp;little&nbsp;endian<br>&nbsp;&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(current)<br>&nbsp;&nbsp;OS/ABI:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UNIX&nbsp;-&nbsp;System&nbsp;V<br>&nbsp;&nbsp;ABI&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<br>&nbsp;&nbsp;Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;REL&nbsp;(Relocatable&nbsp;file)<br>&nbsp;&nbsp;Machine:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Advanced&nbsp;Micro&nbsp;Devices&nbsp;X86-64<br>&nbsp;&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x1<br>&nbsp;&nbsp;Entry&nbsp;point&nbsp;address:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0<br>&nbsp;&nbsp;<span class="hljs-keyword">Start</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;(<span class="hljs-keyword">bytes</span>&nbsp;<span class="hljs-keyword">into</span>&nbsp;<span class="hljs-keyword">file</span>)<br>&nbsp;&nbsp;<span class="hljs-keyword">Start</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">928</span>&nbsp;(<span class="hljs-keyword">bytes</span>&nbsp;<span class="hljs-keyword">into</span>&nbsp;<span class="hljs-keyword">file</span>)<br>&nbsp;&nbsp;Flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;this&nbsp;header:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">64</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-built_in">Number</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">64</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-built_in">Number</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Section</span>&nbsp;header&nbsp;<span class="hljs-keyword">string</span>&nbsp;<span class="hljs-keyword">table</span>&nbsp;<span class="hljs-keyword">index</span>:&nbsp;<span class="hljs-number">9</span><br></code></pre>
 <ul>
@@ -709,7 +712,7 @@
 <p><code>Bind</code>，表示符号所关联对象的的绑定属性（即符号的作用范围）。常见可选项：0（STB_LOCAL，局部符号，仅定义该符号的目标文件可见）、1（STB_GLOBAL，全局符号，所有目标文件可见）、2（STB_WEAK，弱引用，全局作用域，但其优先级低于全局符号）。</p>
 <p><code>Type</code>，表示符号所关联对象的类型。常见可选项：0（STT_NOTYPE，未指定类型，比如一个绝对符号）、1（STT_OBJECT，表示数据对象，比如：变量、数组等）、2（STT_FUNC，表示该符号是个函数或其他可执行代码）、3（STT_SECTION，符号与 section 相关联，意味着该符号表示一个 section，这种符号必须是局部符号）、4（STT_FILE，与目标文件关联的源文件，意味着该符号表示文件名，一般都是该目标文件所对应的源文件名，该符号一定是局部符号，并且其 Ndx 列的值一定是 SHN_ABS）、6（STT_TLS，表示该符号是线程私有存储对象）。</p></li>
 <li><p>Symbol Table Entry 结构体中的第 3 个字段作为保留字段，占用 1 字节。</p></li>
-<li><p><code>Ndx</code>是 Symbol Table Entry 结构体中的第 4 个字段，占用 2 字节，表示符号所关联对象位于哪个 section 。该值为 section 在 Section header table 中的索引，即<code>readelf -S sum.o</code>输出结果中该 section <code>[Nr]</code> 列的值（同一个 section 在不同的 .o 文件中对应的数字不一定相同）。其他可选项：UNDEF（SHN_UNDEF，0，表示未定义符号）、ABS（SHN_ABS，0xfff1，表示绝对符号）、COM（SHN_COMMON，0xfff2，表示未初始化的全局变量）。</p></li>
+<li><p><code>Ndx</code>是 Symbol Table Entry 结构体中的第 4 个字段，占用 2 字节，表示符号所关联对象位于哪个 section 。该值为 section 在 Section header table 中的索引，即<code>readelf -S sum.o</code>输出结果中该 section <code>[Nr]</code> 列的值（同一个 section 在不同的 .o 文件中对应的数字不一定相同）。其他可选项：UND（SHN_UNDEF，0，表示未定义符号）、ABS（SHN_ABS，0xfff1，表示绝对符号，即不需要重定位的符号）、COM（SHN_COMMON，0xfff2，表示未初始化的全局变量）。</p></li>
 <li><p><code>Value</code>是 Symbol Table Entry 结构体中的第 5 个字段，占用 8 字节，表示符号所关联对象的地址。在可重定位目标文件（不包括可共享目标文件）中，如果该符号不是<code>COMMON</code>，那么该值表示符号所关联对象在其 section 中的偏移量（即符号所关联对象在其 section 中的起始地址）；否则，该值表示该符号的对齐属性。在可执行目标文件和可共享目标文件中，该值表示符号所关联对象的虚拟地址。</p></li>
 <li><p><code>Size</code>是 Symbol Table Entry 结构体中的第 6 个字段，占用 8 字节，表示符号所关联对象的大小，单位：字节。如果符号没有关联的大小或大小未知，则此字段的值为 0。如果符号关联的对象是函数，那么该字段的值为实现该函数的机器指令所占用的字节数。如果符号关联的对象是数据，那么该字段的值为数据占用的字节数。比如：符号关联的对象是一个<code>int</code>类型的变量，那么该字段的值为 4；符号关联的对象是一个<code>int</code>类型，大小为 3 的数组，那么该字段的值为 12。</p></li></ul></li>
 </ul>
@@ -719,6 +722,9 @@
 <li><p>如果符号名称较长，那么<code>readelf</code>输出结果中的<code>Name</code>列默认只显示该符号名称的部分。我们可以通过命令<code>readelf -s -W</code>（-W --wide              Allow output width to exceed 80 characters）或者<code>objdump -t</code>查看这些符号的完整名称。</p>
 <p>GCC 对 C++ 语言中的函数进行名称改编时，所有的符号都以<code>_Z</code>开头。我们可以通过命令<code>c++filt</code>命令解析改编后的名称。比如：<code>c++filt _Z41__static_initialization_and_destruction_0ii</code>的输出结果为<code>__static_initialization_and_destruction_0(int, int)</code>。需要注意，不同的编译器采用不同的名称修饰方法。</p></li>
 </ul>
+<p><strong>注意：</strong> CS:APP(Third Edition) 7.5 节中所描述的是，伪节：<code>ABS</code>、<code>UND</code>和<code>COM</code>只可能出现在可重定位目标文件中，不会出现在可执行目标文件中。其原文为：</p>
+<pre><code class="text language-text">Note&nbsp;that&nbsp;these&nbsp;pseudosections&nbsp;exist&nbsp;only&nbsp;in&nbsp;relocatable&nbsp;object&nbsp;files;&nbsp;they&nbsp;do&nbsp;not&nbsp;exist&nbsp;in&nbsp;executable&nbsp;object&nbsp;files.<br></code></pre>
+<p>但经过实际验证，在动态链接的可执行目标文件中，伪节<code>ABS</code>和<code>UND</code>可能出现，这一点需要注意。</p>
 <p><strong>a）</strong> 验证“在可重定位目标文件（不包括可共享目标文件）中，Value 列，表示符号在其 section 中的偏移量”</p>
 <pre><code class="hljs delphi"><span class="hljs-number">15</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;g_val_1<br>&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000008</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;<span class="hljs-number">8</span>:&nbsp;<span class="hljs-number">000000000000000</span>c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_4<br></code></pre>
 <p>表示的含义：在可重定位目标文件 sum.o 中，符号：g_val_1、_ZZ3sumiiE5val_1、_ZZ3sumiiE5val_2、_ZZ3sumiiE5val_4 都位于同一个 setion 中（该 section 在 Section header table 中的索引为 4），符号 g_val_1 所关联的对象在该 section 中占用的空间为 0000000000000000～0000000000000003（即该 section 中第一个 4 字节的值为 g_val_1），符号 _ZZ3sumiiE5val_1 所关联的对象在该 section 中占用的空间为 0000000000000004～0000000000000007（即该 section 中第二个 4 字节的值为 val_1），符号 _ZZ3sumiiE5val_2 所关联的对象在该 section 中占用的空间为 0000000000000008～000000000000000b（即该 section 中第三个 4 字节的值为 val_2），符号 _ZZ3sumiiE5val_4 所关联的对象在该 section 中占用的空间为 000000000000000c～000000000000000f（即该 section 中第四个 4 字节的值为 val_4）。</p>
@@ -754,28 +760,49 @@
 <td>ELF header</td>
 <td>描述生成该目标文件的系统的字大小和字节顺序、目标文件类型、机器类型等信息。</td>
 <td><li><code>readelf -h &lt;object file&gt;</code></li></td>
-<td>Code Segment</td>
-<td>是</td>
+<td>？</td>
+<td>？</td>
 </tr>
 <tr>
 <td>Program header table</td>
 <td>描述可执行目标文件中所有段（Segments）的位置和大小等信息。</td>
 <td><li>方式1：<code>readelf -l &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
-<td>Code Segment</td>
-<td>是</td>
+<td>？</td>
+<td>？</td>
 </tr>
 <tr>
 <td>.interp</td>
 <td>该 section 中保存了可执行目标文件所需要的动态链接器的路径。</td>
-<td><code>readelf -p .interp &lt;object file&gt;</code></td>
-<td>Code Segment</td>
+<td><li>方式1：<code>readelf -p .interp &lt;object file&gt;</code></li> <li>方式2：<code>readelf -l &lt;object file&gt; | grep interpreter</code></li> <li>方式3：<code>objdump -s --section .interp &lt;object file&gt;</code></li></td>
+<td>First Segment（只读）</td>
 <td>是</td>
 </tr>
 <tr>
 <td>.dynsym</td>
 <td>包含需要动态链接的符号</td>
 <td><li>方式1：<code>readelf --dyn-syms &lt;object file&gt;</code></li> <li>方式2：<code>readelf -s &lt;object file&gt;</code></li></td>
-<td>Code Segment</td>
+<td>First Segment（只读）</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.dynstr</td>
+<td>动态链接符号表，仅包括需要动态链接的符号名称</td>
+<td><li><code>readelf -p .dynstr &lt;object file&gt;</code></li></td>
+<td>First Segment（只读）</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.rela.dyn</td>
+<td>动态链接中的数据重定位表。类似于静态链接中的 .rela.data。</td>
+<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
+<td>First Segment（只读）</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.rela.plt</td>
+<td>动态链接中的代码重定位表。类似于静态链接中的 .rela.text。</td>
+<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
+<td>First Segment（只读）</td>
 <td>是</td>
 </tr>
 <tr>
@@ -868,11 +895,11 @@
 <li><p>注：</p>
 <ul>
 <li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-l</code>为<code>--program-headers</code>的缩写，<code>-d</code>为<code>--dynamic</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
-<li><p>objdump 命令中缩写含义：<code>-p</code>为<code>--private-headers</code>的缩写，<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写。</p></li></ul></li>
+<li><p>objdump 命令中缩写含义：<code>-p</code>为<code>--private-headers</code>的缩写，<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写，<code>-s</code>为<code>--full-contents</code>的缩写。</p></li></ul></li>
 </ul>
 <p><strong>注意：</strong></p>
 <ul>
-<li><code>.symtab</code>和<code>.dynsym</code>section 的区别之一：运行可执行目标文件是，前者不会被加载到内存中，而后者是需要加载到内存中的。</li>
+<li><code>.symtab</code>和<code>.dynsym</code>section 的区别之一：运行可执行目标文件时，前者不会被加载到内存中，而后者是需要加载到内存中的。</li>
 </ul>
 <p><strong>1）</strong> 查看可执行目标文件的<code>Program header table</code></p>
 <p>查看 main.cpp 的内容：</p>
@@ -902,12 +929,114 @@
 <p><strong>3）</strong> 查看可执行目标文件的<code>.interp</code>section</p>
 <pre><code class="hljs javascript">$&nbsp;readelf&nbsp;-p&nbsp;.interp&nbsp;main<br><br><span class="hljs-built_in">String</span>&nbsp;dump&nbsp;<span class="hljs-keyword">of</span>&nbsp;section&nbsp;<span class="hljs-string">'.interp'</span>:<br>&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>]&nbsp;&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br></code></pre>
 <p>在动态链接的 ELF 可执行目标文件中，其<code>.interp</code>section 里面保存了可执行目标文件所需要的动态链接器的路径。</p>
-<p>在 X86-64 Linux 下，上面结果中的动态链接器实际指向<code>/lib/x86_64-linux-gnu/ld-2.31.so</code>，如下所示：</p>
+<p>在 X86-64 Linux 下，上面结果中的动态链接器在笔者的机器上实际指向<code>/lib/x86_64-linux-gnu/ld-2.31.so</code>，如下所示：</p>
 <pre><code class="hljs php">$&nbsp;ll&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br>lrwxrwxrwx&nbsp;<span class="hljs-number">1</span>&nbsp;root&nbsp;root&nbsp;<span class="hljs-number">32</span>&nbsp;Aug&nbsp;<span class="hljs-number">18</span>&nbsp;<span class="hljs-number">04</span>:<span class="hljs-number">02</span>&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span>&nbsp;-&gt;&nbsp;/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so*<br></code></pre>
 <p><strong>4）</strong> 查看可执行目标文件的<code>.dynsym</code>section</p>
 <pre><code class="hljs php">$&nbsp;readelf&nbsp;--dyn-syms&nbsp;main<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.dynsym'</span>&nbsp;contains&nbsp;<span class="hljs-number">7</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;Name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;LOCAL&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_deregisterTMCloneTab<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;printf@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__libc_start_main@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__gmon_start__<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_registerTMCloneTable<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__cxa_finalize@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br></code></pre>
 <p><strong>5）</strong> 查看可执行目标文件的<code>.dynamic</code>section</p>
 <pre><code class="hljs go">$&nbsp;readelf&nbsp;-d&nbsp;main<br><br>Dynamic&nbsp;section&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">0x2d</span>c8&nbsp;contains&nbsp;<span class="hljs-number">27</span>&nbsp;entries:<br>&nbsp;&nbsp;Tag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name/Value<br>&nbsp;<span class="hljs-number">0x0000000000000001</span>&nbsp;(NEEDED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shared&nbsp;library:&nbsp;[libc.so<span class="hljs-number">.6</span>]<br>&nbsp;<span class="hljs-number">0x000000000000000c</span>&nbsp;(INIT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span><br>&nbsp;<span class="hljs-number">0x000000000000000d</span>&nbsp;(FINI)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x11f</span>8<br>&nbsp;<span class="hljs-number">0x0000000000000019</span>&nbsp;(INIT_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>b8<br>&nbsp;<span class="hljs-number">0x000000000000001b</span>&nbsp;(INIT_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001a</span>&nbsp;(FINI_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>c0<br>&nbsp;<span class="hljs-number">0x000000000000001c</span>&nbsp;(FINI_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000006ffffef</span>5&nbsp;(GNU_HASH)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3a0</span><br>&nbsp;<span class="hljs-number">0x0000000000000005</span>&nbsp;(STRTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x470</span><br>&nbsp;<span class="hljs-number">0x0000000000000006</span>&nbsp;(SYMTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3c8</span><br>&nbsp;<span class="hljs-number">0x000000000000000a</span>&nbsp;(STRSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">132</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000000b</span>&nbsp;(SYMENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000015</span>&nbsp;(DEBUG)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br>&nbsp;<span class="hljs-number">0x0000000000000003</span>&nbsp;(PLTGOT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3f</span>b8<br>&nbsp;<span class="hljs-number">0x0000000000000002</span>&nbsp;(PLTRELSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000014</span>&nbsp;(PLTREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELA<br>&nbsp;<span class="hljs-number">0x0000000000000017</span>&nbsp;(JMPREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x5e8</span><br>&nbsp;<span class="hljs-number">0x0000000000000007</span>&nbsp;(RELA)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x528</span><br>&nbsp;<span class="hljs-number">0x0000000000000008</span>&nbsp;(RELASZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">192</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000009</span>&nbsp;(RELAENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001e</span>&nbsp;(FLAGS)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BIND_NOW<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>b&nbsp;(FLAGS_1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags:&nbsp;NOW&nbsp;PIE<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>e&nbsp;(VERNEED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x508</span><br>&nbsp;<span class="hljs-number">0x000000006fffffff</span>&nbsp;(VERNEEDNUM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>0&nbsp;(VERSYM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x4f</span>4<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>9&nbsp;(RELACOUNT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span><br>&nbsp;<span class="hljs-number">0x0000000000000000</span>&nbsp;(NULL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br></code></pre>
+<ul>
+<li><p>注：</p>
+<ul>
+<li><p><code>Tag</code>是  Dynamic section entry 结构体中的第 1 个字段，占用 8 字节，表示动态条目类型。最左侧一列表示<code>Tag</code>的值，中间一列为<code>Tag</code>的动态条目类型，对应<code>elf.h</code>中以<code>DT_</code>开头的宏定义。</p></li>
+<li><p><code>Name/Value</code>是  Dynamic section entry 结构体中的第 2 个字段，占用 8 字节，根据<code>Tag</code>类型的不同，该字段表示的含义也不同。常见选项见下表。</p></li></ul></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Tag 的值</th>
+<th>Tag 的类型</th>
+<th>Name/Value 的值</th>
+<th>Name/Value 的含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>NEEDED</td>
+<td>所依赖的共享库名称在 .dynstr section 中的下标</td>
+<td>依赖的共享库名称（<strong>仅包含直接依赖的</strong>）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>STRTAB</td>
+<td>.dynstr section 在目标文件中的偏移量（字节）</td>
+<td>动态链接字符串表的地址</td>
+</tr>
+<tr>
+<td>6</td>
+<td>SYMTAB</td>
+<td>.dynsym section 在目标文件中的偏移量（字节）</td>
+<td>动态链接符号表的地址</td>
+</tr>
+<tr>
+<td>7</td>
+<td>RELA</td>
+<td>.rela.dyn section 在目标文件中的偏移量（字节）</td>
+<td>动态链接重定位表（特指 rela 类型的）的地址</td>
+</tr>
+<tr>
+<td>8</td>
+<td>RELASZ</td>
+<td>.rela.dyn section 在目标文件中占用的空间大小（字节）</td>
+<td>动态链接重定位表（特指 rela 类型的）的大小</td>
+</tr>
+<tr>
+<td>9</td>
+<td>RELAENT</td>
+<td>.rela.dyn section 中每个条目的大小（字节）</td>
+<td>动态链接重定位表（特指 rela 类型的）中每个条目的大小</td>
+</tr>
+<tr>
+<td>10</td>
+<td>STRSZ</td>
+<td>.dynstr section 在目标文件中占用的空间大小（字节）</td>
+<td>动态链接字符串表的大小</td>
+</tr>
+<tr>
+<td>11</td>
+<td>SYMENT</td>
+<td>.dynsym section 中每个条目的大小（字节）</td>
+<td>动态链接符号表中每个条目的大小</td>
+</tr>
+<tr>
+<td>12</td>
+<td>INIT</td>
+<td>.init section 在目标文件中的偏移量（字节）</td>
+<td>初始化代码地址</td>
+</tr>
+<tr>
+<td>13</td>
+<td>FINI</td>
+<td>.fini section 在目标文件中的偏移量（字节）</td>
+<td>结束代码地址</td>
+</tr>
+<tr>
+<td>14</td>
+<td>SONAME</td>
+<td>本共享库名称在 .dynstr section 中的下标</td>
+<td>本共享对象的“SO-NAME”，即本共享库的名称</td>
+</tr>
+<tr>
+<td>15</td>
+<td>RPATH</td>
+<td>？</td>
+<td>动态链接库共享对象搜索路径</td>
+</tr>
+<tr>
+<td>30</td>
+<td>FLAGS</td>
+<td>常见选项：<li><span>SYMBOLIC，符号解析从这开始</span></li> <li><span>TEXTREL，本目标文件包含 .text 的重定位表</span></li> <li><span>BIND_NOW，本目标文件不采用延迟绑定</span></li></td>
+<td>加载对象的标志</td>
+</tr>
+<tr>
+<td>0x6ffffffb</td>
+<td>FLAGS_1</td>
+<td>常见选项：<li><span>NOW，为本目标文件设置了 RTLD_NOW 标志位</span></li> <li><span>GLOBAL，为本目标文件设置了 RTLD_GLOBAL 标志位</span></li></td>
+<td>状态标志</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <p><font size="4"><strong>下一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E9%93%BE%E6%8E%A5%EF%BC%883%EF%BC%89%EF%BC%9A%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%EF%BC%88%E4%B8%8A%EF%BC%89">计算机系统篇之链接（3）：静态链接（上）</a></font></p>
 <p><font size="4"><strong>上一篇：</strong><a href="https://csstormq.github.io/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%AF%87%E4%B9%8B%E9%93%BE%E6%8E%A5%EF%BC%881%EF%BC%89%EF%BC%9Agcc%E6%88%96g++%E7%9A%84%E7%BC%96%E8%AF%91%E6%B5%81%E7%A8%8B">计算机系统篇之链接（1）：gcc / g++的编译流程 </a></font></p>
