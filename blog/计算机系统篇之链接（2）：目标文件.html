@@ -389,7 +389,7 @@
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize62fontp"><span><p align="center"><strong><font size="6">计算机系统篇之链接（2）：目标文件</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
 <p align="right">Created: Saturday, 21. December 2019 11:08AM</p>
-<p align="right">Last Modified: Wednesday, 20. January 2021 08:09PM</p>
+<p align="right">Last Modified: Tuesday, 26. January 2021 11:32PM</p>
 <hr>
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
@@ -398,8 +398,18 @@
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump目标文件类型">目标文件类型</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump目标文件格式">目标文件格式</a></p>
 <p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump可重定位目标文件ELF-64">可重定位目标文件（ELF-64 格式）</a></p>
-<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump符号表">符号表</a></p>
-<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump可执行目标文件ELF-64">可执行目标文件（ELF-64 格式）</a></p></ul><p></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump可执行目标文件ELF-64">可执行目标文件（ELF-64 格式）</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">查看 ELF Header</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump2">查看 Section Header Table</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump3">查看 .comment</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump4">查看 .shstrtab</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump5">查看 .strtab</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump6">查看 .symtab</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump7">查看 Program Header Table</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump8">查看 .interp</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump9">查看 .dynsym</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump10">查看 .dynamic</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump0">.symtab 和 .dynsym 之间的区别</a></p></ul><p></p>
 </li></ul>
 <hr>
 <h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
@@ -445,22 +455,22 @@
 </ul>
 <p><strong>注意：</strong> CS:APP(Third Edition) 7.3 节中所描述的是，可共享目标文件的生成者为编译器和汇编器。其原文为：</p>
 <pre><code class="text language-text">Compilers&nbsp;and&nbsp;assemblers&nbsp;generate&nbsp;relocatable&nbsp;object&nbsp;files&nbsp;(including&nbsp;shared&nbsp;object&nbsp;files).&nbsp;Linkers&nbsp;generate<br>executable&nbsp;object&nbsp;files.<br></code></pre>
-<p>但经过实际验证（验证方法见上一篇：《计算机系统篇之链接（1）：gcc / g++的编译流程》），链接器参与了生成可共享目标文件的过程，这一点需要注意。</p>
+<p>但经过笔者实际验证（验证方法见上一篇：《计算机系统篇之链接（1）：gcc / g++的编译流程》），链接器参与了生成可共享目标文件的过程。这一点需要注意。</p>
 <p><strong>1）</strong> 如何生成可重定位目标文件（On X86-64 Linux）：</p>
 <pre><code class="hljs php">$&nbsp;g++&nbsp;-c&nbsp;main.cpp&nbsp;-o&nbsp;main.o<br><span class="hljs-comment">#&nbsp;或&nbsp;g++&nbsp;-c&nbsp;main.cpp</span><br><span class="hljs-comment">#&nbsp;这两个命令都会生成名称为&nbsp;main.o&nbsp;的可重定位目标文件</span><br></code></pre>
 <p>注：<code>-c</code>选项表示只执行编译和汇编过程，但不执行链接过程（Compile or assemble the source files, but do not link.）。</p>
 <p>查看 main.cpp 的内容：</p>
-<pre><code class="hljs cpp">$&nbsp;cat&nbsp;main.<span class="hljs-function">cpp<br><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">main</span><span class="hljs-params">()</span><br></span>{<br>&nbsp;&nbsp;&nbsp;&nbsp;sum(<span class="hljs-number">1</span>,&nbsp;<span class="hljs-number">2</span>);<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br>}<br></code></pre>
+<pre><code class="hljs cpp">$&nbsp;cat&nbsp;main.<span class="hljs-function">cpp<br><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">main</span><span class="hljs-params">()</span><br></span>{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br>}<br></code></pre>
 <p><strong>2）</strong> 如何生成可执行目标文件（On X86-64 Linux）：</p>
 <pre><code class="hljs php"><span class="hljs-comment">#&nbsp;默认生成的可执行目标文件为&nbsp;a.out</span><br>$&nbsp;g++&nbsp;main.cpp<br><span class="hljs-comment">#&nbsp;指定生成的可执行目标文件为&nbsp;main</span><br>$&nbsp;g++&nbsp;main.cpp&nbsp;-o&nbsp;main<br></code></pre>
 <p><strong>3）</strong> 如何生成可共享目标文件（On X86-64 Linux）：</p>
-<pre><code class="hljs php"><span class="hljs-comment">#&nbsp;默认生成的可共享目标文件为&nbsp;a.out</span><br>$&nbsp;g++&nbsp;-shared&nbsp;sum.cpp<br><span class="hljs-comment">#&nbsp;指定生成的可共享目标文件为&nbsp;sum.so</span><br>$&nbsp;g++&nbsp;-shared&nbsp;sum.cpp&nbsp;-o&nbsp;sum.so<br></code></pre>
-<p>注：<code>-shared</code>选项表示生成可共享目标文件，<strong>属于链接器选项</strong>，默认名称也为 a.out。</p>
-<p><strong>注意：</strong></p>
+<pre><code class="hljs php"><span class="hljs-comment">#&nbsp;默认生成的可共享目标文件为&nbsp;a.out</span><br>$&nbsp;g++&nbsp;-shared&nbsp;-fPIC&nbsp;sum.cpp<br><span class="hljs-comment">#&nbsp;指定生成的可共享目标文件为&nbsp;sum.so</span><br>$&nbsp;g++&nbsp;-shared&nbsp;-fPIC&nbsp;sum.cpp&nbsp;-o&nbsp;sum.so<br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>含有<code>main</code>函数的源文件不能用于生成可共享目标文件，但可以用于生成可重定位目标文件（即 .o 文件）。</p></li>
-<li><p>生成可共享目标文件时，如果带<code>-fPIC</code>或<code>-fpic</code>选项（这两个选项略有差别），那么生成的可共享目标文件是地址无关的，意味着所有进程共享同一份该可共享目标文件的代码段（即该可共享目标文件的代码段在物理内存中仅存在一份），从而达到节省内存空间的目的；否则，每个依赖该可共享目标文件的进程都需要修改该可共享目标文件的代码段，意味着该可共享目标文件的代码段在物理内存中存在多份。</p></li>
+<li><p><code>-shared</code>选项表示生成可共享目标文件，<strong>属于链接器选项</strong>，默认名称也为 a.out。</p></li>
+<li><p><code>-fPIC</code>选项表示生成地址无关代码（在后续文章中会详细介绍），<strong>属于编译器选项</strong>。</p></li>
 </ul>
+<p><strong>注意：</strong> 含有<code>main</code>函数的源文件不能用于生成可共享目标文件，但可用于生成可重定位目标文件（即 .o 文件）。</p>
 <p>查看 sum.cpp 的内容：</p>
 <pre><code class="hljs cpp">$&nbsp;cat&nbsp;sum.<span class="hljs-function">cpp&nbsp;<br><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">sum</span><span class="hljs-params">(<span class="hljs-keyword">int</span>&nbsp;a,&nbsp;<span class="hljs-keyword">int</span>&nbsp;b)</span><br></span>{<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;a&nbsp;+&nbsp;b;<br>}<br></code></pre>
 <hr>
@@ -483,11 +493,11 @@
 <td>Mach-O（Mach Object）</td>
 </tr>
 <tr>
-<td>X86-64 Linux 和 Unix</td>
+<td>X86-64 Linux</td>
 <td>ELF-64（Executable and Linkable Format）</td>
 </tr>
 <tr>
-<td>aarch64 Linux 和 Unix</td>
+<td>aarch64 Linux</td>
 <td>ELF-64</td>
 </tr>
 </tbody>
@@ -581,20 +591,197 @@
 </tr>
 </tbody>
 </table>
-<ul>
-<li><p>注：</p>
+<p>注：</p>
 <ul>
 <li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-r</code>为<code>--relocs</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
-<li><p>objdump 命令中缩写含义：<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写。</p></li></ul></li>
+<li><p>objdump 命令中缩写含义：<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写。</p></li>
 </ul>
 <p><strong>注意：</strong> CS:APP(Third Edition) 7.4 节中所描述的是，节头表名称包含在<code>.strtab</code>section 中。其原文为：</p>
 <pre><code class="text language-text">.strtab:&nbsp;A&nbsp;string&nbsp;table&nbsp;for&nbsp;the&nbsp;symbol&nbsp;tables&nbsp;in&nbsp;the&nbsp;.symtab&nbsp;and&nbsp;.debug&nbsp;sections,&nbsp;and&nbsp;for&nbsp;the&nbsp;section<br>names&nbsp;in&nbsp;the&nbsp;section&nbsp;headers.<br></code></pre>
-<p>但经过实际验证，在 X86-64 Linux（Ubuntu 20.04）中，节头表名称包含在<code>.shstrtab</code>section 中，而不是<code>.strtab</code>section 中。</p>
-<p><strong>1）</strong> 查看可重定位目标文件的<code>ELF Header</code></p>
+<p>但经过笔者实际验证，在 X86-64 Linux（Ubuntu 20.04）中，节头表名称包含在<code>.shstrtab</code>而不是<code>.strtab</code>section 中。这一点需要注意。</p>
+<hr>
+<h3 id="hspanidjumpelf64elf64span-1"><span><span id="jump可执行目标文件ELF-64">可执行目标文件（ELF-64 格式）</span></span></h3>
+<p>在可执行目标文件和可共享目标文件中，section 被分组成 segment 以供加载。每个 segment 中包含的 sections 是连续的。</p>
+<p>典型的 ELF-64 可执行目标文件格式：</p>
+<table>
+<thead>
+<tr>
+<th>组成部分</th>
+<th>描述</th>
+<th>如何查看</th>
+<th>属于哪个 Segment</th>
+<th>Segment 的访问权限</th>
+<th>程序执行时是否加载到内存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ELF header</td>
+<td>描述生成该目标文件的系统的字大小和字节顺序、目标文件类型、机器类型等信息。</td>
+<td><li><code>readelf -h &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>Program header table</td>
+<td>描述可执行目标文件中所有段（Segments）的位置和大小等信息。</td>
+<td><li>方式1：<code>readelf -l &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.interp</td>
+<td>该 section 中保存了可执行目标文件所需要的动态链接器的路径。</td>
+<td><li>方式1：<code>readelf -p .interp &lt;object file&gt;</code></li> <li>方式2：<code>readelf -l &lt;object file&gt; | grep interpreter</code></li> <li>方式3：<code>objdump -s --section .interp &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.dynsym</td>
+<td>包含需要动态链接的符号</td>
+<td><li>方式1：<code>readelf --dyn-syms &lt;object file&gt;</code></li> <li>方式2：<code>readelf -s &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.dynstr</td>
+<td>动态链接符号表，仅包括需要动态链接的符号名称</td>
+<td><li><code>readelf -p .dynstr &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.rela.dyn</td>
+<td>动态链接中的数据重定位表。类似于静态链接中的 .rela.data。</td>
+<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.rela.plt</td>
+<td>动态链接中的代码重定位表。类似于静态链接中的 .rela.text。</td>
+<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
+<td>The First Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.init</td>
+<td>该 section 中定义了一个名称为 _init 的函数，会被程序初始化代码调用。</td>
+<td><code>objdump -d &lt;object file&gt;</code></td>
+<td>Code Segment（ The Second Segment）</td>
+<td>可读，可执行</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.text</td>
+<td>已编译程序的机器代码。</td>
+<td><li>方式1：<code>objdump -d &lt;object file&gt;</code>（只输出汇编）</li> <li>方式2：<code>objdump -S &lt;object file&gt;</code>（输出汇编和对应的源码。需要编译时加-g选项，才会打印源码。）</li> <li>方式3：<code>objdump -d --section .text sum.so</code>（只输出汇编，且只打印 .text section）</li></td>
+<td>Code Segment</td>
+<td>可读，可执行</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.rodata</td>
+<td>只读数据，比如：常量字符串、带 const 修饰的全局变量和静态变量等。</td>
+<td>无</td>
+<td>The Third Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.dynamic</td>
+<td>该 section 中保存了动态链接的基本信息。</td>
+<td><li>方式1：<code>readelf -d &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
+<td>The Fouth Segment</td>
+<td>只读</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.data</td>
+<td>已初始化的且初始值非0的全局变量和静态变量。</td>
+<td>无</td>
+<td>Data Segment（ The Fifth Segment）</td>
+<td>可读，可写</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.bss</td>
+<td>未初始化的或初始值为0的全局变量和静态变量。</td>
+<td>无</td>
+<td>Data Segment</td>
+<td>可读，可写</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.symtab</td>
+<td>一个符号表，它存放着在目标文件中定义和引用的函数和全局变量、静态变量的信息。</td>
+<td><li><code>readelf -s &lt;object file&gt;</code>（注：删除目标文件中 .symtab section 的命令为：<code>strip &lt;object file&gt;</code>）</li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>.debug</td>
+<td>一个调试符号表，其条目是程序中定义的局部变量和类型定义（typedefs），程序中定义和引用的全局变量，以及原始的 C 源文件。（只有带 -g 编译时才会产生）</td>
+<td><li>方式1：<code>readelf --debug-dump &lt;object file&gt;</code></li> <li>方式2：<code>objdump -g &lt;object file&gt;</code></li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>.comment</td>
+<td>版本控制信息。</td>
+<td><li><code>readelf -p .comment &lt;object file&gt;</code> </li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>.shstrtab</td>
+<td>一个字符串表，其内容包括所有 section 的名称。</td>
+<td><li><code>readelf -p .shstrtab &lt;object file&gt;</code> </li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>.strtab</td>
+<td>一个字符串表，其内容包括所有符号的名称。</td>
+<td><li><code>readelf -p .strtab &lt;object file&gt;</code> （注：删除目标文件中 .strtab section 的命令为：<code>strip &lt;object file&gt;</code>）</li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>Section header table</td>
+<td>描述目标文件的所有节（sections）的位置和大小等信息。</td>
+<td><li><code>readelf -S &lt;object file&gt;</code></li></td>
+<td>不属于任何一个 Segment</td>
+<td>无</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p>注：</p>
+<ul>
+<li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-l</code>为<code>--program-headers</code>的缩写，<code>-d</code>为<code>--dynamic</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
+<li><p>objdump 命令中缩写含义：<code>-p</code>为<code>--private-headers</code>的缩写，<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写，<code>-s</code>为<code>--full-contents</code>的缩写。</p></li>
+</ul>
+<p><strong>注意：</strong> CS:APP(Third Edition) 7.8 节中所描述的是，<code>ELF Header</code>、<code>Program Header Table</code>和<code>.rodata</code>section 都位于<code>Code Segment</code>（代码段）中。但经过笔者实际验证，在 X86-64 Linux（Ubuntu 20.04）中，<code>ELF Header</code>和<code>Program Header Table</code>位于同一个段中（根据先后顺序，在这里称之为<code>The First Segment</code>），但不是与<code>.text</code>所在的代码段。另外，<code>.rodata</code>section 所在的段（在这里称之为<code>The Third Segment</code>）也不是代码段。这两点需要注意。</p>
+<hr>
+<h3 id="hspanidjump1elfheaderspan"><span><span id="jump1">查看 ELF Header</span></span></h3>
+<p>查看可重定位目标文件（ELF-64 格式）的<code>ELF Header</code>的内容：</p>
 <pre><code class="hljs sql">$&nbsp;readelf&nbsp;-h&nbsp;sum.o<br>ELF&nbsp;Header:<br>&nbsp;&nbsp;Magic:&nbsp;&nbsp;&nbsp;7f&nbsp;45&nbsp;4c&nbsp;46&nbsp;02&nbsp;01&nbsp;01&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;00&nbsp;<br>&nbsp;&nbsp;Class:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELF64<br>&nbsp;&nbsp;Data:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2's&nbsp;complement,&nbsp;little&nbsp;endian<br>&nbsp;&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(current)<br>&nbsp;&nbsp;OS/ABI:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UNIX&nbsp;-&nbsp;System&nbsp;V<br>&nbsp;&nbsp;ABI&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<br>&nbsp;&nbsp;Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;REL&nbsp;(Relocatable&nbsp;file)<br>&nbsp;&nbsp;Machine:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Advanced&nbsp;Micro&nbsp;Devices&nbsp;X86-64<br>&nbsp;&nbsp;Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x1<br>&nbsp;&nbsp;Entry&nbsp;point&nbsp;address:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0<br>&nbsp;&nbsp;<span class="hljs-keyword">Start</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;(<span class="hljs-keyword">bytes</span>&nbsp;<span class="hljs-keyword">into</span>&nbsp;<span class="hljs-keyword">file</span>)<br>&nbsp;&nbsp;<span class="hljs-keyword">Start</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">928</span>&nbsp;(<span class="hljs-keyword">bytes</span>&nbsp;<span class="hljs-keyword">into</span>&nbsp;<span class="hljs-keyword">file</span>)<br>&nbsp;&nbsp;Flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;this&nbsp;header:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">64</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-built_in">Number</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;program&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Size</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">64</span>&nbsp;(<span class="hljs-keyword">bytes</span>)<br>&nbsp;&nbsp;<span class="hljs-built_in">Number</span>&nbsp;<span class="hljs-keyword">of</span>&nbsp;<span class="hljs-keyword">section</span>&nbsp;headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span><br>&nbsp;&nbsp;<span class="hljs-keyword">Section</span>&nbsp;header&nbsp;<span class="hljs-keyword">string</span>&nbsp;<span class="hljs-keyword">table</span>&nbsp;<span class="hljs-keyword">index</span>:&nbsp;<span class="hljs-number">9</span><br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
+<li><p>ELF-64 目标文件格式中，<code>ELF Header</code>对应的结构体名称为<code>Elf64_Ehdr</code>，定义在<code>/usr/include/elf.h</code>头文件中。</p></li>
 <li><p><code>Magic</code>是 ELF Header 结构体中的第 1 个字段，占用 16 字节。</p>
 <p>前 4 个字节用于标识该文件是 ELF 格式的目标文件，值（十六进制）固定为：7f（0x7f）、45（ASCII 码中大写字母 E 的十六机制表示）、4c（ASCII 码中大写字母 L 的十六机制表示）、46（ASCII 码中大写字母 F 的十六机制表示）。<br>Magic[4] 表示 ELF 目标文件类别，可选项：1（ELFCLASS32，32 位的 ELF 文件）、2（ELFCLASS64，64 位的 ELF 文件）。<br>Magic[5] 表示 ELF 目标文件采用的字节序，可选项：1（ELFDATA2LSB，小端）、2（ELFDATA2MSB，大端）。<br>Magic[6] 表示 ELF 目标文件格式的主版本号，可选项：1（当前版本）。<br>Magic[7] 表示操作系统及 ABI，可选项：0（ELFOSABI_SYSV，System V ABI）、1（ELFOSABI_HPUX，HP-UX operating system）、64（ELFOSABI_ARM_AEABI，ARM EABI）、97（ELFOSABI_ARM，ARM）、255（ELFOSABI_STANDALONE，Embedded application）等。</p></li>
 <li><p><code>Type</code>是 ELF Header 结构体中的第 2 个字段，占用 2 字节，表示目标文件类型。常用可选项：0（ET_NONE，没有文件类型）、1（ET_REL，可重定位目标文件）、2（ET_EXEC，可执行目标文件）、3（ET_DYN，可共享目标文件）、4（ET_CORE，core 文件）。</p></li>
@@ -609,15 +796,16 @@
 <li><p><code>Number of program headers</code>是 ELF Header 结构体中的第 11 个字段，占用 2 字节，表示 program header table 中条目的数量。</p></li>
 <li><p><code>Size of section headers</code>是 ELF Header 结构体中的第 12 个字段，占用 2 字节，表示 section header table 中每个条目的大小（字节），每个条目的大小是固定的。</p></li>
 <li><p><code>Number of section headers</code>是 ELF Header 结构体中的第 13 个字段，占用 2 字节，表示 section header table 中条目的数量。</p></li>
-<li><p><code>Section header string table index</code>是 ELF Header 结构体中的第 14 个字段，占用 2 字节，表示 .strtab section 在 section header table 中的索引。0 表示没有 .strtab section。</p></li></ul></li>
+<li><p><code>Section header string table index</code>是 ELF Header 结构体中的第 14 个字段，占用 2 字节，表示 .strtab section 在 section header table 中的索引。0 表示没有 .strtab section。</p></li>
 </ul>
-<p><strong>注意：</strong> ELF 目标文件格式（包括 32 位和 64 位的版本）中的 ELF Header 结构、Section Header 结构和相关常数等被定义在<code>/usr/include/elf.h</code>头文件中。</p>
-<p><strong>2）</strong> 查看可重定位目标文件的<code>Section header table</code></p>
+<hr>
+<h3 id="hspanidjump2sectionheadertablespan"><span><span id="jump2">查看 Section Header Table</span></span></h3>
+<p>查看可重定位目标文件（ELF-64 格式）的<code>Section Header Table</code>的内容：</p>
 <pre><code class="hljs cs">$&nbsp;readelf&nbsp;-S&nbsp;sum.o<br>There&nbsp;are&nbsp;<span class="hljs-number">12</span>&nbsp;section&nbsp;headers,&nbsp;starting&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">0x3a0</span>:<br><br>Section&nbsp;Headers:<br>&nbsp;&nbsp;[<span class="hljs-meta">Nr</span>]&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Offset<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EntSize&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags&nbsp;&nbsp;Link&nbsp;&nbsp;Info&nbsp;&nbsp;Align<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;0</span>]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000000</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;1</span>]&nbsp;.text&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000040</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000014</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;AX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;2</span>]&nbsp;.data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000054</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">000000000000000</span>c&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;WA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;3</span>]&nbsp;.bss&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000060</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000014</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;WA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;4</span>]&nbsp;.rodata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000060</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;5</span>]&nbsp;.comment&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000064</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000033</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000001</span>&nbsp;&nbsp;MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;6</span>]&nbsp;.note.GNU-stack&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000097</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;7</span>]&nbsp;.eh_frame&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000098</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000038</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;8</span>]&nbsp;.rela.eh_frame&nbsp;&nbsp;&nbsp;&nbsp;RELA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000328</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">10</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;9</span>]&nbsp;.shstrtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000340</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">000000000000005</span>c&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">10</span>]&nbsp;.symtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYMTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">000000</span>d0<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">00000000000001</span>c8&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">11</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">15</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">11</span>]&nbsp;.strtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000298</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000090</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>Key&nbsp;to&nbsp;Flags:<br>&nbsp;&nbsp;W&nbsp;(write),&nbsp;A&nbsp;(alloc),&nbsp;X&nbsp;(execute),&nbsp;M&nbsp;(merge),&nbsp;S&nbsp;(strings),&nbsp;l&nbsp;(large)<br>&nbsp;&nbsp;I&nbsp;(info),&nbsp;L&nbsp;(link&nbsp;order),&nbsp;G&nbsp;(<span class="hljs-keyword">group</span>),&nbsp;T&nbsp;(TLS),&nbsp;E&nbsp;(exclude),&nbsp;x&nbsp;(unknown)<br>&nbsp;&nbsp;O&nbsp;(extra&nbsp;OS&nbsp;processing&nbsp;required)&nbsp;o&nbsp;(OS&nbsp;specific),&nbsp;p&nbsp;(processor&nbsp;specific)<br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
-<li><p><code>There are 12 section headers, starting at offset 0x3a0</code>表示 section header table 中有 12 个条目，section header table 的起始位置在目标文件中的偏移量为 0x3a0 字节。也就是说，section header table 的内容从第 0x3a1 字节（包括该字节）开始。</p></li>
+<li><p>ELF-64 目标文件格式中，<code>Section Header Table</code>对应的结构体名称为<code>Elf64_Shdr</code>，定义在<code>/usr/include/elf.h</code>头文件中。</p></li>
+<li><p><code>There are 12 section headers, starting at offset 0x3a0</code>，表示 section header table 中有 12 个条目，section header table 的起始位置在目标文件中的偏移量为 0x3a0 字节。也就是说，section header table 的内容从第 0x3a1 字节（包括该字节）开始。</p></li>
 <li><p><code>Name</code>是 Section Header 结构体中的第 1 个字段，占用 4 字节，表示该 section 名称的起始位置在<code>.shstrtab</code>section 中的偏移量（字节）。</p></li>
 <li><p><code>Type</code>是 Section Header 结构体中的第 2 个字段，占用 4 字节，表示 section 类型。常用可选项：0（SHT_NULL，表示无效 section）、1（SHT_PROGBITS，表示该 section 包含由程序定义的信息，比如：.text、.data sections）、2（SHT_SYMTAB，表示链接器符号表）、3（SHT_STRTAB，表示字符串表）、4（SHT_RELA，表示 "Rela" 类型的重定位表）、5（SHT_HASH，表示符号表的哈希表）、6（SHT_DYNAMIC，表示动态链接信息）、7（SHT_NOTE，表示提示性信息）、8（SHT_NOBITS，表示未初始化的空间，不占用目标文件的任何空间，比如：.bss section）、9（SHT_REL，表示 "Rel" 类型的重定位表）、10（SHT_SHLIB，保留）、11（SHT_DYNSYM，表示动态链接的符号表）等。</p></li>
 <li><p><code>Flags</code>是 Section Header 结构体中的第 3 个字段，占用 8 字节，表示该 section 在进程虚拟地址空间中的属性。常用可选项：1（SHF_WRITE，简写为 W，表示该 section 在进程空间中可写）、2（SHF_ALLOC，简写为 A，表示该 section 在进程空间中需要被分配空间，即执行程序时会将该 section 加载到内存中）、4（SHF_EXECINSTR，简写为 X，表示该 section 在进程空间中可以被执行）。</p></li>
@@ -627,45 +815,49 @@
 <li><p><code>Link</code>是 Section Header 结构体中的第 7 个字段，占用 4 字节，表示该 section 相关 section 的 section 索引。比如：如果该条目表示<code>.text</code>section，并且其重定位信息在<code>.rela.text</code>section 中，那么该字段的值为<code>.rela.text</code>section 的索引。</p></li>
 <li><p><code>Info</code>是 Section Header 结构体中的第 8 个字段，占用 4 字节，表示该 section 的额外信息。</p></li>
 <li><p><code>Align</code>是 Section Header 结构体中的第 9 个字段，占用 8 字节，表示该 section 的内存对齐要求。这个字段的值必须是 2 的幂。如果该字段的值为 0 或 1，那么表示该 section 没有内存对齐要求。</p></li>
-<li><p><code>EntSize</code>是 Section Header 结构体中的第 10 个字段，占用 8 字节，表示该 section 中每个条目的大小（字节）。0 表示该 section 不包含任何条目。</p></li></ul></li>
+<li><p><code>EntSize</code>是 Section Header 结构体中的第 10 个字段，占用 8 字节，表示该 section 中每个条目的大小（字节）。0 表示该 section 不包含任何条目。</p></li>
 </ul>
-<p><strong>3）</strong> 查看可重定位目标文件的<code>.comment</code>section</p>
+<hr>
+<h3 id="hspanidjump3commentspan"><span><span id="jump3">查看 .comment</span></span></h3>
+<p>查看可重定位目标文件的<code>.comment</code>section 的内容：</p>
 <pre><code class="hljs javascript">$&nbsp;readelf&nbsp;-p&nbsp;.comment&nbsp;sum.o<br><br><span class="hljs-built_in">String</span>&nbsp;dump&nbsp;<span class="hljs-keyword">of</span>&nbsp;section&nbsp;<span class="hljs-string">'.comment'</span>:<br>&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>]&nbsp;&nbsp;GCC:&nbsp;(Ubuntu&nbsp;<span class="hljs-number">6.5</span><span class="hljs-number">.0</span><span class="hljs-number">-2</span>ubuntu1~<span class="hljs-number">16.04</span>)&nbsp;<span class="hljs-number">6.5</span><span class="hljs-number">.0</span>&nbsp;<span class="hljs-number">20181026</span><br></code></pre>
-<p>注：这里<code>.comment</code>section 的第一个字节的值为 0x00（二进制的零，<code>\0</code>），但不代表<code>.comment</code>section 在其他类型的目标文件中第一个字节的值也为 0x00（<code>\0</code>）。比如：在可执行目标文件中该 section 的第一个字节的值不为 0x00。</p>
+<p><strong>注意：</strong> 这里<code>.comment</code>section 的第一个字节的值为 0x00（二进制的零，<code>\0</code>），但不代表<code>.comment</code>section 在其他类型的目标文件中第一个字节的值也为 0x00（<code>\0</code>）。比如：在可执行目标文件中该 section 的第一个字节的值不为 0x00。</p>
 <p>查看可执行目标文件<code>main</code>的<code>.comment</code>section 的内容：</p>
 <pre><code class="hljs javascript">$&nbsp;readelf&nbsp;-p&nbsp;.comment&nbsp;main<br><br><span class="hljs-built_in">String</span>&nbsp;dump&nbsp;<span class="hljs-keyword">of</span>&nbsp;section&nbsp;<span class="hljs-string">'.comment'</span>:<br>&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>]&nbsp;&nbsp;GCC:&nbsp;(Ubuntu&nbsp;<span class="hljs-number">6.5</span><span class="hljs-number">.0</span><span class="hljs-number">-2</span>ubuntu1~<span class="hljs-number">16.04</span>)&nbsp;<span class="hljs-number">6.5</span><span class="hljs-number">.0</span>&nbsp;<span class="hljs-number">20181026</span><br></code></pre>
-<p><strong>4）</strong> 查看可重定位目标文件的<code>.shstrtab</code>section</p>
+<hr>
+<h3 id="hspanidjump4shstrtabspan"><span><span id="jump4">查看 .shstrtab</span></span></h3>
+<p>查看可重定位目标文件的<code>.shstrtab</code>section 的内容：</p>
 <pre><code class="hljs cs">$&nbsp;readelf&nbsp;-p&nbsp;.shstrtab&nbsp;sum.o<br><br>String&nbsp;dump&nbsp;of&nbsp;section&nbsp;<span class="hljs-string">'.shstrtab'</span>:<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span>]&nbsp;&nbsp;.symtab<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9</span>]&nbsp;&nbsp;.strtab<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;11</span>]&nbsp;&nbsp;.shstrtab<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;1b</span>]&nbsp;&nbsp;.text<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;21</span>]&nbsp;&nbsp;.data<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;27</span>]&nbsp;&nbsp;.bss<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;2c</span>]&nbsp;&nbsp;.rodata<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;34</span>]&nbsp;&nbsp;.comment<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;3d</span>]&nbsp;&nbsp;.note.GNU-stack<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;4d</span>]&nbsp;&nbsp;.rela.eh_frame<br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
-<li><p><code>[]</code>中的值表示 section 名称的起始位置在<code>.shstrtab</code>section 中的偏移量（字节）。</p></li>
+<li><p><code>[]</code>中的值，表示 section 名称的起始位置在<code>.shstrtab</code>section 中的偏移量（字节）。</p></li>
 <li><p><code>.shstrtab</code>section 的第一个字节的值固定为 0，表示一个空的或者不存在的 section 名称。</p></li>
-<li><p><code>.shstrtab</code>section 的 section 名称是以<code>\0</code>（对应的 ASCII 码十六机制为 0x00）结尾的字符串。</p></li></ul></li>
+<li><p><code>.shstrtab</code>section 的 section 名称是以<code>\0</code>（对应的 ASCII 码十六机制为 0x00）结尾的字符串。</p></li>
 </ul>
-<p><strong>注意：</strong> 可重定位目标文件<code>sum.o</code>的<code>.shstrtab</code>section 中未显式地包含<code>.eh_frame</code>section 的名称。从表面上看，这不符合“<code>.shstrtab</code>section 的作用：一个字符串表，其内容包括所有 section 的名称”。实际上，<code>.shstrtab</code>section 中隐式地包含<code>.eh_frame</code>section 的名称，即复用了<code>.rela.eh_frame</code>section 的后半部分的名称。</p>
-<p>验证注释中的三条结论：</p>
+<p><strong>注意：</strong> 可重定位目标文件<code>sum.o</code>中，其<code>.shstrtab</code>section 的内容未显式地包含<code>.eh_frame</code>section 的名称。从表面上看，这不符合“<code>.shstrtab</code>section 的作用：一个字符串表，其内容包括所有 section 的名称”。实际上，<code>.shstrtab</code>section 中隐式地包含<code>.eh_frame</code>section 的名称，即复用了<code>.rela.eh_frame</code>section 的后半部分的名称。</p>
+<p><strong>验证过程：</strong></p>
+<p>查看可重定位目标文件的<code>.shstrtab</code>section 的内容（十六进制）：</p>
 <pre><code class="hljs go">$&nbsp;readelf&nbsp;-x&nbsp;.shstrtab&nbsp;sum.o<br><br>Hex&nbsp;dump&nbsp;of&nbsp;section&nbsp;<span class="hljs-string">'.shstrtab'</span>:<br>&nbsp;&nbsp;<span class="hljs-number">0x00000000</span>&nbsp;<span class="hljs-number">002e7379</span>&nbsp;<span class="hljs-number">6d</span>746162&nbsp;<span class="hljs-number">002e7374</span>&nbsp;<span class="hljs-number">72746162</span>&nbsp;..symtab..strtab<br>&nbsp;&nbsp;<span class="hljs-number">0x00000010</span>&nbsp;<span class="hljs-number">002e7368</span>&nbsp;<span class="hljs-number">73747274</span>&nbsp;<span class="hljs-number">6162002</span>e&nbsp;<span class="hljs-number">74657874</span>&nbsp;..shstrtab..text<br>&nbsp;&nbsp;<span class="hljs-number">0x00000020</span>&nbsp;<span class="hljs-number">002e6461</span>&nbsp;<span class="hljs-number">7461002</span>e&nbsp;<span class="hljs-number">62737300</span>&nbsp;<span class="hljs-number">2e726f</span>64&nbsp;..data..bss..rod<br>&nbsp;&nbsp;<span class="hljs-number">0x00000030</span>&nbsp;<span class="hljs-number">61746100</span>&nbsp;<span class="hljs-number">2e636f</span>6d&nbsp;<span class="hljs-number">6d</span>656e74&nbsp;<span class="hljs-number">002e6</span>e6f&nbsp;ata..comment..no<br>&nbsp;&nbsp;<span class="hljs-number">0x00000040</span>&nbsp;<span class="hljs-number">74652e47</span>&nbsp;<span class="hljs-number">4e552d</span>73&nbsp;<span class="hljs-number">7461636</span>b&nbsp;<span class="hljs-number">002e7265</span>&nbsp;te.GNU-stack..re<br>&nbsp;&nbsp;<span class="hljs-number">0x00000050</span>&nbsp;<span class="hljs-number">6</span>c612e65&nbsp;<span class="hljs-number">685f</span>6672&nbsp;<span class="hljs-number">616d</span>6500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;la.eh_frame.<br></code></pre>
 <p>最左侧一列为地址，后面的为 <code>.shstrtab</code>section 中的内容。从上面结果中可以看出：</p>
 <ul>
 <li><p><code>.shstrtab</code>section 的第一个字节的值为 0x00，即<code>\0</code>。打印结果中用<code>.</code>表示这个字符。</p></li>
-<li><p>接下来的 8 字节的内容为：2e7379 6d746162 00。0x2e 对应的 ASCII 码为 .、0x73 对应的 ASCII 码为 s、0x79 对应的 ASCII 码为 y、0x6d 对应的 ASCII 码为 m、0x74 对应的 ASCII 码为 t、0x61 对应的 ASCII 码为 a、0x62 对应的 ASCII 码为 b、0x00 对应的 ASCII 码为 NULL。</p></li>
+<li><p>接下来的 8 字节的内容为：2e7379 6d746162 00，对应的 ASCII 码依次为 <code>.</code>、<code>s</code>、<code>y</code>、<code>m</code>、<code>t</code>、<code>a</code>、<code>b</code>、<code>'\0'</code>。也就是说，<code>.symtab</code> section 名称的起始位置在<code>.shstrtab</code>section 中的偏移量为 1（字节），正好对应其在<code>[]</code>中的值。其余 sections 名称的验证过程与之类似，此处不再赘述。</p></li>
 </ul>
-<p><strong>5）</strong> 查看可重定位目标文件的<code>.strtab</code>section</p>
-<pre><code class="hljs cs">$&nbsp;readelf&nbsp;-p&nbsp;.strtab&nbsp;sum.o<br><br>String&nbsp;dump&nbsp;of&nbsp;section&nbsp;<span class="hljs-string">'.strtab'</span>:<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span>]&nbsp;&nbsp;sum.cpp<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;1a</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;2b</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_3<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;3c</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_4<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;4d</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_5<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;5e</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_6<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;6f</span>]&nbsp;&nbsp;g_val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;77</span>]&nbsp;&nbsp;g_val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;7f</span>]&nbsp;&nbsp;g_val_3<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;87</span>]&nbsp;&nbsp;_Z3sumii<br></code></pre>
-<ul>
-<li><p>注：</p>
-<ul>
-<li><p><code>[]</code>中的值表示符号名称的起始位置在<code>.strtab</code>section 中的偏移量（字节）。</p></li>
-<li><p><code>.strtab</code>section 的第一个字节的值固定为 0，表示一个空的或者不存在的符号名称。</p></li>
-<li><p><code>.strtab</code>section 的符号名称是以<code>\0</code>（对应的 ASCII 码十六机制为 0x00）结尾的字符串。</p></li></ul></li>
-</ul>
-<p><strong>6）</strong> 查看可重定位目标文件的<code>.symtab</code>section，见 <a href="#jumpREADELF程序所打印的.symtabsection及解释">READELF 程序所打印的 .symtab section 及解释</a></p>
 <hr>
-<h3 id="hspanidjumpspan-3"><span><span id="jump符号表">符号表</span></span></h3>
-<p>每个目标文件（包括可重定位目标文件、可共享目标文件和可执行目标文件）中都有一个符号表（.symtab section），符号表中包含了被该目标文件定义和引用的符号的信息。</p>
-<p>符号表（.symtab section）是由汇编器产生的，跟编译时是否添加<code>-g</code>选项无关。</p>
-<p><strong>1）</strong> 符号表中的符号可以分为三类：</p>
+<h3 id="hspanidjump5strtabspan"><span><span id="jump5">查看 .strtab</span></span></h3>
+<p>查看可重定位目标文件的<code>.strtab</code>section 的内容：</p>
+<pre><code class="hljs cs">$&nbsp;readelf&nbsp;-p&nbsp;.strtab&nbsp;sum.o<br><br>String&nbsp;dump&nbsp;of&nbsp;section&nbsp;<span class="hljs-string">'.strtab'</span>:<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span>]&nbsp;&nbsp;sum.cpp<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;1a</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;2b</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_3<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;3c</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_4<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;4d</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_5<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;5e</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_6<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;6f</span>]&nbsp;&nbsp;g_val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;77</span>]&nbsp;&nbsp;g_val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;7f</span>]&nbsp;&nbsp;g_val_3<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;87</span>]&nbsp;&nbsp;_Z3sumii<br></code></pre>
+<p>注：</p>
+<ul>
+<li><p><code>[]</code>中的值，表示符号名称的起始位置在<code>.strtab</code>section 中的偏移量（字节）。</p></li>
+<li><p><code>.strtab</code>section 的第一个字节的值固定为 0，表示一个空的或者不存在的符号名称。</p></li>
+<li><p><code>.strtab</code>section 的符号名称是以<code>\0</code>（对应的 ASCII 码十六机制为 0x00）结尾的字符串。</p></li>
+</ul>
+<hr>
+<h3 id="hspanidjump6symtabspan"><span><span id="jump6">查看 .symtab</span></span></h3>
+<p>每个目标文件（包括可重定位目标文件、可共享目标文件和可执行目标文件）中都有一个符号表（<code>.symtab</code>section），符号表中包含了被该目标文件定义和引用的符号的信息。</p>
+<p>符号表（<code>.symtab</code>section）是由汇编器产生的，跟编译时是否添加<code>-g</code>选项无关。</p>
+<p>符号表中的符号可以分为三类：</p>
 <table>
 <thead>
 <tr>
@@ -697,14 +889,13 @@
 </tbody>
 </table>
 <p>注：严格地讲，静态局部变量不仅对于其他目标文件不可见，而且对于本目标文件的其他函数也不可见。</p>
-<p><strong>2）</strong> <span id="jumpREADELF程序所打印的.symtabsection及解释">READELF 程序所打印的<code>.symtab</code>section 及解释</span></p>
 <p>查看 sum.cpp 的内容：</p>
 <pre><code class="hljs cpp">$&nbsp;cat&nbsp;sum.cpp&nbsp;<br><span class="hljs-keyword">extern</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;g_val;<br><span class="hljs-keyword">int</span>&nbsp;g_val_1&nbsp;=&nbsp;<span class="hljs-number">0</span>;<br><span class="hljs-keyword">int</span>&nbsp;g_val_2&nbsp;=&nbsp;<span class="hljs-number">1</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">sum</span><span class="hljs-params">(<span class="hljs-keyword">int</span>&nbsp;a,&nbsp;<span class="hljs-keyword">int</span>&nbsp;b)</span><br></span>{<br>&nbsp;&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_1;<br>&nbsp;&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_2&nbsp;=&nbsp;<span class="hljs-number">0</span>;<br>&nbsp;&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_3&nbsp;=&nbsp;<span class="hljs-number">1</span>;<br>&nbsp;&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_4&nbsp;=&nbsp;<span class="hljs-number">0</span>;<br>&nbsp;&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_5&nbsp;=&nbsp;<span class="hljs-number">2</span>;<br>&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;val_6&nbsp;=&nbsp;<span class="hljs-number">0</span>;<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;a&nbsp;+&nbsp;b;<br>}<br></code></pre>
-<p>打印 sum.o 的<code>.symtab</code>section：</p>
+<p>查看 sum.o 的<code>.symtab</code>section 的内容：</p>
 <pre><code class="hljs delphi">$&nbsp;readelf&nbsp;-s&nbsp;sum.o<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.symtab'</span>&nbsp;contains&nbsp;<span class="hljs-number">19</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;<span class="hljs-keyword">Type</span>&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;<span class="hljs-keyword">Name</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;<span class="hljs-keyword">FILE</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;ABS&nbsp;sum.cpp<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000008</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>:&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;_ZZ3sumiiE5val_3<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>:&nbsp;<span class="hljs-number">000000000000000</span>c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_4<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">9</span>:&nbsp;<span class="hljs-number">0000000000000008</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;_ZZ3sumiiE5val_5<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">10</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">11</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>&nbsp;_ZZ3sumiiE5val_6<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">13</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">14</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">15</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;g_val_1<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">16</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;g_val_2<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">17</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">28</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;_Z3sumii<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">18</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;g_val<br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
+<li><p>ELF-64 目标文件格式中，<code>Symbol Table Entry</code>对应的结构体名称为<code>Elf64_Sym</code>，定义在<code>/usr/include/elf.h</code>头文件中。</p></li>
 <li><p>符号表的第一个条目被保留，并且该条目中的值必须全部为零。符号常量 STN_UNDEF 用于引用这个条目。</p></li>
 <li><p><code>Num</code>列，表示符号表条目在符号表中的索引，索引从 0 开始。</p></li>
 <li><p><code>Name</code>是 Symbol Table Entry 结构体中的第 1 个字段，占用 4 字节，表示符号名称的起始位置在<code>.strtab</code> section 中的偏移量（字节）。</p></li>
@@ -714,7 +905,7 @@
 <li><p>Symbol Table Entry 结构体中的第 3 个字段作为保留字段，占用 1 字节。</p></li>
 <li><p><code>Ndx</code>是 Symbol Table Entry 结构体中的第 4 个字段，占用 2 字节，表示符号所关联对象位于哪个 section 。该值为 section 在 Section header table 中的索引，即<code>readelf -S sum.o</code>输出结果中该 section <code>[Nr]</code> 列的值（同一个 section 在不同的 .o 文件中对应的数字不一定相同）。其他可选项：UND（SHN_UNDEF，0，表示未定义符号）、ABS（SHN_ABS，0xfff1，表示绝对符号，即不需要重定位的符号）、COM（SHN_COMMON，0xfff2，表示未初始化的全局变量）。</p></li>
 <li><p><code>Value</code>是 Symbol Table Entry 结构体中的第 5 个字段，占用 8 字节，表示符号所关联对象的地址。在可重定位目标文件（不包括可共享目标文件）中，如果该符号不是<code>COMMON</code>，那么该值表示符号所关联对象在其 section 中的偏移量（即符号所关联对象在其 section 中的起始地址）；否则，该值表示该符号的对齐属性。在可执行目标文件和可共享目标文件中，该值表示符号所关联对象的虚拟地址。</p></li>
-<li><p><code>Size</code>是 Symbol Table Entry 结构体中的第 6 个字段，占用 8 字节，表示符号所关联对象的大小，单位：字节。如果符号没有关联的大小或大小未知，则此字段的值为 0。如果符号关联的对象是函数，那么该字段的值为实现该函数的机器指令所占用的字节数。如果符号关联的对象是数据，那么该字段的值为数据占用的字节数。比如：符号关联的对象是一个<code>int</code>类型的变量，那么该字段的值为 4；符号关联的对象是一个<code>int</code>类型，大小为 3 的数组，那么该字段的值为 12。</p></li></ul></li>
+<li><p><code>Size</code>是 Symbol Table Entry 结构体中的第 6 个字段，占用 8 字节，表示符号所关联对象的大小，单位：字节。如果符号没有关联的大小或大小未知，则此字段的值为 0。如果符号关联的对象是函数，那么该字段的值为实现该函数的机器指令所占用的字节数。如果符号关联的对象是数据，那么该字段的值为数据占用的字节数。比如：符号关联的对象是一个<code>int</code>类型的变量，那么该字段的值为 4；符号关联的对象是一个<code>int</code>类型，大小为 3 的数组，那么该字段的值为 12。</p></li>
 </ul>
 <p>另外，关于<code>readelf</code>输出结果的<code>Name</code>列的值，<strong>有两点需要注意</strong>：</p>
 <ul>
@@ -724,222 +915,86 @@
 </ul>
 <p><strong>注意：</strong> CS:APP(Third Edition) 7.5 节中所描述的是，伪节：<code>ABS</code>、<code>UND</code>和<code>COM</code>只可能出现在可重定位目标文件中，不会出现在可执行目标文件中。其原文为：</p>
 <pre><code class="text language-text">Note&nbsp;that&nbsp;these&nbsp;pseudosections&nbsp;exist&nbsp;only&nbsp;in&nbsp;relocatable&nbsp;object&nbsp;files;&nbsp;they&nbsp;do&nbsp;not&nbsp;exist&nbsp;in&nbsp;executable&nbsp;object&nbsp;files.<br></code></pre>
-<p>但经过实际验证，在动态链接的可执行目标文件中，伪节<code>ABS</code>和<code>UND</code>可能出现，这一点需要注意。</p>
-<p><strong>a）</strong> 验证“在可重定位目标文件（不包括可共享目标文件）中，Value 列，表示符号在其 section 中的偏移量”</p>
+<p>但经过实际验证，在动态链接的可执行目标文件中，伪节<code>ABS</code>和<code>UND</code>可能出现。这一点需要注意。</p>
+<p><strong>验证过程：</strong></p>
+<p><strong>1）</strong> 验证“在可重定位目标文件（不包括可共享目标文件）中，Value 列，表示符号在其 section 中的偏移量”</p>
 <pre><code class="hljs delphi"><span class="hljs-number">15</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;g_val_1<br>&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000008</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;<span class="hljs-number">8</span>:&nbsp;<span class="hljs-number">000000000000000</span>c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;_ZZ3sumiiE5val_4<br></code></pre>
-<p>表示的含义：在可重定位目标文件 sum.o 中，符号：g_val_1、_ZZ3sumiiE5val_1、_ZZ3sumiiE5val_2、_ZZ3sumiiE5val_4 都位于同一个 setion 中（该 section 在 Section header table 中的索引为 4），符号 g_val_1 所关联的对象在该 section 中占用的空间为 0000000000000000～0000000000000003（即该 section 中第一个 4 字节的值为 g_val_1），符号 _ZZ3sumiiE5val_1 所关联的对象在该 section 中占用的空间为 0000000000000004～0000000000000007（即该 section 中第二个 4 字节的值为 val_1），符号 _ZZ3sumiiE5val_2 所关联的对象在该 section 中占用的空间为 0000000000000008～000000000000000b（即该 section 中第三个 4 字节的值为 val_2），符号 _ZZ3sumiiE5val_4 所关联的对象在该 section 中占用的空间为 000000000000000c～000000000000000f（即该 section 中第四个 4 字节的值为 val_4）。</p>
-<p><strong>b）</strong> 验证“Ndx 列，表示符号所关联对象位于哪个 section”</p>
+<p>上述内容表示的含义：</p>
+<ul>
+<li><p>在可重定位目标文件 sum.o 中，符号：g_val_1、_ZZ3sumiiE5val_1、_ZZ3sumiiE5val_2、_ZZ3sumiiE5val_4 都位于同一个 setion 中（该 section 在 Section header table 中的索引为 4）</p></li>
+<li><p>符号 g_val_1 所关联的对象在该 section 中占用的空间为 0000000000000000～0000000000000003（即该 section 中第一个 4 字节的值为 g_val_1）</p></li>
+<li><p>符号 _ZZ3sumiiE5val_1 所关联的对象在该 section 中占用的空间为 0000000000000004～0000000000000007（即该 section 中第二个 4 字节的值为 val_1）</p></li>
+<li><p>符号 _ZZ3sumiiE5val_2 所关联的对象在该 section 中占用的空间为 0000000000000008～000000000000000b（即该 section 中第三个 4 字节的值为 val_2）</p></li>
+<li><p>符号 _ZZ3sumiiE5val_4 所关联的对象在该 section 中占用的空间为 000000000000000c～000000000000000f（即该 section 中第四个 4 字节的值为 val_4）。</p></li>
+</ul>
+<p><strong>2）</strong> 验证“Ndx 列，表示符号所关联对象位于哪个 section”</p>
 <pre><code class="hljs cs">$&nbsp;readelf&nbsp;-S&nbsp;sum.o<br>There&nbsp;are&nbsp;<span class="hljs-number">13</span>&nbsp;section&nbsp;headers,&nbsp;starting&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">0x3c8</span>:<br><br>Section&nbsp;Headers:<br>&nbsp;&nbsp;[<span class="hljs-meta">Nr</span>]&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Offset<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EntSize&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags&nbsp;&nbsp;Link&nbsp;&nbsp;Info&nbsp;&nbsp;Align<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;0</span>]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000000</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;1</span>]&nbsp;.text&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000040</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">000000000000001</span>c&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;AX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;2</span>]&nbsp;.rela.text&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000330</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;3</span>]&nbsp;.data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000005</span>c<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">000000000000000</span>c&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;WA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;4</span>]&nbsp;.bss&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000068</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000010</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;WA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;5</span>]&nbsp;.rodata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000068</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000004</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;6</span>]&nbsp;.comment&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000006</span>c<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000033</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000001</span>&nbsp;&nbsp;MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;7</span>]&nbsp;.note.GNU-stack&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000009</span>f<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;8</span>]&nbsp;.eh_frame&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROGBITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">000000</span>a0<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000038</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;9</span>]&nbsp;.rela.eh_frame&nbsp;&nbsp;&nbsp;&nbsp;RELA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000348</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">10</span>]&nbsp;.shstrtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">00000360</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000061</span>&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;[<span class="hljs-meta">11</span>]&nbsp;.symtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYMTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">000000</span>d8<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">00000000000001</span>c8&nbsp;&nbsp;<span class="hljs-number">0000000000000018</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">15</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;[<span class="hljs-meta">12</span>]&nbsp;.strtab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRTAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;<span class="hljs-number">000002</span>a0<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">000000000000008</span>e&nbsp;&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>Key&nbsp;to&nbsp;Flags:<br>&nbsp;&nbsp;W&nbsp;(write),&nbsp;A&nbsp;(alloc),&nbsp;X&nbsp;(execute),&nbsp;M&nbsp;(merge),&nbsp;S&nbsp;(strings),&nbsp;l&nbsp;(large)<br>&nbsp;&nbsp;I&nbsp;(info),&nbsp;L&nbsp;(link&nbsp;order),&nbsp;G&nbsp;(<span class="hljs-keyword">group</span>),&nbsp;T&nbsp;(TLS),&nbsp;E&nbsp;(exclude),&nbsp;x&nbsp;(unknown)<br>&nbsp;&nbsp;O&nbsp;(extra&nbsp;OS&nbsp;processing&nbsp;required)&nbsp;o&nbsp;(OS&nbsp;specific),&nbsp;p&nbsp;(processor&nbsp;specific)<br></code></pre>
-<p>全局变量 g_val1，静态变量 val_1、val_2、val_4 要么未初始化，要么初始值为 0。所以，这些变量会存放到<code>.bss</code> section 中。<code>.bss</code> section 在 Section header table 中的索引为 4（[Nr] 列），与<code>Ndx</code>列的值相同。从而，验证了“readelf 输出结果中的<code>Ndx</code>列即为上面结果中<code>Nr</code>列的值，表示符号所关联对象所在的 section”。</p>
-<p><strong>c）</strong> 验证“Name 列，表示符号在<code>.strtab</code> section 中的名称”</p>
+<p>全局变量 g_val1，静态变量 val_1、val_2、val_4 要么未初始化，要么初始值为 0。所以，这些变量会存放到<code>.bss</code> section 中。<code>.bss</code> section 在 Section header table 中的索引为 4（[Nr] 列），与<code>Ndx</code>列的值相同。从而，验证了“readelf -s 输出结果中的<code>Ndx</code>列即为上面结果中<code>Nr</code>列的值，表示符号所关联对象所在的 section”。</p>
+<p><strong>3）</strong> 验证“Name 列，表示符号在<code>.strtab</code> section 中的名称”</p>
 <pre><code class="hljs cs">$&nbsp;readelf&nbsp;sum.o&nbsp;-p&nbsp;.strtab<br><br>String&nbsp;dump&nbsp;of&nbsp;section&nbsp;<span class="hljs-string">'.strtab'</span>:<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span>]&nbsp;&nbsp;sum.cpp<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;1a</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;2b</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_3<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;3c</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_4<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;4d</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_5<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;5e</span>]&nbsp;&nbsp;_ZZ3sumiiE5val_6<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;6f</span>]&nbsp;&nbsp;g_val_1<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;77</span>]&nbsp;&nbsp;g_val_2<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;7f</span>]&nbsp;&nbsp;_Z3sumii<br>&nbsp;&nbsp;[<span class="hljs-meta">&nbsp;&nbsp;&nbsp;&nbsp;88</span>]&nbsp;&nbsp;g_val<br></code></pre>
 <p>从<code>.strtab</code> section 中可以看到符号名称。</p>
-<p><strong>d）</strong> 验证“Size 列，表示符号所关联对象的大小”</p>
-<pre><code class="hljs perl"><span class="hljs-comment">#&nbsp;查看测试代码&nbsp;test.cpp</span><br>$&nbsp;cat&nbsp;test.cpp&nbsp;<br><span class="hljs-keyword">int</span>&nbsp;g_val_1&nbsp;=&nbsp;<span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span>&nbsp;g_val_2[]&nbsp;=&nbsp;{<span class="hljs-number">1</span>,&nbsp;<span class="hljs-number">2</span>,&nbsp;<span class="hljs-number">3</span>};<br><br><span class="hljs-keyword">int</span>&nbsp;add(<span class="hljs-keyword">int</span>&nbsp;a,&nbsp;<span class="hljs-keyword">int</span>&nbsp;b)<br>{<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;a&nbsp;+&nbsp;b;<br>}<br><br><span class="hljs-comment">#&nbsp;生成可重定位目标文件&nbsp;test.o</span><br>$&nbsp;g++&nbsp;-c&nbsp;-o&nbsp;test.o&nbsp;test.cpp<br><br><span class="hljs-comment">#&nbsp;查看&nbsp;test.o&nbsp;的符号表</span><br>$&nbsp;readelf&nbsp;-<span class="hljs-keyword">s</span>&nbsp;test.o<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.symtab'</span>&nbsp;contains&nbsp;<span class="hljs-number">11</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;Name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FILE&nbsp;&nbsp;&nbsp;&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;ABS&nbsp;test.cpp<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;LOCAL&nbsp;&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;OBJECT&nbsp;&nbsp;GLOBAL&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;g_val_1<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">9</span>:&nbsp;<span class="hljs-number">000000000000000</span>8&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span>&nbsp;OBJECT&nbsp;&nbsp;GLOBAL&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;g_val_2<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">10</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">20</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;GLOBAL&nbsp;DEFAULT&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;_Z3addii<br><br><span class="hljs-comment">#&nbsp;反汇编&nbsp;add&nbsp;函数</span><br>$&nbsp;objdump&nbsp;-d&nbsp;test.o<br><br>test.o:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;<span class="hljs-keyword">format</span>&nbsp;elf64-x86-<span class="hljs-number">64</span><br><br><br>Disassembly&nbsp;of&nbsp;section&nbsp;.text:<br><br><span class="hljs-number">0000000000000000</span>&nbsp;&lt;_Z3addii&gt;:<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">55</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rbp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;<span class="hljs-number">89</span>&nbsp;e5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rsp,%rbp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">89</span>&nbsp;<span class="hljs-number">7</span>d&nbsp;fc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%edi,-<span class="hljs-number">0x4</span>(%rbp)<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">89</span>&nbsp;<span class="hljs-number">75</span>&nbsp;f8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%esi,-<span class="hljs-number">0x8</span>(%rbp)<br>&nbsp;&nbsp;&nbsp;a:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>b&nbsp;<span class="hljs-number">55</span>&nbsp;fc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;-<span class="hljs-number">0x4</span>(%rbp),%edx<br>&nbsp;&nbsp;&nbsp;d:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>b&nbsp;<span class="hljs-number">45</span>&nbsp;f8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;-<span class="hljs-number">0x8</span>(%rbp),%eax<br>&nbsp;&nbsp;<span class="hljs-number">10</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">01</span>&nbsp;d<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;add&nbsp;&nbsp;&nbsp;&nbsp;%edx,%eax<br>&nbsp;&nbsp;<span class="hljs-number">12</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">pop</span>&nbsp;&nbsp;&nbsp;&nbsp;%rbp<br>&nbsp;&nbsp;<span class="hljs-number">13</span>:&nbsp;&nbsp;&nbsp;&nbsp;c3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;retq<br></code></pre>
+<p><strong>4）</strong> 验证“Size 列，表示符号所关联对象的大小”</p>
+<p>a）测试代码 test.cpp </p>
+<pre><code class="hljs cpp"><span class="hljs-keyword">int</span>&nbsp;g_val_1&nbsp;=&nbsp;<span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span>&nbsp;g_val_2[]&nbsp;=&nbsp;{<span class="hljs-number">1</span>,&nbsp;<span class="hljs-number">2</span>,&nbsp;<span class="hljs-number">3</span>};<br><br><span class="hljs-function"><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-keyword">int</span>&nbsp;a,&nbsp;<span class="hljs-keyword">int</span>&nbsp;b)</span><br></span>{<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;a&nbsp;+&nbsp;b;<br>}<br></code></pre>
+<p>b）生成可重定位目标文件 test.o</p>
+<pre><code class="hljs php">$&nbsp;g++&nbsp;-c&nbsp;-o&nbsp;test.o&nbsp;test.cpp<br></code></pre>
+<p>c）查看 test.o 的符号表</p>
+<pre><code class="hljs delphi">$&nbsp;readelf&nbsp;-s&nbsp;test.o<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.symtab'</span>&nbsp;contains&nbsp;<span class="hljs-number">11</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;<span class="hljs-keyword">Type</span>&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;<span class="hljs-keyword">Name</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;<span class="hljs-keyword">FILE</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;ABS&nbsp;test.cpp<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;SECTION&nbsp;<span class="hljs-keyword">LOCAL</span>&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;g_val_1<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">9</span>:&nbsp;<span class="hljs-number">0000000000000008</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">12</span>&nbsp;<span class="hljs-keyword">OBJECT</span>&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>&nbsp;g_val_2<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">10</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">20</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;GLOBAL&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>&nbsp;_Z3addii<br></code></pre>
+<p>d）反汇编 add 函数</p>
+<pre><code class="hljs perl">$&nbsp;objdump&nbsp;-d&nbsp;test.o<br><br>test.o:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;<span class="hljs-keyword">format</span>&nbsp;elf64-x86-<span class="hljs-number">64</span><br><br><br>Disassembly&nbsp;of&nbsp;section&nbsp;.text:<br><br><span class="hljs-number">0000000000000000</span>&nbsp;&lt;_Z3addii&gt;:<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">55</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rbp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;<span class="hljs-number">89</span>&nbsp;e5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rsp,%rbp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">89</span>&nbsp;<span class="hljs-number">7</span>d&nbsp;fc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%edi,-<span class="hljs-number">0x4</span>(%rbp)<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">7</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">89</span>&nbsp;<span class="hljs-number">75</span>&nbsp;f8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%esi,-<span class="hljs-number">0x8</span>(%rbp)<br>&nbsp;&nbsp;&nbsp;a:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>b&nbsp;<span class="hljs-number">55</span>&nbsp;fc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;-<span class="hljs-number">0x4</span>(%rbp),%edx<br>&nbsp;&nbsp;&nbsp;d:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>b&nbsp;<span class="hljs-number">45</span>&nbsp;f8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;-<span class="hljs-number">0x8</span>(%rbp),%eax<br>&nbsp;&nbsp;<span class="hljs-number">10</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">01</span>&nbsp;d<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;add&nbsp;&nbsp;&nbsp;&nbsp;%edx,%eax<br>&nbsp;&nbsp;<span class="hljs-number">12</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">pop</span>&nbsp;&nbsp;&nbsp;&nbsp;%rbp<br>&nbsp;&nbsp;<span class="hljs-number">13</span>:&nbsp;&nbsp;&nbsp;&nbsp;c3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;retq<br></code></pre>
 <p>从上面可以看出：</p>
 <ul>
-<li><p>符号 _Z3addii 所关联的对象是一个函数，并且实现该函数的机器指令所占用的字节数为 20，而 size 字段的值也正好为 20。因此，验证了“如果符号关联的对象是函数，那么该字段的值为实现该函数的机器指令所占用的字节数。”。</p></li>
-<li><p>符号 g_val_1 所关联的对象是一个 int 类型的变量，而 size 字段的值也正好为 4。符号 g_val_2 所关联的对象一个大小为 3 的 int 类型数据，而 size 字段的值也正好为 12。因此，验证了“如果符号关联的对象是数据，那么该字段的值为数据占用的字节数。”。</p></li>
+<li><p>符号<code>_Z3addii</code>所关联的对象是一个函数，并且实现该函数的机器指令所占用的字节数为 20，而 size 字段的值也正好为 20。因此，验证了“如果符号关联的对象是函数，那么该字段的值为实现该函数的机器指令所占用的字节数。”。</p></li>
+<li><p>符号<code>g_val_1</code>所关联的对象是一个 int 类型的变量，而 size 字段的值也正好为 4。符号<code>g_val_2</code>所关联的对象一个大小为 3 的 int 类型数组，而 size 字段的值也正好为 12。因此，验证了“如果符号关联的对象是数据，那么该字段的值为数据占用的字节数。”。</p></li>
 </ul>
 <hr>
-<h3 id="hspanidjumpelf64elf64span-1"><span><span id="jump可执行目标文件ELF-64">可执行目标文件（ELF-64 格式）</span></span></h3>
-<p>在可执行目标文件和可共享目标文件中，section 被分组成 segment 以供加载。每个 segment 中包含的 sections 是连续的。</p>
-<p>典型的 ELF-64 可执行目标文件格式：</p>
-<table>
-<thead>
-<tr>
-<th>组成部分</th>
-<th>描述</th>
-<th>如何查看</th>
-<th>属于哪个 Segment</th>
-<th>程序执行时是否加载到内存</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ELF header</td>
-<td>描述生成该目标文件的系统的字大小和字节顺序、目标文件类型、机器类型等信息。</td>
-<td><li><code>readelf -h &lt;object file&gt;</code></li></td>
-<td>？</td>
-<td>？</td>
-</tr>
-<tr>
-<td>Program header table</td>
-<td>描述可执行目标文件中所有段（Segments）的位置和大小等信息。</td>
-<td><li>方式1：<code>readelf -l &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
-<td>？</td>
-<td>？</td>
-</tr>
-<tr>
-<td>.interp</td>
-<td>该 section 中保存了可执行目标文件所需要的动态链接器的路径。</td>
-<td><li>方式1：<code>readelf -p .interp &lt;object file&gt;</code></li> <li>方式2：<code>readelf -l &lt;object file&gt; | grep interpreter</code></li> <li>方式3：<code>objdump -s --section .interp &lt;object file&gt;</code></li></td>
-<td>First Segment（只读）</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.dynsym</td>
-<td>包含需要动态链接的符号</td>
-<td><li>方式1：<code>readelf --dyn-syms &lt;object file&gt;</code></li> <li>方式2：<code>readelf -s &lt;object file&gt;</code></li></td>
-<td>First Segment（只读）</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.dynstr</td>
-<td>动态链接符号表，仅包括需要动态链接的符号名称</td>
-<td><li><code>readelf -p .dynstr &lt;object file&gt;</code></li></td>
-<td>First Segment（只读）</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.rela.dyn</td>
-<td>动态链接中的数据重定位表。类似于静态链接中的 .rela.data。</td>
-<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
-<td>First Segment（只读）</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.rela.plt</td>
-<td>动态链接中的代码重定位表。类似于静态链接中的 .rela.text。</td>
-<td><li><code>readelf -r &lt;object file&gt;</code></li></td>
-<td>First Segment（只读）</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.init</td>
-<td>该 section 中定义了一个名称为 _init 的函数，会被程序初始化代码调用。</td>
-<td><code>objdump -d &lt;object file&gt;</code></td>
-<td>Code Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.text</td>
-<td>已编译程序的机器代码。</td>
-<td><li>方式1：<code>objdump -d &lt;object file&gt;</code>（只输出汇编）</li> <li>方式2：<code>objdump -S &lt;object file&gt;</code>（输出汇编和对应的源码。需要编译时加-g选项，才会打印源码。）</li> <li>方式3：<code>objdump -d --section .text sum.so</code>（只输出汇编，且只打印 .text section）</li></td>
-<td>Code Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.rodata</td>
-<td>只读数据，比如：常量字符串、带 const 修饰的全局变量和静态变量等。</td>
-<td>无</td>
-<td>Code Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.dynamic</td>
-<td>该 section 中保存了动态链接的基本信息。</td>
-<td><li>方式1：<code>readelf -d &lt;object file&gt;</code></li> <li>方式2：<code>objdump -p &lt;object file&gt;</code></li></td>
-<td>Data Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.data</td>
-<td>已初始化的且初始值非0的全局变量和静态变量。</td>
-<td>无</td>
-<td>Data Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.bss</td>
-<td>未初始化的或初始值为0的全局变量和静态变量。</td>
-<td>无</td>
-<td>Data Segment</td>
-<td>是</td>
-</tr>
-<tr>
-<td>.symtab</td>
-<td>一个符号表，它存放着在目标文件中定义和引用的函数和全局变量、静态变量的信息。</td>
-<td><li><code>readelf -s &lt;object file&gt;</code>（注：删除目标文件中 .symtab section 的命令为：<code>strip &lt;object file&gt;</code>）</li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-<tr>
-<td>.debug</td>
-<td>一个调试符号表，其条目是程序中定义的局部变量和类型定义（typedefs），程序中定义和引用的全局变量，以及原始的 C 源文件。（只有带 -g 编译时才会产生）</td>
-<td><li>方式1：<code>readelf --debug-dump &lt;object file&gt;</code></li> <li>方式2：<code>objdump -g &lt;object file&gt;</code></li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-<tr>
-<td>.comment</td>
-<td>版本控制信息。</td>
-<td><li><code>readelf -p .comment &lt;object file&gt;</code> </li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-<tr>
-<td>.shstrtab</td>
-<td>一个字符串表，其内容包括所有 section 的名称。</td>
-<td><li><code>readelf -p .shstrtab &lt;object file&gt;</code> </li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-<tr>
-<td>.strtab</td>
-<td>一个字符串表，其内容包括所有符号的名称。</td>
-<td><li><code>readelf -p .strtab &lt;object file&gt;</code> （注：删除目标文件中 .strtab section 的命令为：<code>strip &lt;object file&gt;</code>）</li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-<tr>
-<td>Section header table</td>
-<td>描述目标文件的所有节（sections）的位置和大小等信息。</td>
-<td><li><code>readelf -S &lt;object file&gt;</code></li></td>
-<td>不属于任何一个 Segment</td>
-<td>否</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li><p>注：</p>
-<ul>
-<li><p>readelf 命令中缩写含义：<code>-h</code>为<code>--file-header</code>的缩写，<code>-l</code>为<code>--program-headers</code>的缩写，<code>-d</code>为<code>--dynamic</code>的缩写，<code>-s</code>为<code>--symbols</code>的缩写，<code>-p</code>为<code>--string-dump</code>的缩写，<code>-S</code>为<code>--section-headers</code>的缩写。</p></li>
-<li><p>objdump 命令中缩写含义：<code>-p</code>为<code>--private-headers</code>的缩写，<code>-d</code>为<code>--disassemble</code>的缩写，<code>-S</code>为<code>--source</code>的缩写，<code>-g</code>为<code>--debugging</code>的缩写，<code>-s</code>为<code>--full-contents</code>的缩写。</p></li></ul></li>
-</ul>
-<p><strong>注意：</strong></p>
-<ul>
-<li><code>.symtab</code>和<code>.dynsym</code>section 的区别之一：运行可执行目标文件时，前者不会被加载到内存中，而后者是需要加载到内存中的。</li>
-</ul>
-<p><strong>1）</strong> 查看可执行目标文件的<code>Program header table</code></p>
-<p>查看 main.cpp 的内容：</p>
+<h3 id="hspanidjump7programheadertablespan"><span><span id="jump7">查看 Program Header Table</span></span></h3>
+<p>查看测试程序 main.cpp 的内容：</p>
 <pre><code class="hljs cpp">$&nbsp;cat&nbsp;main.cpp<br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-keyword">int</span>&nbsp;g_val_1;<br><span class="hljs-keyword">int</span>&nbsp;g_val_2&nbsp;=&nbsp;<span class="hljs-number">16</span>;<br><span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">int</span>&nbsp;g_val_3&nbsp;=&nbsp;<span class="hljs-number">2</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span>&nbsp;<span class="hljs-title">main</span><span class="hljs-params">()</span><br></span>{<br>&nbsp;&nbsp;<span class="hljs-built_in">printf</span>(<span class="hljs-string">"g_val_1=%x,&nbsp;g_val_2=%x\n"</span>,&nbsp;g_val_1,&nbsp;g_val_2);<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-number">0</span>;<br>}<br></code></pre>
-<p>查看可执行目标文件<code>main</code>的<code>Program header table</code>：</p>
+<p>查看可执行目标文件<code>main</code>的<code>Program Header Table</code>：</p>
 <pre><code class="hljs delphi">$&nbsp;readelf&nbsp;-l&nbsp;main<br><br>Elf&nbsp;<span class="hljs-keyword">file</span>&nbsp;<span class="hljs-keyword">type</span>&nbsp;<span class="hljs-keyword">is</span>&nbsp;EXEC&nbsp;(Executable&nbsp;<span class="hljs-keyword">file</span>)<br>Entry&nbsp;point&nbsp;<span class="hljs-number">0</span>x400430<br>There&nbsp;are&nbsp;<span class="hljs-number">9</span>&nbsp;<span class="hljs-keyword">program</span>&nbsp;headers,&nbsp;starting&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">64</span><br><br><span class="hljs-keyword">Program</span>&nbsp;Headers:<br>&nbsp;&nbsp;<span class="hljs-keyword">Type</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Offset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VirtAddr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PhysAddr<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FileSiz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MemSiz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags&nbsp;&nbsp;Align<br>&nbsp;&nbsp;PHDR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000040&nbsp;<span class="hljs-number">0</span>x0000000000400040&nbsp;<span class="hljs-number">0</span>x0000000000400040<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x00000000000001f8&nbsp;<span class="hljs-number">0</span>x00000000000001f8&nbsp;&nbsp;R&nbsp;E&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;INTERP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000238&nbsp;<span class="hljs-number">0</span>x0000000000400238&nbsp;<span class="hljs-number">0</span>x0000000000400238<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x000000000000001c&nbsp;<span class="hljs-number">0</span>x000000000000001c&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Requesting&nbsp;<span class="hljs-keyword">program</span>&nbsp;interpreter:&nbsp;/lib64/ld-linux-x86-<span class="hljs-number">64</span>.so.<span class="hljs-number">2</span>]<br>&nbsp;&nbsp;LOAD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000000&nbsp;<span class="hljs-number">0</span>x0000000000400000&nbsp;<span class="hljs-number">0</span>x0000000000400000<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x000000000000071c&nbsp;<span class="hljs-number">0</span>x000000000000071c&nbsp;&nbsp;R&nbsp;E&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">200000</span><br>&nbsp;&nbsp;LOAD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000e10&nbsp;<span class="hljs-number">0</span>x0000000000600e10&nbsp;<span class="hljs-number">0</span>x0000000000600e10<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x000000000000022c&nbsp;<span class="hljs-number">0</span>x0000000000000238&nbsp;&nbsp;RW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">200000</span><br>&nbsp;&nbsp;<span class="hljs-keyword">DYNAMIC</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000e28&nbsp;<span class="hljs-number">0</span>x0000000000600e28&nbsp;<span class="hljs-number">0</span>x0000000000600e28<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x00000000000001d0&nbsp;<span class="hljs-number">0</span>x00000000000001d0&nbsp;&nbsp;RW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span><br>&nbsp;&nbsp;NOTE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000254&nbsp;<span class="hljs-number">0</span>x0000000000400254&nbsp;<span class="hljs-number">0</span>x0000000000400254<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000044&nbsp;<span class="hljs-number">0</span>x0000000000000044&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;GNU_EH_FRAME&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x00000000000005f0&nbsp;<span class="hljs-number">0</span>x00000000004005f0&nbsp;<span class="hljs-number">0</span>x00000000004005f0<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000034&nbsp;<span class="hljs-number">0</span>x0000000000000034&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span><br>&nbsp;&nbsp;GNU_STACK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000000&nbsp;<span class="hljs-number">0</span>x0000000000000000&nbsp;<span class="hljs-number">0</span>x0000000000000000<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000000&nbsp;<span class="hljs-number">0</span>x0000000000000000&nbsp;&nbsp;RW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">10</span><br>&nbsp;&nbsp;GNU_RELRO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x0000000000000e10&nbsp;<span class="hljs-number">0</span>x0000000000600e10&nbsp;<span class="hljs-number">0</span>x0000000000600e10<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>x00000000000001f0&nbsp;<span class="hljs-number">0</span>x00000000000001f0&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br><br>&nbsp;Section&nbsp;<span class="hljs-keyword">to</span>&nbsp;Segment&nbsp;mapping:<br>&nbsp;&nbsp;Segment&nbsp;Sections...<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">00</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">01</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.interp&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">02</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.interp&nbsp;.note.ABI-tag&nbsp;.note.gnu.build-id&nbsp;.gnu.hash&nbsp;.dynsym&nbsp;.dynstr&nbsp;.gnu.version&nbsp;.gnu.version_r&nbsp;.rela.dyn&nbsp;.rela.plt&nbsp;.init&nbsp;.plt&nbsp;.plt.got&nbsp;.text&nbsp;.fini&nbsp;.rodata&nbsp;.eh_frame_hdr&nbsp;.eh_frame&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">03</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.init_array&nbsp;.fini_array&nbsp;.jcr&nbsp;.<span class="hljs-keyword">dynamic</span>&nbsp;.got&nbsp;.got.plt&nbsp;.data&nbsp;.bss&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">04</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="hljs-keyword">dynamic</span>&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">05</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.note.ABI-tag&nbsp;.note.gnu.build-id&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">06</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.eh_frame_hdr&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">07</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">08</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.init_array&nbsp;.fini_array&nbsp;.jcr&nbsp;.<span class="hljs-keyword">dynamic</span>&nbsp;.got&nbsp;<br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
+<li><p>ELF-64 目标文件格式中，<code>Program Header Table Entry</code>对应的结构体名称为<code>Elf64_Phdr</code>，定义在<code>/usr/include/elf.h</code>头文件中。</p></li>
 <li><p><code>Entry point 0x400430</code>表示程序所执行的第一条指令的虚拟地址为 0x400430。</p></li>
-<li><p><code>There are 9 program headers, starting at offset 64</code>表示 Program Header Table Entry 中有 9 个条目，其起始位置在可执行目标文件中的偏移量为 64 字节（可执行目标文件的前 64 字节被 ELF header 占用）。</p></li>
-<li><p><code>Type</code>是  Program Header Table Entry 结构体中的第 1 个字段，占用 4 字节，表示 segment 的类型。常用可选项：0（PT_NULL，未使用的条目）、1（PT_LOAD，可加载的 segment）、2（PT_DYNAMIC，动态链接表）、3（PT_INTERP，程序解释器的路径名称）、4（PT_NOTE，Note sections）、5（PT_SHLIB，保留）、6（PT_PHDR，Program header table）。</p></li>
+<li><p><code>There are 9 program headers, starting at offset 64</code>，表示 Program Header Table Entry 中有 9 个条目，其起始位置在可执行目标文件中的偏移量为 64 字节（可执行目标文件的前 64 字节被 ELF Header 占用）。</p></li>
+<li><p><code>Type</code>是  Program Header Table Entry 结构体中的第 1 个字段，占用 4 字节，表示 segment 的类型。常用可选项：0（PT_NULL，未使用的条目）、1（PT_LOAD，可加载的 segment）、2（PT_DYNAMIC，动态链接信息）、3（PT_INTERP，动态链接器的路径名称）、4（PT_NOTE，辅助性信息）、5（PT_SHLIB，保留）、6（PT_PHDR，Program header table）、0x6474e552（PT_GNU_RELRO，重定位后访问权限变为只读）。</p></li>
 <li><p><code>Flags</code>是  Program Header Table Entry 结构体中的第 2 个字段，占用 4 字节，表示 segment 的属性。。常用可选项：0x1（PF_X，可执行权限）、0x2（PF_W，可写权限）、0x4（PF_R，可读权限）。</p></li>
 <li><p><code>Offset</code>是  Program Header Table Entry 结构体中的第 3 个字段，占用 8 字节，表示该 segment 的起始位置在可执行目标文件中的偏移量（字节）。</p></li>
 <li><p><code>VirtAddr</code>是  Program Header Table Entry 结构体中的第 4 个字段，占用 8 字节，表示该 segment 的虚拟地址，即该 segment 中第一个字节在进程虚拟地址空间的虚拟地址。</p></li>
 <li><p><code>PhysAddr</code>是  Program Header Table Entry 结构体中的第 5 个字段，占用 8 字节，为物理寻址的系统保留。</p></li>
 <li><p><code>FileSiz</code>是  Program Header Table Entry 结构体中的第 6 个字段，占用 8 字节，表示该 segment 在可执行目标文件中的大小（字节）。</p></li>
 <li><p><code>MemSiz</code>是  Program Header Table Entry 结构体中的第 7 个字段，占用 8 字节，表示该 segment 在内存中的大小（字节）。</p></li>
-<li><p><code>Align</code>是  Program Header Table Entry 结构体中的第 8 个字段，占用 8 字节，表示该 segment 的内存对齐要求。该字段的值必须是 2 的幂。上面打印结果中该字段的值是十六进制的（可以用<code>objdump -p main</code>的输出结果进行佐证）。</p></li></ul></li>
+<li><p><code>Align</code>是  Program Header Table Entry 结构体中的第 8 个字段，占用 8 字节，表示该 segment 的内存对齐要求。该字段的值必须是 2 的幂。上面打印结果中该字段的值是十六进制的（可以用<code>objdump -p main</code>的输出结果进行佐证）。</p></li>
 </ul>
-<p><strong>a）</strong> 程序入口点</p>
-<p>查看可执行目标文件<code>main</code>的<code>.text</code>section：</p>
+<p><strong>验证过程：</strong></p>
+<p><strong>1）</strong> 程序入口点</p>
+<p>查看可执行目标文件<code>main</code>的<code>.text</code>section 的内容：</p>
 <pre><code class="hljs perl">$&nbsp;objdump&nbsp;-d&nbsp;main<br><span class="hljs-comment">#&nbsp;省略...</span><br>Disassembly&nbsp;of&nbsp;section&nbsp;.text:<br><br><span class="hljs-number">0000000000400430</span>&nbsp;&lt;_start&gt;:<br>&nbsp;&nbsp;<span class="hljs-number">400430</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">31</span>&nbsp;ed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">xor</span>&nbsp;&nbsp;&nbsp;&nbsp;%ebp,%ebp<br>&nbsp;&nbsp;<span class="hljs-number">400432</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">49</span>&nbsp;<span class="hljs-number">89</span>&nbsp;d1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rdx,%r9<br>&nbsp;&nbsp;<span class="hljs-number">400435</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>e&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">pop</span>&nbsp;&nbsp;&nbsp;&nbsp;%rsi<br>&nbsp;&nbsp;<span class="hljs-number">400436</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;<span class="hljs-number">89</span>&nbsp;e2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rsp,%rdx<br>&nbsp;&nbsp;<span class="hljs-number">400439</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;<span class="hljs-number">83</span>&nbsp;e4&nbsp;f<span class="hljs-number">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">and</span>&nbsp;&nbsp;&nbsp;&nbsp;$0xfffffffffffffff<span class="hljs-number">0</span>,%rsp<br>&nbsp;&nbsp;<span class="hljs-number">40043</span>d:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">50</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rax<br>&nbsp;&nbsp;<span class="hljs-number">40043</span>e:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">54</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rsp<br>&nbsp;&nbsp;<span class="hljs-number">40043</span>f:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">49</span>&nbsp;c7&nbsp;c<span class="hljs-number">0</span>&nbsp;c<span class="hljs-number">0</span>&nbsp;<span class="hljs-number">05</span>&nbsp;<span class="hljs-number">40</span>&nbsp;<span class="hljs-number">00</span>&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x4005c<span class="hljs-number">0</span>,%r8<br>&nbsp;&nbsp;<span class="hljs-number">400446</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;c7&nbsp;c1&nbsp;<span class="hljs-number">50</span>&nbsp;<span class="hljs-number">05</span>&nbsp;<span class="hljs-number">40</span>&nbsp;<span class="hljs-number">00</span>&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x40055<span class="hljs-number">0</span>,%rcx<br>&nbsp;&nbsp;<span class="hljs-number">40044</span>d:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">48</span>&nbsp;c7&nbsp;c7&nbsp;<span class="hljs-number">26</span>&nbsp;<span class="hljs-number">05</span>&nbsp;<span class="hljs-number">40</span>&nbsp;<span class="hljs-number">00</span>&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x400526,%rdi<br>&nbsp;&nbsp;<span class="hljs-number">400454</span>:&nbsp;&nbsp;&nbsp;&nbsp;e8&nbsp;b7&nbsp;ff&nbsp;ff&nbsp;ff&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;callq&nbsp;&nbsp;<span class="hljs-number">400410</span>&nbsp;&lt;__libc_start_main@plt&gt;<br>&nbsp;&nbsp;<span class="hljs-number">400459</span>:&nbsp;&nbsp;&nbsp;&nbsp;f4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hlt&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;<span class="hljs-number">40045</span>a:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">66</span>&nbsp;0f&nbsp;<span class="hljs-number">1</span>f&nbsp;<span class="hljs-number">44</span>&nbsp;<span class="hljs-number">00</span>&nbsp;<span class="hljs-number">00</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nopw&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span>(%rax,%rax,<span class="hljs-number">1</span>)<br><span class="hljs-comment">#&nbsp;省略...</span><br></code></pre>
 <p>从上面结果中可以看出，程序入口点即为<code>.text</code>section 的第一条指令。</p>
 <p>程序执行时，程序入口点的地址仍为 0x400430，如下所示：</p>
 <pre><code class="hljs perl">$&nbsp;gdb&nbsp;-<span class="hljs-keyword">q</span>&nbsp;./main<br>Reading&nbsp;symbols&nbsp;from&nbsp;./main...(<span class="hljs-keyword">no</span>&nbsp;debugging&nbsp;symbols&nbsp;found)...done.<br>(gdb)&nbsp;start<br>Temporary&nbsp;breakpoint&nbsp;<span class="hljs-number">1</span>&nbsp;at&nbsp;<span class="hljs-number">0x40052a</span><br>Starting&nbsp;program:&nbsp;<span class="hljs-regexp">/home/test</span><span class="hljs-regexp">/tx/main</span>&nbsp;<br><br>Temporary&nbsp;breakpoint&nbsp;<span class="hljs-number">1</span>,&nbsp;<span class="hljs-number">0x000000000040052a</span>&nbsp;in&nbsp;main&nbsp;()<br>(gdb)&nbsp;disas&nbsp;<span class="hljs-number">0x400430</span><br>Dump&nbsp;of&nbsp;assembler&nbsp;code&nbsp;<span class="hljs-keyword">for</span>&nbsp;function&nbsp;_start:<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400430</span>&nbsp;&lt;+<span class="hljs-number">0</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">xor</span>&nbsp;&nbsp;&nbsp;&nbsp;%ebp,%ebp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400432</span>&nbsp;&lt;+<span class="hljs-number">2</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rdx,%r9<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400435</span>&nbsp;&lt;+<span class="hljs-number">5</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">pop</span>&nbsp;&nbsp;&nbsp;&nbsp;%rsi<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400436</span>&nbsp;&lt;+<span class="hljs-number">6</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;%rsp,%rdx<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400439</span>&nbsp;&lt;+<span class="hljs-number">9</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">and</span>&nbsp;&nbsp;&nbsp;&nbsp;$0xfffffffffffffff<span class="hljs-number">0</span>,%rsp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x000000000040043d</span>&nbsp;&lt;+<span class="hljs-number">13</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rax<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x000000000040043e</span>&nbsp;&lt;+<span class="hljs-number">14</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">push</span>&nbsp;&nbsp;&nbsp;%rsp<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x000000000040043f</span>&nbsp;&lt;+<span class="hljs-number">15</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x4005c<span class="hljs-number">0</span>,%r8<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400446</span>&nbsp;&lt;+<span class="hljs-number">22</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x40055<span class="hljs-number">0</span>,%rcx<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x000000000040044d</span>&nbsp;&lt;+<span class="hljs-number">29</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;mov&nbsp;&nbsp;&nbsp;&nbsp;$0x400526,%rdi<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400454</span>&nbsp;&lt;+<span class="hljs-number">36</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;callq&nbsp;&nbsp;<span class="hljs-number">0x400410</span>&nbsp;&lt;__libc_start_main@plt&gt;<br>&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0000000000400459</span>&nbsp;&lt;+<span class="hljs-number">41</span>&gt;:&nbsp;&nbsp;&nbsp;&nbsp;hlt<br>End&nbsp;of&nbsp;assembler&nbsp;dump.<br></code></pre>
-<p><strong>3）</strong> 查看可执行目标文件的<code>.interp</code>section</p>
+<hr>
+<h3 id="hspanidjump8interpspan"><span><span id="jump8">查看 .interp</span></span></h3>
+<p>查看可执行目标文件的<code>.interp</code>section 的内容：</p>
 <pre><code class="hljs javascript">$&nbsp;readelf&nbsp;-p&nbsp;.interp&nbsp;main<br><br><span class="hljs-built_in">String</span>&nbsp;dump&nbsp;<span class="hljs-keyword">of</span>&nbsp;section&nbsp;<span class="hljs-string">'.interp'</span>:<br>&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>]&nbsp;&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br></code></pre>
 <p>在动态链接的 ELF 可执行目标文件中，其<code>.interp</code>section 里面保存了可执行目标文件所需要的动态链接器的路径。</p>
 <p>在 X86-64 Linux 下，上面结果中的动态链接器在笔者的机器上实际指向<code>/lib/x86_64-linux-gnu/ld-2.31.so</code>，如下所示：</p>
 <pre><code class="hljs php">$&nbsp;ll&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span><br>lrwxrwxrwx&nbsp;<span class="hljs-number">1</span>&nbsp;root&nbsp;root&nbsp;<span class="hljs-number">32</span>&nbsp;Aug&nbsp;<span class="hljs-number">18</span>&nbsp;<span class="hljs-number">04</span>:<span class="hljs-number">02</span>&nbsp;/lib64/ld-linux-x86<span class="hljs-number">-64.</span>so<span class="hljs-number">.2</span>&nbsp;-&gt;&nbsp;/lib/x86_64-linux-gnu/ld<span class="hljs-number">-2.31</span>.so*<br></code></pre>
-<p><strong>4）</strong> 查看可执行目标文件的<code>.dynsym</code>section</p>
+<hr>
+<h3 id="hspanidjump9dynsymspan"><span><span id="jump9">查看 .dynsym</span></span></h3>
+<p>查看可执行目标文件的<code>.dynsym</code>section 的内容：</p>
 <pre><code class="hljs php">$&nbsp;readelf&nbsp;--dyn-syms&nbsp;main<br><br>Symbol&nbsp;table&nbsp;<span class="hljs-string">'.dynsym'</span>&nbsp;contains&nbsp;<span class="hljs-number">7</span>&nbsp;entries:<br>&nbsp;&nbsp;&nbsp;Num:&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;Bind&nbsp;&nbsp;&nbsp;Vis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ndx&nbsp;Name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;LOCAL&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_deregisterTMCloneTab<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">2</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;printf@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">GLOBAL</span>&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__libc_start_main@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">4</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__gmon_start__<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">5</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;NOTYPE&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;_ITM_registerTMCloneTable<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">6</span>:&nbsp;<span class="hljs-number">0000000000000000</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0</span>&nbsp;FUNC&nbsp;&nbsp;&nbsp;&nbsp;WEAK&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">DEFAULT</span>&nbsp;&nbsp;UND&nbsp;__cxa_finalize@GLIBC_2<span class="hljs-number">.2</span><span class="hljs-number">.5</span>&nbsp;(<span class="hljs-number">2</span>)<br></code></pre>
-<p><strong>5）</strong> 查看可执行目标文件的<code>.dynamic</code>section</p>
+<p>上述输出结果中各字段的含义与<code>.symtab</code>section 中的相同。这里不再赘述。</p>
+<hr>
+<h3 id="hspanidjump10dynamicspan"><span><span id="jump10">查看 .dynamic</span></span></h3>
+<p>查看可执行目标文件的<code>.dynamic</code>section 的内容：</p>
 <pre><code class="hljs go">$&nbsp;readelf&nbsp;-d&nbsp;main<br><br>Dynamic&nbsp;section&nbsp;at&nbsp;offset&nbsp;<span class="hljs-number">0x2d</span>c8&nbsp;contains&nbsp;<span class="hljs-number">27</span>&nbsp;entries:<br>&nbsp;&nbsp;Tag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name/Value<br>&nbsp;<span class="hljs-number">0x0000000000000001</span>&nbsp;(NEEDED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shared&nbsp;library:&nbsp;[libc.so<span class="hljs-number">.6</span>]<br>&nbsp;<span class="hljs-number">0x000000000000000c</span>&nbsp;(INIT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x1000</span><br>&nbsp;<span class="hljs-number">0x000000000000000d</span>&nbsp;(FINI)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x11f</span>8<br>&nbsp;<span class="hljs-number">0x0000000000000019</span>&nbsp;(INIT_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>b8<br>&nbsp;<span class="hljs-number">0x000000000000001b</span>&nbsp;(INIT_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001a</span>&nbsp;(FINI_ARRAY)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3d</span>c0<br>&nbsp;<span class="hljs-number">0x000000000000001c</span>&nbsp;(FINI_ARRAYSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">8</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000006ffffef</span>5&nbsp;(GNU_HASH)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3a0</span><br>&nbsp;<span class="hljs-number">0x0000000000000005</span>&nbsp;(STRTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x470</span><br>&nbsp;<span class="hljs-number">0x0000000000000006</span>&nbsp;(SYMTAB)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3c8</span><br>&nbsp;<span class="hljs-number">0x000000000000000a</span>&nbsp;(STRSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">132</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000000b</span>&nbsp;(SYMENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000015</span>&nbsp;(DEBUG)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br>&nbsp;<span class="hljs-number">0x0000000000000003</span>&nbsp;(PLTGOT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x3f</span>b8<br>&nbsp;<span class="hljs-number">0x0000000000000002</span>&nbsp;(PLTRELSZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000014</span>&nbsp;(PLTREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RELA<br>&nbsp;<span class="hljs-number">0x0000000000000017</span>&nbsp;(JMPREL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x5e8</span><br>&nbsp;<span class="hljs-number">0x0000000000000007</span>&nbsp;(RELA)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x528</span><br>&nbsp;<span class="hljs-number">0x0000000000000008</span>&nbsp;(RELASZ)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">192</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x0000000000000009</span>&nbsp;(RELAENT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">24</span>&nbsp;(bytes)<br>&nbsp;<span class="hljs-number">0x000000000000001e</span>&nbsp;(FLAGS)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BIND_NOW<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>b&nbsp;(FLAGS_1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flags:&nbsp;NOW&nbsp;PIE<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>e&nbsp;(VERNEED)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x508</span><br>&nbsp;<span class="hljs-number">0x000000006fffffff</span>&nbsp;(VERNEEDNUM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">1</span><br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>0&nbsp;(VERSYM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x4f</span>4<br>&nbsp;<span class="hljs-number">0x000000006ffffff</span>9&nbsp;(RELACOUNT)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">3</span><br>&nbsp;<span class="hljs-number">0x0000000000000000</span>&nbsp;(NULL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-number">0x0</span><br></code></pre>
+<p>注：</p>
 <ul>
-<li><p>注：</p>
-<ul>
-<li><p><code>Tag</code>是  Dynamic section entry 结构体中的第 1 个字段，占用 8 字节，表示动态条目类型。最左侧一列表示<code>Tag</code>的值，中间一列为<code>Tag</code>的动态条目类型，对应<code>elf.h</code>中以<code>DT_</code>开头的宏定义。</p></li>
-<li><p><code>Name/Value</code>是  Dynamic section entry 结构体中的第 2 个字段，占用 8 字节，根据<code>Tag</code>类型的不同，该字段表示的含义也不同。常见选项见下表。</p></li></ul></li>
+<li><p>ELF-64 目标文件格式中，<code>Dynamic Section Entry</code>对应的结构体名称为<code>Elf64_Dyn</code>，定义在<code>/usr/include/elf.h</code>头文件中。</p></li>
+<li><p><code>Tag</code>是 Dynamic Section Entry 结构体中的第 1 个字段，占用 8 字节，表示动态条目类型。最左侧一列表示<code>Tag</code>的值，中间一列为<code>Tag</code>的动态条目类型，对应<code>elf.h</code>中以<code>DT_</code>开头的宏定义。</p></li>
+<li><p><code>Name/Value</code>是 Dynamic Section Entry 结构体中的第 2 个字段，占用 8 字节，根据<code>Tag</code>类型的不同，该字段表示的含义也不同。常见选项见下表。</p></li>
 </ul>
 <table>
 <thead>
@@ -1018,12 +1073,6 @@
 <td>本共享对象的“SO-NAME”，即本共享库的名称</td>
 </tr>
 <tr>
-<td>15</td>
-<td>RPATH</td>
-<td>？</td>
-<td>动态链接库共享对象搜索路径</td>
-</tr>
-<tr>
 <td>30</td>
 <td>FLAGS</td>
 <td>常见选项：<li><span>SYMBOLIC，符号解析从这开始</span></li> <li><span>TEXTREL，本目标文件包含 .text 的重定位表</span></li> <li><span>BIND_NOW，本目标文件不采用延迟绑定</span></li></td>
@@ -1034,6 +1083,33 @@
 <td>FLAGS_1</td>
 <td>常见选项：<li><span>NOW，为本目标文件设置了 RTLD_NOW 标志位</span></li> <li><span>GLOBAL，为本目标文件设置了 RTLD_GLOBAL 标志位</span></li></td>
 <td>状态标志</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="hspanidjump0symtabdynsymspan"><span><span id="jump0">.symtab 和 .dynsym 之间的区别</span></span></h3>
+<p><code>.symtab</code>和<code>.dynsym</code>section 之间的区别为：</p>
+<table>
+<thead>
+<tr>
+<th>Section 名称</th>
+<th>内容</th>
+<th>是否会被加载到内存</th>
+<th>是否可以通过 strip 命令删除该 section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.symtab</td>
+<td>包含所有的符号</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>.dynsym</td>
+<td>只包含需要动态链接的符号</td>
+<td>是</td>
+<td>否</td>
 </tr>
 </tbody>
 </table>
