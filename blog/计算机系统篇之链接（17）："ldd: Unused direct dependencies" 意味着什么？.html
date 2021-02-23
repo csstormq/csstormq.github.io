@@ -457,7 +457,7 @@
 <p>结合<code>ldd -u</code>命令的输出结果以及上面的代码，我们可以看出：</p>
 <ul>
 <li><p>仅在第一次（即局部变量<code>first</code>值为<code>false</code>）发现有未使用的（即<code>l-&gt;l_used</code>值为<code>false</code>）共享库时，才会输出"Unused direct dependencies:"。</p></li>
-<li><p>只要发现有未使用的共享库，就打印共享库的名称（即<code>l-&amp;gt;l_name</code>的值）。</p></li>
+<li><p>只要发现有未使用的共享库，就打印共享库的名称（即<code>l-&gt;l_name</code>的值）。</p></li>
 </ul>
 <p>这里，我们有如下几个疑问：</p>
 <ul>
