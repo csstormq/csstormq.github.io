@@ -469,7 +469,7 @@
 <p>如果要识别“0 到 9 的数字可以重复 0 次或多次”，那么对应的正则表达式如下：</p>
 <pre><code class="hljs bash">([<span class="hljs-string">"0"</span>-<span class="hljs-string">"9"</span>])*<br></code></pre>
 <p>注：对于可以<code>重复 0 次或多次</code>的模式，需要将模式用英文小括号<code>()</code>括起来，并且在<code>)</code>后面加一个<code>*</code>。</p>
-<p><strong>注意</strong> 在 JavaCC 中，<code>重复 0 次或多次</code>等重复性模式中的英文小括号<code>()</code>不能省略。</p>
+<p><strong>注意：</strong> 在 JavaCC 中，<code>重复 0 次或多次</code>等重复性模式中的英文小括号<code>()</code>不能省略。</p>
 <p>对应的<code>TOKEN</code>如下：</p>
 <pre><code class="hljs bash">TOKEN&nbsp;:<br>{<br>&nbsp;&nbsp;&lt;&nbsp;A:&nbsp;([<span class="hljs-string">"0"</span>-<span class="hljs-string">"9"</span>])*&nbsp;&gt;<br>}<br></code></pre>
 <p><strong>8）</strong> 重复 1 次或多次</p>
