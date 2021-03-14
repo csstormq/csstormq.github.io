@@ -428,7 +428,7 @@
 <p>JavaCC 5.0 生成的解析器中默认提供的构造函数之一为：<code>Adder(java.io.Reader stream)</code>。因此，我们才可以在<code>evaluate</code>函数中将<code>Reader</code>类型的实例作为解析器类<code>Adder</code>的参数。</p>
 <p>此外，要运行 JavaCC 生成的解析器类，需要如下两个步骤：1）生成解析器类的对象实例；2）用生成的对象调用和需要解析的语句同名的方法。</p>
 <p>上述代码中，语句<code>new Adder(reader).expr();</code>完成了这两个步骤。</p>
-<p><strong>c）</strong> 导入依赖</p>
+<p><strong>d）</strong> 导入依赖</p>
 <p>由于<code>evaluate</code>函数中使用了<code>StringReader</code>类。因此，需要导入如下依赖：</p>
 <pre><code class="hljs nginx"><span class="hljs-attribute">import</span>&nbsp;<span class="hljs-regexp">java.io.*</span>;<br></code></pre>
 <p><strong>step 3：</strong> 编写语法描述文件的“扫描器的描述”部分</p>
