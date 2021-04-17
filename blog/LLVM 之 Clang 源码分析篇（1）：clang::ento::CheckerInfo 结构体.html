@@ -404,11 +404,18 @@
 <p>本文基于<code>release/12.x</code>版本的 LLVM 源码，研究了<code>clang::ento::CheckerInfo</code>结构体中各数据成员表示的意义以及成员函数的作用。从而，有助于理解 Clang 静态分析器源码实现的其他相关部分。</p>
 <hr>
 <h3 id="hspanidjump1span"><span><span id="jump1">研究过程</span></span></h3>
+<ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_1">数据成员</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_2">成员函数</a></p>
+</ul>
+<hr>
 <p>结构体<code>clang::ento::CheckerInfo</code>的源码实现目录如下：</p>
 <ul>
 <li><p>头文件为<code>clang/include/clang/StaticAnalyzer/Core/CheckerRegistryData.h</code></p></li>
 <li><p>源文件为<code>clang/lib/StaticAnalyzer/Core/CheckerRegistryData.cpp</code></p></li>
 </ul>
+<hr>
+<h4 id="hspanidjump1_1span"><span><span id="jump1_1">数据成员</span></span></h4>
 <p><strong>step 1：</strong> <span id="jump1_1_1">数据成员<code>Initialize</code>、<code>ShouldRegister</code>、<code>FullName</code>和<code>IsHidden</code>等</span></p>
 <p><strong>1）</strong> 数据成员<code>Initialize</code></p>
 <p><code>Initialize</code>是结构体<code>CheckerInfo</code>的数据成员之一。其定义及初始值如下：</p>
@@ -526,16 +533,20 @@
 <p>因此，结构体<code>CheckerInfo</code>中的数据成员<code>IsHidden</code>的作用为：表示检查器是否对用户可见。</p>
 <p><strong>step 5：</strong> <span id="jump1_1_2">数据成员<code>CmdLineOptions</code></span></p>
 <p>待补充</p>
-<p><strong>step 6：</strong> <span id="jump1_2_1">成员函数<code>isEnabled()</code></span></p>
+<p><a href="#jump1">返回上一级</a></p>
+<hr>
+<h4 id="hspanidjump1_2span"><span><span id="jump1_2">成员函数</span></span></h4>
+<p><strong>step 1：</strong> <span id="jump1_2_1">成员函数<code>isEnabled()</code></span></p>
 <p>该函数的源码实现如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">116</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">bool</span>&nbsp;<span class="hljs-title">isEnabled</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;mgr)</span>&nbsp;<span class="hljs-keyword">const</span>&nbsp;</span>{<br><span class="hljs-number">117</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State&nbsp;==&nbsp;StateFromCmdLine::State_Enabled&nbsp;&amp;&amp;&nbsp;ShouldRegister(mgr);<br><span class="hljs-number">118</span>&nbsp;&nbsp;&nbsp;}<br></code></pre>
 <p>从上述分析可以得出，成员函数<code>isEnabled()</code>的代码逻辑为：如果通过<code>-analyzer-checker</code>标志显式地启用了检查器<strong>并且</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>true</code>，那么该函数的返回值为<code>true</code>。</p>
 <p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isEnabled()</code>的作用为：判断是否启用了检查器。</p>
-<p><strong>step 7：</strong> <span id="jump1_2_2">成员函数<code>isDisabled()</code></span></p>
+<p><strong>step 2：</strong> <span id="jump1_2_2">成员函数<code>isDisabled()</code></span></p>
 <p>该函数的源码实现如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">120</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">bool</span>&nbsp;<span class="hljs-title">isDisabled</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;mgr)</span>&nbsp;<span class="hljs-keyword">const</span>&nbsp;</span>{<br><span class="hljs-number">121</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State&nbsp;==&nbsp;StateFromCmdLine::State_Disabled&nbsp;||&nbsp;!ShouldRegister(mgr);<br><span class="hljs-number">122</span>&nbsp;&nbsp;&nbsp;}<br></code></pre>
 <p>从上述分析可以得出，成员函数<code>isDisabled()</code>的代码逻辑为：如果通过<code>-analyzer-disable-checker</code>标志显式地禁用了检查器<strong>或者</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>false</code>，那么该函数的返回值为<code>true</code>。</p>
 <p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isDisabled()</code>的作用为：判断是否禁用了检查器。</p>
+<p><a href="#jump1">返回上一级</a></p>
 <hr>
 <h3 id="hspanidjump2span"><span><span id="jump2">研究结论</span></span></h3>
 <p><strong>结构体<code>clang::ento::CheckerInfo</code>的作用为：</strong> 用于封装创建一个检查器类实例所需要的所有数据。</p>
