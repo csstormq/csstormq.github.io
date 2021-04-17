@@ -530,12 +530,12 @@
 <p>该函数的源码实现如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">116</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">bool</span>&nbsp;<span class="hljs-title">isEnabled</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;mgr)</span>&nbsp;<span class="hljs-keyword">const</span>&nbsp;</span>{<br><span class="hljs-number">117</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State&nbsp;==&nbsp;StateFromCmdLine::State_Enabled&nbsp;&amp;&amp;&nbsp;ShouldRegister(mgr);<br><span class="hljs-number">118</span>&nbsp;&nbsp;&nbsp;}<br></code></pre>
 <p>从上述分析可以得出，成员函数<code>isEnabled()</code>的代码逻辑为：如果通过<code>-analyzer-checker</code>标志显式地启用了检查器<strong>并且</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>true</code>，那么该函数的返回值为<code>true</code>。</p>
-<p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isEnabled()</code>的作用为：判断是否显式地启用了检查器。</p>
+<p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isEnabled()</code>的作用为：判断是否启用了检查器。</p>
 <p><strong>step 7：</strong> <span id="jump1_2_2">成员函数<code>isDisabled()</code></span></p>
 <p>该函数的源码实现如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">120</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">bool</span>&nbsp;<span class="hljs-title">isDisabled</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;mgr)</span>&nbsp;<span class="hljs-keyword">const</span>&nbsp;</span>{<br><span class="hljs-number">121</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State&nbsp;==&nbsp;StateFromCmdLine::State_Disabled&nbsp;||&nbsp;!ShouldRegister(mgr);<br><span class="hljs-number">122</span>&nbsp;&nbsp;&nbsp;}<br></code></pre>
 <p>从上述分析可以得出，成员函数<code>isDisabled()</code>的代码逻辑为：如果通过<code>-analyzer-disable-checker</code>标志显式地禁用了检查器<strong>或者</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>false</code>，那么该函数的返回值为<code>true</code>。</p>
-<p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isDisabled()</code>的作用为：判断是否显式地禁用了检查器。</p>
+<p>因此，结构体<code>CheckerInfo</code>中的成员函数<code>isDisabled()</code>的作用为：判断是否禁用了检查器。</p>
 <hr>
 <h3 id="hspanidjump2span"><span><span id="jump2">研究结论</span></span></h3>
 <p><strong>结构体<code>clang::ento::CheckerInfo</code>的作用为：</strong> 用于封装创建一个检查器类实例所需要的所有数据。</p>
@@ -614,12 +614,12 @@
 <tr>
 <td><a href="#jump1_2_1">isEnabled()</a></td>
 <td>bool isEnabled(const CheckerManager &amp;mgr) const;</td>
-<td>判断是否显式地启用了检查器。<li>返回值为<code>true</code>，表示通过<code>-analyzer-checker</code>标志显式地启用了检查器<strong>并且</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>true</code>。</li></td>
+<td>判断是否启用了检查器。<li>返回值为<code>true</code>，表示通过<code>-analyzer-checker</code>标志显式地启用了检查器<strong>并且</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>true</code>。</li></td>
 </tr>
 <tr>
 <td><a href="#jump1_2_2">isDisabled()</a></td>
 <td>bool isDisabled(const CheckerManager &amp;mgr) const;</td>
-<td>判断是否显式地禁用了检查器。<li>返回值为<code>true</code>，表示通过<code>-analyzer-disable-checker</code>标志显式地禁用了检查器<strong>或者</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>false</code>。</li></td>
+<td>判断是否禁用了检查器。<li>返回值为<code>true</code>，表示通过<code>-analyzer-disable-checker</code>标志显式地禁用了检查器<strong>或者</strong>检查器注册函数<code>shouldRegisterXXX</code>的返回值为<code>false</code>。</li></td>
 </tr>
 </tbody>
 </table>
