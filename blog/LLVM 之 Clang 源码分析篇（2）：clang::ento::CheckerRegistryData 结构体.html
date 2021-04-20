@@ -458,7 +458,9 @@
 <p><strong>step 2：</strong> <span id="jump1_1_1">数据成员<code>EnabledCheckers</code></span></p>
 <p><code>EnabledCheckers</code>是结构体<code>CheckerRegistryData</code>的数据成员之一。其定义如下：</p>
 <pre><code class="hljs">195&nbsp;&nbsp;&nbsp;CheckerInfoSet&nbsp;EnabledCheckers;<br></code></pre>
-<p>因此，数据成员<code>EnabledCheckers</code>是一个<code>std::vector</code>向量，其元素的数据类型为<code>CheckerInfo</code>。</p>
+<p>数据类型<code>CheckerInfoSet</code>的定义如下（定义在 clang/include/clang/StaticAnalyzer/Core/CheckerRegistryData.h 文件中）：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">90</span>&nbsp;<span class="hljs-keyword">using</span>&nbsp;CheckerInfoSet&nbsp;=&nbsp;llvm::SetVector&lt;<span class="hljs-keyword">const</span>&nbsp;CheckerInfo&nbsp;*&gt;;<br></code></pre>
+<p>因此，数据成员<code>EnabledCheckers</code>是一个<code>llvm::SetVector</code>向量，其元素的数据类型为<code>const CheckerInfo *</code>。</p>
 <p>类似地，可以通过研究<code>clang::ento::CheckerRegistry::Data.EnabledCheckers</code>对象的初始化过程，从而理解该数据成员的意义。</p>
 <p><strong>1）</strong> 哪些函数会添加<code>Data.EnabledCheckers</code>对象的元素</p>
 <p>通过搜索源码发现， <code>Data.EnabledCheckers</code>对象添加元素的操作仅发生在<code>CheckerRegistry::initializeRegistry()</code>函数中。</p>
@@ -550,7 +552,7 @@
 </tr>
 <tr>
 <td><a href="#jump1_1_2">Checkers</a></td>
-<td><code>CheckerInfoSet</code></td>
+<td><code>CheckerInfoList</code></td>
 <td>用于存储所有可以被注册的检查器的相关数据。这些检查器正是<code>Checkers.td</code>文件中所描述的那些检查器。</td>
 </tr>
 <tr>
