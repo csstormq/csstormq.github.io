@@ -406,7 +406,7 @@
 <p><strong>step 1：</strong> 获取源码</p>
 <p><strong>1）</strong> 获取 Clang 的源码</p>
 <pre><code class="hljs php">$&nbsp;git&nbsp;clone&nbsp;https:<span class="hljs-comment">//github.com/llvm/llvm-project.git</span><br></code></pre>
-<p>注：Clang 的源码位于目录<code>llvm-project/clang</code>中。</p>
+<p><em>注：</em>Clang 的源码位于目录<code>llvm-project/clang</code>中。</p>
 <p><strong>2）</strong> 切换到指定的版本（optional）</p>
 <p>如果要以发布版本<code>release/12.x</code>作为接下来编译的基础版本。在 llvm-project 目录下执行如下命令：</p>
 <pre><code class="hljs php">$&nbsp;git&nbsp;checkout&nbsp;release/<span class="hljs-number">12.</span>x<br></code></pre>
@@ -463,7 +463,7 @@
 <p><strong>2）</strong> 仅编译 Clang</p>
 <p>在 llvm-project/build 目录中执行如下命令：</p>
 <pre><code class="hljs php">$&nbsp;cmake&nbsp;-DLLVM_TARGETS_TO_BUILD=<span class="hljs-string">"X86;AArch64;RISCV"</span>&nbsp;-DLLVM_ENABLE_PROJECTS=clang&nbsp;-DBUILD_SHARED_LIBS=ON&nbsp;-G&nbsp;Ninja&nbsp;../llvm/<br>$&nbsp;ninja&nbsp;clang&nbsp;-j8<br></code></pre>
-<p>注：选项<code>-j8</code>表示并发任务最多可以有 8 个，从而减少编译时间。如此指定是由于笔者机器中的逻辑 CPU 数量为 8。</p>
+<p><em>注：</em>选项<code>-j8</code>表示并发任务最多可以有 8 个，从而减少编译时间。如此指定是由于笔者机器中的逻辑 CPU 数量为 8。</p>
 <p><strong>注意：</strong> 执行上述命令时，需要确保可用的内存（包括交换空间）大小至少 25 G，可用的磁盘空间至少 15 G。</p>
 <p>编译的 Clang——<code>clang-12</code>位于 llvm-project/build/bin 目录中。如下所示：</p>
 <pre><code class="hljs diff">$&nbsp;ll&nbsp;-h&nbsp;bin/<br>total&nbsp;89M<br>drwxrwxr-x&nbsp;&nbsp;2&nbsp;xxq&nbsp;xxq&nbsp;4.0K&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;./<br>drwxrwxr-x&nbsp;16&nbsp;xxq&nbsp;xxq&nbsp;4.0K&nbsp;Apr&nbsp;&nbsp;3&nbsp;11:44&nbsp;../<br>lrwxrwxrwx&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;clang&nbsp;-&gt;&nbsp;clang-12*<br>lrwxrwxrwx&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;clang++&nbsp;-&gt;&nbsp;clang-12*<br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;11M&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;clang-12*</span><br>lrwxrwxrwx&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;clang-cl&nbsp;-&gt;&nbsp;clang-12*<br>lrwxrwxrwx&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:32&nbsp;clang-cpp&nbsp;-&gt;&nbsp;clang-12*<br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;1.7M&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:31&nbsp;clang-offload-bundler*</span><br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;3.0M&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:31&nbsp;clang-offload-wrapper*</span><br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;14M&nbsp;Apr&nbsp;&nbsp;3&nbsp;12:10&nbsp;clang-tblgen*</span><br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;1.8K&nbsp;Apr&nbsp;&nbsp;3&nbsp;11:41&nbsp;llvm-lit*</span><br><span class="hljs-deletion">-rwxrwxr-x&nbsp;&nbsp;1&nbsp;xxq&nbsp;xxq&nbsp;&nbsp;61M&nbsp;Apr&nbsp;&nbsp;3&nbsp;11:46&nbsp;llvm-tblgen*</span><br></code></pre>
@@ -474,7 +474,7 @@
 <p><strong>1）</strong> 安装 Clang 测试套件的依赖</p>
 <p>在笔者机器上运行时，只需安装如下依赖：</p>
 <pre><code class="hljs cs">$&nbsp;sudo&nbsp;apt-<span class="hljs-keyword">get</span>&nbsp;install&nbsp;python3-distutils<br></code></pre>
-<p>注：在不同的机器上运行时，缺少的依赖可能不同。如果运行 Clang 测试套件失败，则根据报错内容进行相应地解决。</p>
+<p><em>注：</em>在不同的机器上运行时，缺少的依赖可能不同。如果运行 Clang 测试套件失败，则根据报错内容进行相应地解决。</p>
 <p><strong>2）</strong> 运行 Clang 测试套件</p>
 <p>在 llvm-project/build 目录中执行如下命令：</p>
 <pre><code class="hljs php">$&nbsp;ninja&nbsp;check-clang<br></code></pre>
@@ -490,7 +490,7 @@
 <p><strong>1）</strong> 安装方式 1</p>
 <p>如果选择的构建工具是<code>ninja</code>，在 llvm-project/build 目录中执行如下命令进行安装：</p>
 <pre><code class="hljs php">$&nbsp;sudo&nbsp;ninja&nbsp;install<br></code></pre>
-<p>注：命令<code>ninja install</code>实际调用 llvm-project/build 目录中的<code>cmake_install.cmake</code>脚本进行安装。</p>
+<p><em>注：</em>命令<code>ninja install</code>实际调用 llvm-project/build 目录中的<code>cmake_install.cmake</code>脚本进行安装。</p>
 <p>默认的安装目录为<code>/usr/local</code>。相应地，<code>cmake_install.cmake</code>脚本中会有如下内容：</p>
 <pre><code class="hljs vbscript">#&nbsp;<span class="hljs-keyword">Set</span>&nbsp;the&nbsp;install&nbsp;prefix<br><span class="hljs-keyword">if</span>(<span class="hljs-keyword">NOT</span>&nbsp;DEFINED&nbsp;CMAKE_INSTALL_PREFIX)<br>&nbsp;&nbsp;<span class="hljs-keyword">set</span>(CMAKE_INSTALL_PREFIX&nbsp;<span class="hljs-string">"/usr/local"</span>)<br>endif()<br><span class="hljs-built_in">string</span>(REGEX&nbsp;<span class="hljs-built_in">REPLACE</span>&nbsp;<span class="hljs-string">"/$"</span>&nbsp;<span class="hljs-string">""</span>&nbsp;CMAKE_INSTALL_PREFIX&nbsp;<span class="hljs-string">"${CMAKE_INSTALL_PREFIX}"</span>)<br></code></pre>
 <p>从上面的代码可以看出，如果要更改默认安装目录，则可以通过设置<code>CMAKE_INSTALL_PREFIX</code>选项做到这一点。</p>
