@@ -389,7 +389,7 @@
 </head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize6llvmclang3clangentocheckerregistryfontp"><span><p align="center"><strong><font size="6">LLVM 之 Clang 源码分析篇（3）：clang::ento::CheckerRegistry 类</font></strong></p></span></h1>
 <p align="right">Author: stormQ</p>
 <p align="right">Created: Thursday, 15. April 2021 00:11AM</p>
-<p align="right">Last Modified: Sunday, 18. April 2021 10:04AM</p>
+<p align="right">Last Modified: Tuesday, 20. April 2021 07:20PM</p>
 <hr>
 <ul>
 <li><h3 id="h"><span>目录</span></h3>
@@ -419,8 +419,10 @@
 <p><strong>step 1：</strong> <span id="jump1_1_1">数据成员<code>Data</code></span></p>
 <p><code>Data</code>是类<code>CheckerRegistry</code>的数据成员之一。其定义如下：</p>
 <pre><code class="hljs">190&nbsp;&nbsp;&nbsp;CheckerRegistryData&nbsp;&amp;Data;<br></code></pre>
-<p>类<code>CheckerRegistry</code>中的数据成员<code>Data</code>的作用为：用于封装由<code>Checkers.td</code>文件所描述的检查器及其相关数据。</p>
-<p>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</p>
+<p>从上面的代码可以看出，数据成员<code>Data</code>的数据类型为<code>CheckerRegistryData &amp;</code>。</p>
+<p>而结构体<code>clang::ento::CheckerRegistryData</code>的作用为：用于封装由<code>Checkers.td</code>文件所描述的检查器及其相关数据。</p>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</em></p>
+<p>因此，类<code>CheckerRegistry</code>中的数据成员<code>Data</code>的作用为：用于存储由<code>Checkers.td</code>文件所描述的检查器及其相关数据。</p>
 <p><strong>step 2：</strong> <span id="jump1_1_2">数据成员<code>Diags</code></span></p>
 <p>待补充</p>
 <p><strong>step 3：</strong> <span id="jump1_1_3">数据成员<code>AnOpts</code></span></p>
@@ -440,7 +442,7 @@
 </ul>
 <p><strong>1）</strong> 分析<code>Data.Checkers</code>对象</p>
 <p><code>Data.Checkers</code>对象的作用为：用于存储所有可以被注册的检查器的相关数据。这些检查器正是<code>Checkers.td</code>文件中所描述的那些检查器。</p>
-<p>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</p>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</em></p>
 <p><strong>2）</strong> 分析<code>CheckerInfo</code>结构体</p>
 <p>结构体<code>CheckerInfo</code>的相关结论如下：</p>
 <ul>
@@ -449,7 +451,7 @@
 <li><p>数据成员<code>Dependencies</code>的作用为：用于存放直接强依赖的检查器有哪些。</p></li>
 <li><p>数据成员<code>WeakDependencies</code>的作用为：用于存放直接弱依赖的检查器有哪些。</p></li>
 </ul>
-<p>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（1）：clang::ento::CheckerInfo 结构体》。</p>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（1）：clang::ento::CheckerInfo 结构体》。</em></p>
 <p><strong>3）</strong> <span id="jump1_3_1">分析<code>collectStrongDependencies()</code>模板函数</span></p>
 <p>该函数的源码实现如下（定义在 clang/lib/StaticAnalyzer/Frontend/CheckerRegistry.cpp 文件中）：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">260</span>&nbsp;<span class="hljs-keyword">template</span>&nbsp;&lt;<span class="hljs-keyword">typename</span>&nbsp;IsEnabledFn&gt;<br><span class="hljs-number">261</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">static</span>&nbsp;<span class="hljs-keyword">bool</span>&nbsp;<span class="hljs-title">collectStrongDependencies</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;ConstCheckerInfoList&nbsp;&amp;Deps,<br><span class="hljs-number">262</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;Mgr,<br><span class="hljs-number">263</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerInfoSet&nbsp;&amp;Ret,<br><span class="hljs-number">264</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IsEnabledFn&nbsp;IsEnabled)</span>&nbsp;</span>{<br><span class="hljs-number">265</span>&nbsp;<br><span class="hljs-number">266</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">for</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;CheckerInfo&nbsp;*Dependency&nbsp;:&nbsp;Deps)&nbsp;{<br><span class="hljs-number">267</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!IsEnabled(Dependency))<br><span class="hljs-number">268</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">false</span>;<br><span class="hljs-number">269</span>&nbsp;<br><span class="hljs-number">270</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">//&nbsp;Collect&nbsp;dependencies&nbsp;recursively.</span><br><span class="hljs-number">271</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!collectStrongDependencies(Dependency-&gt;Dependencies,&nbsp;Mgr,&nbsp;Ret,<br><span class="hljs-number">272</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IsEnabled))<br><span class="hljs-number">273</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">false</span>;<br><span class="hljs-number">274</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ret.insert(Dependency);<br><span class="hljs-number">275</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">276</span>&nbsp;<br><span class="hljs-number">277</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">true</span>;<br><span class="hljs-number">278</span>&nbsp;}<br></code></pre>
@@ -487,18 +489,47 @@
 <li><p>首先，判断检查器<code>Checker</code>是否被启用了。如果未被启用，那么跳过该检查器，并进行下一个检查器的收集；否则，继续下面的流程。</p></li>
 <li><p>接下来，收集检查器<code>Checker</code>所有直接和间接弱依赖的检查器，以及这些弱依赖的检查器所直接和间接强依赖的所有检查器。收集结果中的检查器一定来自于<code>Tmp</code>集合。</p></li>
 <li><p>接下来，收集检查器<code>Checker</code>所有直接和间接强依赖的检查器。收集结果中的检查器也一定来自于<code>Tmp</code>集合。如果收集失败，那么跳过该检查器，并进行下一个检查器的收集；否则收集成功，继续下面的流程。</p></li>
-<li><p>最后，将收集的所有检查器<code>Deps</code>添加到<code>Data.EnabledCheckers</code>对象中，再将检查器<code>Checker</code>添加到<code>Data.EnabledCheckers</code>对象中。</p></li>
+<li><p>最后，将收集的所有检查器依赖<code>Deps</code>添加到<code>Data.EnabledCheckers</code>对象中，再将检查器<code>Checker</code>添加到<code>Data.EnabledCheckers</code>对象中。</p></li>
 </ul>
-<p>从上述分析可以得出，类<code>CheckerRegistry</code>中的成员函数<code>initializeRegistry</code>的作用为：收集所有启用的检查器及其所有依赖的检查器。依赖的检查器包括如下几种：</p>
+<p>从上述分析可以得出，类<code>CheckerRegistry</code>中的成员函数<code>initializeRegistry()</code>的作用为：收集所有启用的检查器及其所有依赖的检查器。依赖的检查器包括如下几种：</p>
 <ul>
 <li><p>直接和间接强依赖的检查器</p></li>
 <li><p>直接和间接弱依赖的检查器</p></li>
 <li><p>弱依赖检查器所直接和间接强依赖的检查器</p></li>
 </ul>
+<p><strong>step 2：</strong> <span id="jump1_2_2">成员函数<code>initializeManager()</code></span></p>
+<p>该函数的源码实现如下（定义在 clang/lib/StaticAnalyzer/Frontend/CheckerRegistry.cpp 文件中）：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">462</span>&nbsp;<span class="hljs-keyword">void</span>&nbsp;CheckerRegistry::initializeManager(CheckerManager&nbsp;&amp;CheckerMgr)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">463</span>&nbsp;&nbsp;&nbsp;<span class="hljs-comment">//&nbsp;Initialize&nbsp;the&nbsp;CheckerManager&nbsp;with&nbsp;all&nbsp;enabled&nbsp;checkers.</span><br><span class="hljs-number">464</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">for</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">auto</span>&nbsp;*Checker&nbsp;:&nbsp;Data.EnabledCheckers)&nbsp;{<br><span class="hljs-number">465</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerMgr.setCurrentCheckerName(CheckerNameRef(Checker-&gt;FullName));<br><span class="hljs-number">466</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Checker-&gt;Initialize(CheckerMgr);<br><span class="hljs-number">467</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">468</span>&nbsp;}<br></code></pre>
+<p><code>Data</code>是类<code>CheckerRegistry</code>的数据成员之一，其数据类型为<code>CheckerRegistryData &amp;</code>。而结构体<code>clang::ento::CheckerRegistryData</code>中的数据成员<code>EnabledCheckers</code>的作用为：用于存储所有启用的检查器及其所有依赖的检查器。依赖的检查器包括如下几种：</p>
+<ul>
+<li><p>直接和间接强依赖的检查器</p></li>
+<li><p>直接和间接弱依赖的检查器</p></li>
+<li><p>弱依赖检查器所直接和间接强依赖的检查器</p></li>
+</ul>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</em></p>
+<p><code>Checker</code>是<code>Data.EnabledCheckers</code>对象中的元素，其数据类型为<code>const CheckerInfo *</code>。而结构体<code>clang::ento::CheckerInfo</code>中的数据成员<code>FullName</code>和<code>Initialize</code>的作用分别为：表示检查器的全称、表示检查器注册函数<code>registerXXX()</code>的运行时内存地址。</p>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（1）：clang::ento::CheckerInfo 结构体》。</em></p>
+<p>因此，成员函数<code>initializeManager()</code>的代码逻辑为：遍历所有要启用的检查器<code>Data.EnabledCheckers</code>，对其中的每个检查器<code>Checker</code>执行如下逻辑：</p>
+<ul>
+<li><p>首先，在检查器管理类<code>CheckerMgr</code>中设置当前检查器<code>Checker</code>的检查器全称。</p></li>
+<li><p>然后，调用检查器注册函数<code>registerXXX()</code>。</p></li>
+</ul>
+<p>从上述分析可以得出，类<code>CheckerRegistry</code>中的成员函数<code>initializeManager()</code>的作用为：注册所有启用的检查器及其所有依赖的检查器。</p>
+<p><strong>step 3：</strong> <span id="jump1_2_3">成员函数<code>resolveDependencies()</code></span></p>
+<p>该函数的源码实现如下（定义在 clang/lib/StaticAnalyzer/Frontend/CheckerRegistry.cpp 文件中）：</p>
+<pre><code class="hljs php"><span class="hljs-number">298</span>&nbsp;template&nbsp;&lt;bool&nbsp;IsWeak&gt;&nbsp;void&nbsp;CheckerRegistry::resolveDependencies()&nbsp;{<br><span class="hljs-number">299</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">for</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;std::pair&lt;StringRef,&nbsp;StringRef&gt;&nbsp;&amp;Entry&nbsp;:<br><span class="hljs-number">300</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(IsWeak&nbsp;?&nbsp;Data.WeakDependencies&nbsp;:&nbsp;Data.Dependencies))&nbsp;{<br><span class="hljs-number">301</span>&nbsp;<br><span class="hljs-number">302</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;auto&nbsp;CheckerIt&nbsp;=&nbsp;binaryFind(Data.Checkers,&nbsp;Entry.first);<br><span class="hljs-number">303</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert(CheckerIt&nbsp;!=&nbsp;Data.Checkers.end()&nbsp;&amp;&amp;<br><span class="hljs-number">304</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerIt-&gt;FullName&nbsp;==&nbsp;Entry.first&nbsp;&amp;&amp;<br><span class="hljs-number">305</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"Failed&nbsp;to&nbsp;find&nbsp;the&nbsp;checker&nbsp;while&nbsp;attempting&nbsp;to&nbsp;set&nbsp;up&nbsp;its&nbsp;"</span><br><span class="hljs-number">306</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"dependencies!"</span>);<br><span class="hljs-number">307</span>&nbsp;<br><span class="hljs-number">308</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;auto&nbsp;DependencyIt&nbsp;=&nbsp;binaryFind(Data.Checkers,&nbsp;Entry.second);<br><span class="hljs-number">309</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert(DependencyIt&nbsp;!=&nbsp;Data.Checkers.end()&nbsp;&amp;&amp;<br><span class="hljs-number">310</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DependencyIt-&gt;FullName&nbsp;==&nbsp;Entry.second&nbsp;&amp;&amp;<br><span class="hljs-number">311</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"Failed&nbsp;to&nbsp;find&nbsp;the&nbsp;dependency&nbsp;of&nbsp;a&nbsp;checker!"</span>);<br><span class="hljs-number">312</span>&nbsp;<br><span class="hljs-number">313</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">//&nbsp;We&nbsp;do&nbsp;allow&nbsp;diagnostics&nbsp;from&nbsp;unit&nbsp;test/example&nbsp;dependency&nbsp;checkers.</span><br><span class="hljs-number">314</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert((DependencyIt-&gt;FullName.startswith(<span class="hljs-string">"test"</span>)&nbsp;||<br><span class="hljs-number">315</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DependencyIt-&gt;FullName.startswith(<span class="hljs-string">"example"</span>)&nbsp;||&nbsp;IsWeak&nbsp;||<br><span class="hljs-number">316</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DependencyIt-&gt;IsHidden)&nbsp;&amp;&amp;<br><span class="hljs-number">317</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"Strong&nbsp;dependencies&nbsp;are&nbsp;modeling&nbsp;checkers,&nbsp;and&nbsp;as&nbsp;such&nbsp;"</span><br><span class="hljs-number">318</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"non-user&nbsp;facing!&nbsp;Mark&nbsp;them&nbsp;hidden&nbsp;in&nbsp;Checkers.td!"</span>);<br><span class="hljs-number">319</span>&nbsp;<br><span class="hljs-number">320</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(IsWeak)<br><span class="hljs-number">321</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerIt-&gt;WeakDependencies.emplace_back(&amp;*DependencyIt);<br><span class="hljs-number">322</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">else</span><br><span class="hljs-number">323</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerIt-&gt;Dependencies.emplace_back(&amp;*DependencyIt);<br><span class="hljs-number">324</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">325</span>&nbsp;}<br></code></pre>
+<p>结构体<code>clang::ento::CheckerRegistryData</code>的相关结论如下：</p>
+<ul>
+<li><p>数据成员<code>WeakDependencies</code>，用于存储检查器之间的<strong>直接弱依赖</strong>关系（这些依赖关系是由<code>Checkers.td</code>文件的内容决定的）。其元素的<code>first</code>字段表示一个检查器的全称，<code>second</code>字段表示其直接弱依赖的检查器的全称。</p></li>
+<li><p>数据成员<code>Dependencies</code>，用于存储检查器之间的<strong>直接强依赖</strong>关系（这些依赖关系是由<code>Checkers.td</code>文件的内容决定的）。其元素的<code>first</code>字段表示一个检查器的全称，<code>second</code>字段表示其直接强依赖的检查器的全称。</p></li>
+</ul>
+<p><em>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（2）：clang::ento::CheckerRegistryData 结构体》。</em></p>
+<p>因此，成员函数<code>resolveDependencies()</code>的代码逻辑为：如果模板参数的值为<code>flase</code>，则遍历检查器之间的所有直接弱依赖关系，并将每个检查器直接弱依赖的检查器保存到该检查器内部。如果模板参数的值为<code>true</code>，则遍历检查器之间的所有直接强依赖关系，并将每个检查器直接强依赖的检查器保存到该检查器内部。</p>
+<p>从上述分析可以得出，类<code>CheckerRegistry</code>中的成员函数<code>resolveDependencies()</code>的作用为：将直接强依赖或直接弱依赖的检查器保存到检查器的内部。</p>
 <p><a href="#jump1">返回上一级</a></p>
 <hr>
 <h3 id="hspanidjump2span"><span><span id="jump2">研究结论</span></span></h3>
-<p><strong>类<code>clang::ento::CheckerRegistry</code>的作用为：</strong> ？。</p>
+<p><strong>类<code>clang::ento::CheckerRegistry</code>的作用为：</strong> 收集所有启用的检查器及其所有依赖的检查器，并将这些检查器注册到检查器管理类中。</p>
 <p><strong>其数据成员及用途如下：</strong></p>
 <table>
 <thead>
@@ -511,17 +542,17 @@
 <tbody>
 <tr>
 <td><a href="#jump1_1_1">Data</a></td>
-<td>CheckerRegistryData &amp;</td>
-<td>用于封装由<code>Checkers.td</code>文件所描述的检查器及其相关数据</td>
+<td><code>CheckerRegistryData &amp;</code></td>
+<td>用于存储由<code>Checkers.td</code>文件所描述的检查器及其相关数据</td>
 </tr>
 <tr>
 <td><a href="#jump1_1_2">Diags</a></td>
-<td>DiagnosticsEngine &amp;</td>
+<td><code>DiagnosticsEngine &amp;</code></td>
 <td>？</td>
 </tr>
 <tr>
 <td><a href="#jump1_1_3">AnOpts</a></td>
-<td>AnalyzerOptions &amp;</td>
+<td><code>AnalyzerOptions &amp;</code></td>
 <td>？</td>
 </tr>
 </tbody>
@@ -538,8 +569,18 @@
 <tbody>
 <tr>
 <td><a href="#jump1_2_1">initializeRegistry()</a></td>
-<td>void initializeRegistry(const CheckerManager &amp;Mgr);</td>
+<td><code>void initializeRegistry(const CheckerManager &amp;Mgr);</code></td>
 <td>收集所有启用的检查器及其所有依赖的检查器。依赖的检查器包括如下几种：<li><span>直接和间接强依赖的检查器</span></li> <li><span>直接和间接弱依赖的检查器</span></li> <li><span>弱依赖检查器所直接和间接强依赖的检查器</span></li></td>
+</tr>
+<tr>
+<td><a href="#jump1_2_2">initializeManager()</a></td>
+<td><code>void initializeManager(CheckerManager &amp;CheckerMgr) const</code></td>
+<td>注册所有启用的检查器及其所有依赖的检查器</td>
+</tr>
+<tr>
+<td><a href="#jump1_2_3">resolveDependencies()</a></td>
+<td><code>template &lt;bool IsWeak&gt; void resolveDependencies()</code></td>
+<td>将直接强依赖或直接弱依赖的检查器保存到检查器的内部</td>
 </tr>
 </tbody>
 </table>
