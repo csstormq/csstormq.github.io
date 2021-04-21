@@ -471,7 +471,7 @@
 <li><p>直接和间接弱依赖的检查器</p></li>
 <li><p>弱依赖检查器所直接和间接强依赖的检查器</p></li>
 </ul>
-<p>注：这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（3）：clang::ento::CheckerRegistry 类》。</p>
+<p><em>注：</em>这里直接给出了结论，具体研究过程可参考笔者的另一篇文章：《LLVM 之 Clang 源码分析篇（3）：clang::ento::CheckerRegistry 类》。</p>
 <p>因此， 结构体<code>CheckerRegistryData</code>中的数据成员<code>EnabledCheckers</code>的作用为：用于存储所有启用的检查器及其所有依赖的检查器。</p>
 <p><strong>step 3：</strong><span id="jump1_1_3"> 数据成员<code>Packages</code></span></p>
 <p>待补充</p>
@@ -484,7 +484,7 @@
 <p><strong>step 7：</strong> <span id="jump1_1_7">数据成员<code>Dependencies</code></span></p>
 <p><code>Dependencies</code>是结构体<code>CheckerRegistryData</code>的数据成员之一。其定义如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-number">209</span>&nbsp;&nbsp;&nbsp;llvm::SmallVector&lt;<span class="hljs-built_in">std</span>::pair&lt;StringRef,&nbsp;StringRef&gt;,&nbsp;<span class="hljs-number">0</span>&gt;&nbsp;Dependencies;<br></code></pre>
-<p>注：数据类型<code>llvm::SmallVector&lt;std::pair&lt;StringRef, StringRef&gt;, 0&gt;</code>表示向量类型，其元素的数据类型为<code>std::pair&lt;StringRef, StringRef&gt;</code>，初始元素个数为 0。</p>
+<p><em>注：</em>数据类型<code>llvm::SmallVector&lt;std::pair&lt;StringRef, StringRef&gt;, 0&gt;</code>表示向量类型，其元素的数据类型为<code>std::pair&lt;StringRef, StringRef&gt;</code>，初始元素个数为 0。</p>
 <p>因此，数据成员<code>Dependencies</code>是一个<code>llvm::SmallVector</code>向量，其元素的数据类型为<code>std::pair&lt;StringRef, StringRef&gt;</code>。</p>
 <p>类似地，可以通过研究<code>clang::ento::CheckerRegistry::Data.Dependencies</code>对象的初始化过程，从而理解该数据成员的意义。</p>
 <p><strong>1）</strong> 哪些函数会添加<code>Data.Dependencies</code>对象的元素</p>
