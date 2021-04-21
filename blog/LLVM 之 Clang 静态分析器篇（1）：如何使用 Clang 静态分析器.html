@@ -494,7 +494,7 @@
 <p><strong>1）</strong> 方式 1——通过编译器驱动程序 clang</p>
 <p><strong>a）</strong> 启用指定包的所有检查器</p>
 <pre><code class="hljs xml">$&nbsp;clang&nbsp;--analyze&nbsp;-Xanalyzer&nbsp;-analyzer-checker=<span class="hljs-tag">&lt;<span class="hljs-name">package</span>&gt;</span>&nbsp;<span class="hljs-tag">&lt;<span class="hljs-name">source-files</span>&gt;</span><br></code></pre>
-<p>注：</p>
+<p><em>注：</em></p>
 <ul>
 <li><p><code>--analyze</code>选项，表示运行 Clang 静态分析器。</p></li>
 <li><p><code>-Xanalyzer -analyzer-checker=&lt;package&gt;</code>选项，表示将<code>-analyzer-checker=&lt;package&gt;</code>参数传递给 Clang 静态分析器。</p></li>
@@ -503,7 +503,7 @@
 </ul>
 <p><strong>b）</strong> 启用指定的检查器</p>
 <pre><code class="hljs xml">$&nbsp;clang&nbsp;--analyze&nbsp;-Xanalyzer&nbsp;-analyzer-checker=<span class="hljs-tag">&lt;<span class="hljs-name">package.subpackage.checker</span>&gt;</span>&nbsp;<span class="hljs-tag">&lt;<span class="hljs-name">source-files</span>&gt;</span><br></code></pre>
-<p>注：如果要同时指定多个检查器，则形如：<code>clang --analyze -Xanalyzer -analyzer-checker=core.DivideZero -Xanalyzer -analyzer-checker=cplusplus.NewDelete hello.cpp</code>。</p>
+<p><em>注：</em>如果要同时指定多个检查器，则形如：<code>clang --analyze -Xanalyzer -analyzer-checker=core.DivideZero -Xanalyzer -analyzer-checker=cplusplus.NewDelete hello.cpp</code>。</p>
 <p><strong>需要注意的是，</strong> 通过编译器驱动程序运行 Clang 静态分析器的方式，会根据系统环境默认提供一些检查器。</p>
 <p>比如，执行如下命令时未显式指定任何检查器，但仍可以检测出“除 0”错误。如下所示：</p>
 <pre><code class="hljs perl">$&nbsp;clang&nbsp;--analyze&nbsp;hello_w1.cpp<br>hello_w1.cpp:<span class="hljs-number">6</span>:<span class="hljs-number">41</span>:&nbsp;warning:&nbsp;Division&nbsp;by&nbsp;zero&nbsp;[core.DivideZero]<br>&nbsp;&nbsp;<span class="hljs-keyword">printf</span>(<span class="hljs-string">"Hello,&nbsp;World!&nbsp;%d,&nbsp;%d\n"</span>,&nbsp;i,&nbsp;i&nbsp;/&nbsp;<span class="hljs-number">0</span>);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~~^~~<br><span class="hljs-number">1</span>&nbsp;warning&nbsp;generated.<br></code></pre>
@@ -522,7 +522,7 @@
 <p>如果要真正实现只运行我们指定的检查器，则应该通过编译器<code>clang -cc1</code>的方式运行 Clang 静态分析器。</p>
 <p><strong>a）</strong> 启用指定包的所有检查器</p>
 <pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-w&nbsp;-fcolor-diagnostics&nbsp;-<span class="hljs-keyword">analyze</span>&nbsp;-analyzer-checker=&lt;<span class="hljs-keyword">package</span>&gt;&nbsp;&lt;<span class="hljs-keyword">source</span>-files&gt;&nbsp;-I&lt;<span class="hljs-keyword">directory</span>&gt;<br></code></pre>
-<p>注：</p>
+<p><em>注：</em></p>
 <ul>
 <li><p><code>-w</code>选项，表示禁用编译器的所有诊断，即禁用类似于<code>-Wdivision-by-zero</code>的诊断。从而，只启用 Clang 静态分析器的分析功能以避免重复警告。</p></li>
 <li><p><code>-fcolor-diagnostics</code>选项，表示输出带颜色的诊断信息。</p></li>
@@ -542,7 +542,7 @@
 <pre><code class="hljs lua">&nbsp;&nbsp;<span class="hljs-comment">--analyzer-output&nbsp;&lt;value&gt;</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Static&nbsp;analyzer&nbsp;report&nbsp;<span class="hljs-built_in">output</span>&nbsp;<span class="hljs-built_in">format</span>&nbsp;(html|plist|plist-multi-file|plist-html|sarif|text).<br></code></pre>
 <p>我们可以通过<code>--analyzer-output</code>标志指定静态分析结果的文件格式。命令如下：</p>
 <pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-w&nbsp;-fcolor-diagnostics&nbsp;-<span class="hljs-keyword">analyze</span>&nbsp;-analyzer-checker=&lt;package.subpackage.checker&gt;&nbsp;&lt;<span class="hljs-keyword">source</span>-files&gt;&nbsp;-analyzer-<span class="hljs-keyword">output</span>&nbsp;&lt;<span class="hljs-keyword">format</span>&gt;&nbsp;-o&nbsp;&lt;<span class="hljs-keyword">output</span>-<span class="hljs-keyword">file</span>&gt;<br></code></pre>
-<p>注： <code>-analyzer-output &lt;format&gt;</code>选项，表示要保存的文件格式为<code>&lt;format&gt;</code>，形如<code>-analyzer-output plist</code>。<code>-o &lt;output-file&gt;</code>选项，用于指定输出文件。</p>
+<p><em>注：</em> <code>-analyzer-output &lt;format&gt;</code>选项，表示要保存的文件格式为<code>&lt;format&gt;</code>，形如<code>-analyzer-output plist</code>。<code>-o &lt;output-file&gt;</code>选项，用于指定输出文件。</p>
 <p><strong>需要注意的是，</strong> 在 Linux 系统环境中，Clang 12 目前仅支持<code>plist</code>格式（即 XML 格式）。</p>
 <p>使用示例：</p>
 <pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-fcolor-diagnostics&nbsp;-<span class="hljs-keyword">analyze</span>&nbsp;-analyzer-checker=core&nbsp;hello_w1.cpp&nbsp;-I/usr/<span class="hljs-keyword">include</span>/&nbsp;-I/usr/<span class="hljs-keyword">local</span>/lib/clang/<span class="hljs-number">12.0</span><span class="hljs-number">.0</span>/<span class="hljs-keyword">include</span>&nbsp;-analyzer-<span class="hljs-keyword">output</span>&nbsp;plist&nbsp;-o&nbsp;a<br></code></pre>
