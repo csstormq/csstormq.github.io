@@ -411,21 +411,21 @@
 <pre><code class="hljs python"><span class="hljs-function"><span class="hljs-keyword">def</span>&nbsp;<span class="hljs-title">MainCallChecker</span>&nbsp;:</span>&nbsp;Checker&lt;<span class="hljs-string">"MainCall"</span>&gt;,<br>&nbsp;&nbsp;HelpText&lt;<span class="hljs-string">"Check&nbsp;for&nbsp;calls&nbsp;to&nbsp;main"</span>&gt;,<br>&nbsp;&nbsp;Documentation&lt;NotDocumented&gt;;<br></code></pre>
 <p>修改后的内容如下：</p>
 <pre><code class="hljs cs"><span class="hljs-keyword">let</span>&nbsp;ParentPackage&nbsp;=&nbsp;CoreAlpha&nbsp;<span class="hljs-keyword">in</span>&nbsp;{<br><br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><br>def&nbsp;MainCallChecker&nbsp;:&nbsp;Checker&lt;<span class="hljs-string">"MainCall"</span>&gt;,<br>&nbsp;&nbsp;HelpText&lt;<span class="hljs-string">"Check&nbsp;for&nbsp;calls&nbsp;to&nbsp;main"</span>&gt;,<br>&nbsp;&nbsp;Documentation&lt;NotDocumented&gt;;<br><br>}&nbsp;<span class="hljs-comment">//&nbsp;end&nbsp;"alpha.core"</span><br></code></pre>
-<p>注：</p>
+<p><em>注：</em></p>
 <ul>
 <li><p><code>Checkers.td</code>文件位于<code>clang/include/clang/StaticAnalyzer/Checkers/</code>目录中。</p></li>
 <li><p><code>clang  -cc1 -analyzer-checker-help</code>和<code>clang  -cc1 -analyzer-checker-help-alpha</code>等命令所显示的检查器列表来源于<code>Checkers.td</code>文件。</p></li>
 <li><p><code>def MainCallChecker</code>，表示检查器的注册名称为<code>MainCallChecker</code>。</p></li>
 <li><p><code>"MainCall"</code>，表示检查器的名称为<code>MainCall</code>。也就是说，可以通过<code>-analyzer-checker=alpha.core.MainCall</code>标志来启用该检查器。</p></li>
 <li><p><code>HelpText</code>选项，用于指定该检查器对应的描述。从而，在执行类似于<code>-help</code>命令时显示。</p></li>
-<li><p><code>Documentation</code>选项，？？？。</p></li>
+<li><p><code>Documentation</code>选项，用于指定检查器文档的<code>URI</code>地址。</p></li>
 </ul>
 <p><strong>需要注意的是，</strong> 修改的<code>Checkers.td</code>文件在<strong>重新编译安装 Clang</strong> 后才生效。</p>
 <p><strong>step 2：</strong> 实现自定义的检查器</p>
 <p><strong>1）</strong> 添加检查器的实现代码</p>
 <p>在<code>clang/lib/StaticAnalyzer/Checkers/</code>目录中新建<code>MainCallChecker.cpp</code>文件，内容如下：</p>
 <pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Core/BugReporter/BugType.h"</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Core/Checker.h"</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Core/CheckerManager.h"</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Core/PathSensitive/CallEvent.h"</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span>&nbsp;<span class="hljs-meta-string">"clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h"</span></span><br><br><span class="hljs-keyword">using</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;clang;<br><span class="hljs-keyword">using</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;ento;<br><br><span class="hljs-keyword">namespace</span>&nbsp;{<br><br><span class="hljs-class"><span class="hljs-keyword">class</span>&nbsp;<span class="hljs-title">MainCallChecker</span>&nbsp;:</span>&nbsp;<span class="hljs-keyword">public</span>&nbsp;Checker&lt;check::PreCall&gt;<br>{<br><span class="hljs-keyword">public</span>:<br>&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">checkPreCall</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,&nbsp;CheckerContext&nbsp;&amp;Ctx)</span>&nbsp;<span class="hljs-keyword">const</span></span>;<br><br><span class="hljs-keyword">private</span>:<br>&nbsp;&nbsp;<span class="hljs-keyword">mutable</span>&nbsp;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BugType&gt;&nbsp;BT_;<br>};<br><br>}&nbsp;<span class="hljs-comment">//&nbsp;anonymous&nbsp;namespace</span><br><br><span class="hljs-keyword">void</span>&nbsp;MainCallChecker::checkPreCall(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerContext&nbsp;&amp;Ctx)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br>&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;IdentifierInfo&nbsp;*II&nbsp;=&nbsp;Call.getCalleeIdentifier())&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(II-&gt;isStr(<span class="hljs-string">"main"</span>))&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!BT_)&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BT_.reset(<span class="hljs-keyword">new</span>&nbsp;BugType(<span class="hljs-keyword">this</span>,&nbsp;<span class="hljs-string">"Call&nbsp;to&nbsp;main"</span>,&nbsp;<span class="hljs-string">"Example&nbsp;checker"</span>));<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ExplodedNode&nbsp;*Node&nbsp;=&nbsp;Ctx.generateErrorNode();<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">auto</span>&nbsp;Report<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="hljs-built_in">std</span>::make_unique&lt;PathSensitiveBugReport&gt;(*BT_,&nbsp;BT_-&gt;getDescription(),&nbsp;Node);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctx.emitReport(<span class="hljs-built_in">std</span>::move(Report));<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}<br><br><span class="hljs-keyword">void</span>&nbsp;ento::registerMainCallChecker(CheckerManager&nbsp;&amp;Mgr)&nbsp;{<br>&nbsp;&nbsp;Mgr.registerChecker&lt;MainCallChecker&gt;();<br>}<br><br><span class="hljs-keyword">bool</span>&nbsp;ento::shouldRegisterMainCallChecker(<span class="hljs-keyword">const</span>&nbsp;CheckerManager&nbsp;&amp;mgr)&nbsp;{<br>&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">true</span>;<br>}<br></code></pre>
-<p>注：</p>
+<p><em>注：</em></p>
 <ul>
 <li><p>新建的源文件名称不必是<code>MainCallChecker.cpp</code>，也可以是其他名称。</p></li>
 <li><p>检查器的类名不必与在<code>Checkers.td</code>文件中定义的检查器的注册名称保持一致。</p></li>
@@ -436,13 +436,13 @@
 <p><strong>2）</strong> 修改 CMakeLists.txt</p>
 <p>在<code>clang/lib/StaticAnalyzer/Checkers/CMakeLists.txt</code>文件中添加如下内容：</p>
 <pre><code class="hljs css"><span class="hljs-selector-tag">MainCallChecker</span><span class="hljs-selector-class">.cpp</span><br></code></pre>
-<p>注：<code>MainCallChecker.cpp</code>即上文中新建的用于存放检查器实现代码的源文件。</p>
+<p><em>注：</em><code>MainCallChecker.cpp</code>即上文中新建的用于存放检查器实现代码的源文件。</p>
 <p>修改后的内容如下：</p>
 <pre><code class="hljs bash">add_clang_library(<br>&nbsp;&nbsp;<span class="hljs-comment">#&nbsp;省略&nbsp;...</span><br>&nbsp;&nbsp;MainCallChecker.cpp<br>&nbsp;&nbsp;<span class="hljs-comment">#&nbsp;省略&nbsp;...</span><br>)<br></code></pre>
 <p><strong>step 3：</strong> 编译安装 Clang</p>
 <p>如果你已经编译并安装过 Clang，那么在构建目录中执行如下命令：</p>
 <pre><code class="hljs php">$&nbsp;ninja&nbsp;clang<br>$&nbsp;sudo&nbsp;ninja&nbsp;install<br></code></pre>
-<p>注：如果你还未编译并安装过 Clang，那么可参考笔者的另一篇文章《LLVM 之 Clang 篇（1）：如何从源码构建并安装 Clang》。</p>
+<p><em>注：</em>如果你还未编译并安装过 Clang，那么可参考笔者的另一篇文章《LLVM 之 Clang 篇（1）：如何从源码构建并安装 Clang》。</p>
 <p>重新编译安装 Clang 后，执行如下命令查看自定义的检查器：</p>
 <pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-analyzer-checker-<span class="hljs-keyword">help</span>-alpha&nbsp;|&nbsp;grep&nbsp;MainCall<br>&nbsp;&nbsp;alpha.core.MainCall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="hljs-keyword">Enable</span>&nbsp;<span class="hljs-keyword">only</span>&nbsp;<span class="hljs-keyword">for</span>&nbsp;development!)&nbsp;<span class="hljs-keyword">Check</span>&nbsp;<span class="hljs-keyword">for</span>&nbsp;calls&nbsp;<span class="hljs-keyword">to</span>&nbsp;<span class="hljs-keyword">main</span><br></code></pre>
 <p>从上面的输出可以看出：</p>
@@ -457,7 +457,7 @@
 <p>上述测试程序存在这样的错误：通过函数指针变量<code>foo</code>调用<code>main</code>函数。</p>
 <p><strong>2）</strong> 运行自定义的检查器</p>
 <pre><code class="hljs php">$&nbsp;clang&nbsp;--analyze&nbsp;-Xanalyzer&nbsp;-analyzer-checker=alpha.core.MainCall&nbsp;Example_Test.c<br></code></pre>
-<p>注：关于 Clang 静态分析器使用方法的更多内容，可参考笔者的另一篇文章《LLVM 之 Clang 静态分析器篇（1）：如何使用 Clang 静态分析器》。</p>
+<p><em>注：</em>关于 Clang 静态分析器使用方法的更多内容，可参考笔者的另一篇文章《LLVM 之 Clang 静态分析器篇（1）：如何使用 Clang 静态分析器》。</p>
 <p>执行上述命令后，输出如下：</p>
 <pre><code class="hljs sql">Example_Test.c:4:19:&nbsp;warning:&nbsp;<span class="hljs-keyword">Call</span>&nbsp;<span class="hljs-keyword">to</span>&nbsp;<span class="hljs-keyword">main</span>&nbsp;[alpha.core.MainCall]<br>&nbsp;&nbsp;<span class="hljs-built_in">int</span>&nbsp;exit_code&nbsp;=&nbsp;foo(argc,&nbsp;argv);&nbsp;&nbsp;&nbsp;//&nbsp;actually&nbsp;calls&nbsp;main()!<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~~~~~~~~~<br>1&nbsp;warning&nbsp;generated.<br></code></pre>
 <p>从上面的输出可以看出，我们自定义的检查器检测到了用户调用<code>main</code>函数的错误。</p>
