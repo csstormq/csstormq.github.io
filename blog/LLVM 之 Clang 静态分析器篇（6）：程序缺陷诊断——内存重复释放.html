@@ -1,1 +1,632 @@
-待补充
+﻿<!DOCTYPE html>
+<html>
+<head>  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0">
+  <meta name="author" content="微信公众号：颜家大少">
+  <meta name="email" content="3056432@qq.com">
+  <meta name="description" content="一个Markdown在线转换工具，让Markdown内容，不需作任何调整就能同时在微信公众号、博客园、掘金、csdn等平台正确显示当前预览的效果">
+  <title>StormQ's Blog</title>  
+  <style type="text/css" id="markdown_preview_css"> 
+ .output_wrapper pre code{font-family: Consolas, Inconsolata, Courier, monospace; display: block !important; white-space: pre !important; word-wrap: normal !important; word-break: normal !important;  overflow: auto !important;}  
+.output_wrapper a:hover { text-decoration: underline; color: rgb(0, 96, 100); }
+.output_wrapper figcaption { margin-top: 10px; text-align: center; color: rgb(153, 153, 153); font-size: 0.7em; }
+.output_wrapper pre code .linenum { padding-right: 20px; word-spacing: 0px; }
+.task-list-list { list-style-type: none; }
+.task-list-list.checked { color: rgb(62, 62, 62); }
+.task-list-list.uncheck { color: rgb(191, 193, 191); }
+.task-list-list .icon_uncheck, .task-list-list .icon_check { display: inline-block; vertical-align: middle; margin-right: 10px; }
+.task-list-list .icon_check::before { content: "√"; border: 2px solid rgb(62, 62, 62); color: red; }
+.task-list-list .icon_uncheck::before { content: "x"; border: 2px solid rgb(191, 193, 191); color: rgb(191, 193, 191); }
+.task-list-list .icon_check::before, .task-list-list .icon_uncheck::before { padding: 2px 8px 2px 5px; border-radius: 5px; }
+@font-face { font-family: "KaTeX_AMS"; src: url("fonts/KaTeX_AMS-Regular.woff2") format("woff2"), url("fonts/KaTeX_AMS-Regular.woff") format("woff"), url("fonts/KaTeX_AMS-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Caligraphic"; src: url("fonts/KaTeX_Caligraphic-Bold.woff2") format("woff2"), url("fonts/KaTeX_Caligraphic-Bold.woff") format("woff"), url("fonts/KaTeX_Caligraphic-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Caligraphic"; src: url("fonts/KaTeX_Caligraphic-Regular.woff2") format("woff2"), url("fonts/KaTeX_Caligraphic-Regular.woff") format("woff"), url("fonts/KaTeX_Caligraphic-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Fraktur"; src: url("fonts/KaTeX_Fraktur-Bold.woff2") format("woff2"), url("fonts/KaTeX_Fraktur-Bold.woff") format("woff"), url("fonts/KaTeX_Fraktur-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Fraktur"; src: url("fonts/KaTeX_Fraktur-Regular.woff2") format("woff2"), url("fonts/KaTeX_Fraktur-Regular.woff") format("woff"), url("fonts/KaTeX_Fraktur-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Bold.woff2") format("woff2"), url("fonts/KaTeX_Main-Bold.woff") format("woff"), url("fonts/KaTeX_Main-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-BoldItalic.woff2") format("woff2"), url("fonts/KaTeX_Main-BoldItalic.woff") format("woff"), url("fonts/KaTeX_Main-BoldItalic.ttf") format("truetype"); font-style: italic; font-weight: bold; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Italic.woff2") format("woff2"), url("fonts/KaTeX_Main-Italic.woff") format("woff"), url("fonts/KaTeX_Main-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_Main"; src: url("fonts/KaTeX_Main-Regular.woff2") format("woff2"), url("fonts/KaTeX_Main-Regular.woff") format("woff"), url("fonts/KaTeX_Main-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Math"; src: url("fonts/KaTeX_Math-BoldItalic.woff2") format("woff2"), url("fonts/KaTeX_Math-BoldItalic.woff") format("woff"), url("fonts/KaTeX_Math-BoldItalic.ttf") format("truetype"); font-style: italic; font-weight: bold; }
+@font-face { font-family: "KaTeX_Math"; src: url("fonts/KaTeX_Math-Italic.woff2") format("woff2"), url("fonts/KaTeX_Math-Italic.woff") format("woff"), url("fonts/KaTeX_Math-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Bold.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Bold.woff") format("woff"), url("fonts/KaTeX_SansSerif-Bold.ttf") format("truetype"); font-style: normal; font-weight: bold; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Italic.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Italic.woff") format("woff"), url("fonts/KaTeX_SansSerif-Italic.ttf") format("truetype"); font-style: italic; font-weight: normal; }
+@font-face { font-family: "KaTeX_SansSerif"; src: url("fonts/KaTeX_SansSerif-Regular.woff2") format("woff2"), url("fonts/KaTeX_SansSerif-Regular.woff") format("woff"), url("fonts/KaTeX_SansSerif-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Script"; src: url("fonts/KaTeX_Script-Regular.woff2") format("woff2"), url("fonts/KaTeX_Script-Regular.woff") format("woff"), url("fonts/KaTeX_Script-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size1"; src: url("fonts/KaTeX_Size1-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size1-Regular.woff") format("woff"), url("fonts/KaTeX_Size1-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size2"; src: url("fonts/KaTeX_Size2-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size2-Regular.woff") format("woff"), url("fonts/KaTeX_Size2-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size3"; src: url("fonts/KaTeX_Size3-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size3-Regular.woff") format("woff"), url("fonts/KaTeX_Size3-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Size4"; src: url("fonts/KaTeX_Size4-Regular.woff2") format("woff2"), url("fonts/KaTeX_Size4-Regular.woff") format("woff"), url("fonts/KaTeX_Size4-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@font-face { font-family: "KaTeX_Typewriter"; src: url("fonts/KaTeX_Typewriter-Regular.woff2") format("woff2"), url("fonts/KaTeX_Typewriter-Regular.woff") format("woff"), url("fonts/KaTeX_Typewriter-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+@media screen {
+  .katex .mtable .vertical-separator { min-width: 1px; }
+  .katex .mfrac .frac-line, .katex .overline .overline-line, .katex .underline .underline-line, .katex .hline, .katex .hdashline, .katex .rule { min-height: 1px; }
+}
+.katex-display { display: block; margin: 1em 0px; text-align: center; }
+.katex-display > .katex { display: block; text-align: center; white-space: nowrap; }
+.katex-display > .katex > .katex-html { display: block; }
+.katex-display > .katex > .katex-html > .tag { position: absolute; right: 0px; }
+.katex { font: 1.21em / 1.2 KaTeX_Main, Times New Roman, serif; text-indent: 0px; text-rendering: auto; }
+.katex * { }
+.katex .katex-mathml { position: absolute; clip: rect(1px, 1px, 1px, 1px); padding: 0px; border: 0px none; height: 1px; width: 1px; overflow: hidden; }
+.katex .katex-html { }
+.katex .katex-html > .newline { display: block; }
+.katex .base { position: relative; display: inline-block; white-space: nowrap; width: min-content; }
+.katex .strut { display: inline-block; }
+.katex .textbf { font-weight: bold; }
+.katex .textit { font-style: italic; }
+.katex .textrm { font-family: KaTeX_Main; }
+.katex .textsf { font-family: KaTeX_SansSerif; }
+.katex .texttt { font-family: KaTeX_Typewriter; }
+.katex .mathit { font-family: KaTeX_Math; font-style: italic; }
+.katex .mathrm { font-style: normal; }
+.katex .mathbf { font-family: KaTeX_Main; font-weight: bold; }
+.katex .boldsymbol { font-family: KaTeX_Math; font-weight: bold; font-style: italic; }
+.katex .amsrm { font-family: KaTeX_AMS; }
+.katex .mathbb, .katex .textbb { font-family: KaTeX_AMS; }
+.katex .mathcal { font-family: KaTeX_Caligraphic; }
+.katex .mathfrak, .katex .textfrak { font-family: KaTeX_Fraktur; }
+.katex .mathtt { font-family: KaTeX_Typewriter; }
+.katex .mathscr, .katex .textscr { font-family: KaTeX_Script; }
+.katex .mathsf, .katex .textsf { font-family: KaTeX_SansSerif; }
+.katex .mainit { font-family: KaTeX_Main; font-style: italic; }
+.katex .mainrm { font-family: KaTeX_Main; font-style: normal; }
+.katex .vlist-t { display: inline-table; table-layout: fixed; }
+.katex .vlist-r { display: table-row; }
+.katex .vlist { display: table-cell; vertical-align: bottom; position: relative; }
+.katex .vlist > span { display: block; height: 0px; position: relative; }
+.katex .vlist > span > span { display: inline-block; }
+.katex .vlist > span > .pstrut { overflow: hidden; width: 0px; }
+.katex .vlist-t2 { margin-right: -2px; }
+.katex .vlist-s { display: table-cell; vertical-align: bottom; font-size: 1px; width: 2px; min-width: 2px; }
+.katex .msupsub { text-align: left; }
+.katex .mfrac > span > span { text-align: center; }
+.katex .mfrac .frac-line { display: inline-block; width: 100%; border-bottom-style: solid; }
+.katex .mspace { display: inline-block; }
+.katex .llap, .katex .rlap, .katex .clap { width: 0px; position: relative; }
+.katex .llap > .inner, .katex .rlap > .inner, .katex .clap > .inner { position: absolute; }
+.katex .llap > .fix, .katex .rlap > .fix, .katex .clap > .fix { display: inline-block; }
+.katex .llap > .inner { right: 0px; }
+.katex .rlap > .inner, .katex .clap > .inner { left: 0px; }
+.katex .clap > .inner > span { margin-left: -50%; margin-right: 50%; }
+.katex .rule { display: inline-block; border: 0px solid; position: relative; }
+.katex .overline .overline-line, .katex .underline .underline-line, .katex .hline { display: inline-block; width: 100%; border-bottom-style: solid; }
+.katex .hdashline { display: inline-block; width: 100%; border-bottom-style: dashed; }
+.katex .sqrt > .root { margin-left: 0.277778em; margin-right: -0.555556em; }
+.katex .sizing, .katex .fontsize-ensurer { display: inline-block; }
+.katex .sizing.reset-size1.size1, .katex .fontsize-ensurer.reset-size1.size1 { font-size: 1em; }
+.katex .sizing.reset-size1.size2, .katex .fontsize-ensurer.reset-size1.size2 { font-size: 1.2em; }
+.katex .sizing.reset-size1.size3, .katex .fontsize-ensurer.reset-size1.size3 { font-size: 1.4em; }
+.katex .sizing.reset-size1.size4, .katex .fontsize-ensurer.reset-size1.size4 { font-size: 1.6em; }
+.katex .sizing.reset-size1.size5, .katex .fontsize-ensurer.reset-size1.size5 { font-size: 1.8em; }
+.katex .sizing.reset-size1.size6, .katex .fontsize-ensurer.reset-size1.size6 { font-size: 2em; }
+.katex .sizing.reset-size1.size7, .katex .fontsize-ensurer.reset-size1.size7 { font-size: 2.4em; }
+.katex .sizing.reset-size1.size8, .katex .fontsize-ensurer.reset-size1.size8 { font-size: 2.88em; }
+.katex .sizing.reset-size1.size9, .katex .fontsize-ensurer.reset-size1.size9 { font-size: 3.456em; }
+.katex .sizing.reset-size1.size10, .katex .fontsize-ensurer.reset-size1.size10 { font-size: 4.148em; }
+.katex .sizing.reset-size1.size11, .katex .fontsize-ensurer.reset-size1.size11 { font-size: 4.976em; }
+.katex .sizing.reset-size2.size1, .katex .fontsize-ensurer.reset-size2.size1 { font-size: 0.833333em; }
+.katex .sizing.reset-size2.size2, .katex .fontsize-ensurer.reset-size2.size2 { font-size: 1em; }
+.katex .sizing.reset-size2.size3, .katex .fontsize-ensurer.reset-size2.size3 { font-size: 1.16667em; }
+.katex .sizing.reset-size2.size4, .katex .fontsize-ensurer.reset-size2.size4 { font-size: 1.33333em; }
+.katex .sizing.reset-size2.size5, .katex .fontsize-ensurer.reset-size2.size5 { font-size: 1.5em; }
+.katex .sizing.reset-size2.size6, .katex .fontsize-ensurer.reset-size2.size6 { font-size: 1.66667em; }
+.katex .sizing.reset-size2.size7, .katex .fontsize-ensurer.reset-size2.size7 { font-size: 2em; }
+.katex .sizing.reset-size2.size8, .katex .fontsize-ensurer.reset-size2.size8 { font-size: 2.4em; }
+.katex .sizing.reset-size2.size9, .katex .fontsize-ensurer.reset-size2.size9 { font-size: 2.88em; }
+.katex .sizing.reset-size2.size10, .katex .fontsize-ensurer.reset-size2.size10 { font-size: 3.45667em; }
+.katex .sizing.reset-size2.size11, .katex .fontsize-ensurer.reset-size2.size11 { font-size: 4.14667em; }
+.katex .sizing.reset-size3.size1, .katex .fontsize-ensurer.reset-size3.size1 { font-size: 0.714286em; }
+.katex .sizing.reset-size3.size2, .katex .fontsize-ensurer.reset-size3.size2 { font-size: 0.857143em; }
+.katex .sizing.reset-size3.size3, .katex .fontsize-ensurer.reset-size3.size3 { font-size: 1em; }
+.katex .sizing.reset-size3.size4, .katex .fontsize-ensurer.reset-size3.size4 { font-size: 1.14286em; }
+.katex .sizing.reset-size3.size5, .katex .fontsize-ensurer.reset-size3.size5 { font-size: 1.28571em; }
+.katex .sizing.reset-size3.size6, .katex .fontsize-ensurer.reset-size3.size6 { font-size: 1.42857em; }
+.katex .sizing.reset-size3.size7, .katex .fontsize-ensurer.reset-size3.size7 { font-size: 1.71429em; }
+.katex .sizing.reset-size3.size8, .katex .fontsize-ensurer.reset-size3.size8 { font-size: 2.05714em; }
+.katex .sizing.reset-size3.size9, .katex .fontsize-ensurer.reset-size3.size9 { font-size: 2.46857em; }
+.katex .sizing.reset-size3.size10, .katex .fontsize-ensurer.reset-size3.size10 { font-size: 2.96286em; }
+.katex .sizing.reset-size3.size11, .katex .fontsize-ensurer.reset-size3.size11 { font-size: 3.55429em; }
+.katex .sizing.reset-size4.size1, .katex .fontsize-ensurer.reset-size4.size1 { font-size: 0.625em; }
+.katex .sizing.reset-size4.size2, .katex .fontsize-ensurer.reset-size4.size2 { font-size: 0.75em; }
+.katex .sizing.reset-size4.size3, .katex .fontsize-ensurer.reset-size4.size3 { font-size: 0.875em; }
+.katex .sizing.reset-size4.size4, .katex .fontsize-ensurer.reset-size4.size4 { font-size: 1em; }
+.katex .sizing.reset-size4.size5, .katex .fontsize-ensurer.reset-size4.size5 { font-size: 1.125em; }
+.katex .sizing.reset-size4.size6, .katex .fontsize-ensurer.reset-size4.size6 { font-size: 1.25em; }
+.katex .sizing.reset-size4.size7, .katex .fontsize-ensurer.reset-size4.size7 { font-size: 1.5em; }
+.katex .sizing.reset-size4.size8, .katex .fontsize-ensurer.reset-size4.size8 { font-size: 1.8em; }
+.katex .sizing.reset-size4.size9, .katex .fontsize-ensurer.reset-size4.size9 { font-size: 2.16em; }
+.katex .sizing.reset-size4.size10, .katex .fontsize-ensurer.reset-size4.size10 { font-size: 2.5925em; }
+.katex .sizing.reset-size4.size11, .katex .fontsize-ensurer.reset-size4.size11 { font-size: 3.11em; }
+.katex .sizing.reset-size5.size1, .katex .fontsize-ensurer.reset-size5.size1 { font-size: 0.555556em; }
+.katex .sizing.reset-size5.size2, .katex .fontsize-ensurer.reset-size5.size2 { font-size: 0.666667em; }
+.katex .sizing.reset-size5.size3, .katex .fontsize-ensurer.reset-size5.size3 { font-size: 0.777778em; }
+.katex .sizing.reset-size5.size4, .katex .fontsize-ensurer.reset-size5.size4 { font-size: 0.888889em; }
+.katex .sizing.reset-size5.size5, .katex .fontsize-ensurer.reset-size5.size5 { font-size: 1em; }
+.katex .sizing.reset-size5.size6, .katex .fontsize-ensurer.reset-size5.size6 { font-size: 1.11111em; }
+.katex .sizing.reset-size5.size7, .katex .fontsize-ensurer.reset-size5.size7 { font-size: 1.33333em; }
+.katex .sizing.reset-size5.size8, .katex .fontsize-ensurer.reset-size5.size8 { font-size: 1.6em; }
+.katex .sizing.reset-size5.size9, .katex .fontsize-ensurer.reset-size5.size9 { font-size: 1.92em; }
+.katex .sizing.reset-size5.size10, .katex .fontsize-ensurer.reset-size5.size10 { font-size: 2.30444em; }
+.katex .sizing.reset-size5.size11, .katex .fontsize-ensurer.reset-size5.size11 { font-size: 2.76444em; }
+.katex .sizing.reset-size6.size1, .katex .fontsize-ensurer.reset-size6.size1 { font-size: 0.5em; }
+.katex .sizing.reset-size6.size2, .katex .fontsize-ensurer.reset-size6.size2 { font-size: 0.6em; }
+.katex .sizing.reset-size6.size3, .katex .fontsize-ensurer.reset-size6.size3 { font-size: 0.7em; }
+.katex .sizing.reset-size6.size4, .katex .fontsize-ensurer.reset-size6.size4 { font-size: 0.8em; }
+.katex .sizing.reset-size6.size5, .katex .fontsize-ensurer.reset-size6.size5 { font-size: 0.9em; }
+.katex .sizing.reset-size6.size6, .katex .fontsize-ensurer.reset-size6.size6 { font-size: 1em; }
+.katex .sizing.reset-size6.size7, .katex .fontsize-ensurer.reset-size6.size7 { font-size: 1.2em; }
+.katex .sizing.reset-size6.size8, .katex .fontsize-ensurer.reset-size6.size8 { font-size: 1.44em; }
+.katex .sizing.reset-size6.size9, .katex .fontsize-ensurer.reset-size6.size9 { font-size: 1.728em; }
+.katex .sizing.reset-size6.size10, .katex .fontsize-ensurer.reset-size6.size10 { font-size: 2.074em; }
+.katex .sizing.reset-size6.size11, .katex .fontsize-ensurer.reset-size6.size11 { font-size: 2.488em; }
+.katex .sizing.reset-size7.size1, .katex .fontsize-ensurer.reset-size7.size1 { font-size: 0.416667em; }
+.katex .sizing.reset-size7.size2, .katex .fontsize-ensurer.reset-size7.size2 { font-size: 0.5em; }
+.katex .sizing.reset-size7.size3, .katex .fontsize-ensurer.reset-size7.size3 { font-size: 0.583333em; }
+.katex .sizing.reset-size7.size4, .katex .fontsize-ensurer.reset-size7.size4 { font-size: 0.666667em; }
+.katex .sizing.reset-size7.size5, .katex .fontsize-ensurer.reset-size7.size5 { font-size: 0.75em; }
+.katex .sizing.reset-size7.size6, .katex .fontsize-ensurer.reset-size7.size6 { font-size: 0.833333em; }
+.katex .sizing.reset-size7.size7, .katex .fontsize-ensurer.reset-size7.size7 { font-size: 1em; }
+.katex .sizing.reset-size7.size8, .katex .fontsize-ensurer.reset-size7.size8 { font-size: 1.2em; }
+.katex .sizing.reset-size7.size9, .katex .fontsize-ensurer.reset-size7.size9 { font-size: 1.44em; }
+.katex .sizing.reset-size7.size10, .katex .fontsize-ensurer.reset-size7.size10 { font-size: 1.72833em; }
+.katex .sizing.reset-size7.size11, .katex .fontsize-ensurer.reset-size7.size11 { font-size: 2.07333em; }
+.katex .sizing.reset-size8.size1, .katex .fontsize-ensurer.reset-size8.size1 { font-size: 0.347222em; }
+.katex .sizing.reset-size8.size2, .katex .fontsize-ensurer.reset-size8.size2 { font-size: 0.416667em; }
+.katex .sizing.reset-size8.size3, .katex .fontsize-ensurer.reset-size8.size3 { font-size: 0.486111em; }
+.katex .sizing.reset-size8.size4, .katex .fontsize-ensurer.reset-size8.size4 { font-size: 0.555556em; }
+.katex .sizing.reset-size8.size5, .katex .fontsize-ensurer.reset-size8.size5 { font-size: 0.625em; }
+.katex .sizing.reset-size8.size6, .katex .fontsize-ensurer.reset-size8.size6 { font-size: 0.694444em; }
+.katex .sizing.reset-size8.size7, .katex .fontsize-ensurer.reset-size8.size7 { font-size: 0.833333em; }
+.katex .sizing.reset-size8.size8, .katex .fontsize-ensurer.reset-size8.size8 { font-size: 1em; }
+.katex .sizing.reset-size8.size9, .katex .fontsize-ensurer.reset-size8.size9 { font-size: 1.2em; }
+.katex .sizing.reset-size8.size10, .katex .fontsize-ensurer.reset-size8.size10 { font-size: 1.44028em; }
+.katex .sizing.reset-size8.size11, .katex .fontsize-ensurer.reset-size8.size11 { font-size: 1.72778em; }
+.katex .sizing.reset-size9.size1, .katex .fontsize-ensurer.reset-size9.size1 { font-size: 0.289352em; }
+.katex .sizing.reset-size9.size2, .katex .fontsize-ensurer.reset-size9.size2 { font-size: 0.347222em; }
+.katex .sizing.reset-size9.size3, .katex .fontsize-ensurer.reset-size9.size3 { font-size: 0.405093em; }
+.katex .sizing.reset-size9.size4, .katex .fontsize-ensurer.reset-size9.size4 { font-size: 0.462963em; }
+.katex .sizing.reset-size9.size5, .katex .fontsize-ensurer.reset-size9.size5 { font-size: 0.520833em; }
+.katex .sizing.reset-size9.size6, .katex .fontsize-ensurer.reset-size9.size6 { font-size: 0.578704em; }
+.katex .sizing.reset-size9.size7, .katex .fontsize-ensurer.reset-size9.size7 { font-size: 0.694444em; }
+.katex .sizing.reset-size9.size8, .katex .fontsize-ensurer.reset-size9.size8 { font-size: 0.833333em; }
+.katex .sizing.reset-size9.size9, .katex .fontsize-ensurer.reset-size9.size9 { font-size: 1em; }
+.katex .sizing.reset-size9.size10, .katex .fontsize-ensurer.reset-size9.size10 { font-size: 1.20023em; }
+.katex .sizing.reset-size9.size11, .katex .fontsize-ensurer.reset-size9.size11 { font-size: 1.43981em; }
+.katex .sizing.reset-size10.size1, .katex .fontsize-ensurer.reset-size10.size1 { font-size: 0.24108em; }
+.katex .sizing.reset-size10.size2, .katex .fontsize-ensurer.reset-size10.size2 { font-size: 0.289296em; }
+.katex .sizing.reset-size10.size3, .katex .fontsize-ensurer.reset-size10.size3 { font-size: 0.337512em; }
+.katex .sizing.reset-size10.size4, .katex .fontsize-ensurer.reset-size10.size4 { font-size: 0.385728em; }
+.katex .sizing.reset-size10.size5, .katex .fontsize-ensurer.reset-size10.size5 { font-size: 0.433944em; }
+.katex .sizing.reset-size10.size6, .katex .fontsize-ensurer.reset-size10.size6 { font-size: 0.48216em; }
+.katex .sizing.reset-size10.size7, .katex .fontsize-ensurer.reset-size10.size7 { font-size: 0.578592em; }
+.katex .sizing.reset-size10.size8, .katex .fontsize-ensurer.reset-size10.size8 { font-size: 0.694311em; }
+.katex .sizing.reset-size10.size9, .katex .fontsize-ensurer.reset-size10.size9 { font-size: 0.833173em; }
+.katex .sizing.reset-size10.size10, .katex .fontsize-ensurer.reset-size10.size10 { font-size: 1em; }
+.katex .sizing.reset-size10.size11, .katex .fontsize-ensurer.reset-size10.size11 { font-size: 1.19961em; }
+.katex .sizing.reset-size11.size1, .katex .fontsize-ensurer.reset-size11.size1 { font-size: 0.200965em; }
+.katex .sizing.reset-size11.size2, .katex .fontsize-ensurer.reset-size11.size2 { font-size: 0.241158em; }
+.katex .sizing.reset-size11.size3, .katex .fontsize-ensurer.reset-size11.size3 { font-size: 0.281351em; }
+.katex .sizing.reset-size11.size4, .katex .fontsize-ensurer.reset-size11.size4 { font-size: 0.321543em; }
+.katex .sizing.reset-size11.size5, .katex .fontsize-ensurer.reset-size11.size5 { font-size: 0.361736em; }
+.katex .sizing.reset-size11.size6, .katex .fontsize-ensurer.reset-size11.size6 { font-size: 0.401929em; }
+.katex .sizing.reset-size11.size7, .katex .fontsize-ensurer.reset-size11.size7 { font-size: 0.482315em; }
+.katex .sizing.reset-size11.size8, .katex .fontsize-ensurer.reset-size11.size8 { font-size: 0.578778em; }
+.katex .sizing.reset-size11.size9, .katex .fontsize-ensurer.reset-size11.size9 { font-size: 0.694534em; }
+.katex .sizing.reset-size11.size10, .katex .fontsize-ensurer.reset-size11.size10 { font-size: 0.833601em; }
+.katex .sizing.reset-size11.size11, .katex .fontsize-ensurer.reset-size11.size11 { font-size: 1em; }
+.katex .delimsizing.size1 { font-family: KaTeX_Size1; }
+.katex .delimsizing.size2 { font-family: KaTeX_Size2; }
+.katex .delimsizing.size3 { font-family: KaTeX_Size3; }
+.katex .delimsizing.size4 { font-family: KaTeX_Size4; }
+.katex .delimsizing.mult .delim-size1 > span { font-family: KaTeX_Size1; }
+.katex .delimsizing.mult .delim-size4 > span { font-family: KaTeX_Size4; }
+.katex .nulldelimiter { display: inline-block; width: 0.12em; }
+.katex .delimcenter { position: relative; }
+.katex .op-symbol { position: relative; }
+.katex .op-symbol.small-op { font-family: KaTeX_Size1; }
+.katex .op-symbol.large-op { font-family: KaTeX_Size2; }
+.katex .op-limits > .vlist-t { text-align: center; }
+.katex .accent > .vlist-t { text-align: center; }
+.katex .accent .accent-body:not(.accent-full) { width: 0px; }
+.katex .accent .accent-body { position: relative; }
+.katex .overlay { display: block; }
+.katex .mtable .vertical-separator { display: inline-block; margin: 0px -0.025em; border-right: 0.05em solid; }
+.katex .mtable .vs-dashed { border-right: 0.05em dashed; }
+.katex .mtable .arraycolsep { display: inline-block; }
+.katex .mtable .col-align-c > .vlist-t { text-align: center; }
+.katex .mtable .col-align-l > .vlist-t { text-align: left; }
+.katex .mtable .col-align-r > .vlist-t { text-align: right; }
+.katex .svg-align { text-align: left; }
+.katex svg, .screenShotTempCanvas { display: block; position: absolute; width: 100%; height: inherit; fill: currentcolor; stroke: currentcolor; fill-rule: nonzero; fill-opacity: 1; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-opacity: 1; }
+.katex svg path { stroke: none; }
+.katex .stretchy { width: 100%; display: block; position: relative; overflow: hidden; }
+.katex .stretchy::before, .katex .stretchy::after { content: ""; }
+.katex .hide-tail { width: 100%; position: relative; overflow: hidden; }
+.katex .halfarrow-left { position: absolute; left: 0px; width: 50.2%; overflow: hidden; }
+.katex .halfarrow-right { position: absolute; right: 0px; width: 50.2%; overflow: hidden; }
+.katex .brace-left { position: absolute; left: 0px; width: 25.1%; overflow: hidden; }
+.katex .brace-center { position: absolute; left: 25%; width: 50%; overflow: hidden; }
+.katex .brace-right { position: absolute; right: 0px; width: 25.1%; overflow: hidden; }
+.katex .x-arrow-pad { padding: 0px 0.5em; }
+.katex .x-arrow, .katex .mover, .katex .munder { text-align: center; }
+.katex .boxpad { padding: 0px 0.3em; }
+.katex .fbox { box-sizing: border-box; border: 0.04em solid black; }
+.katex .fcolorbox { box-sizing: border-box; border: 0.04em solid; }
+.katex .cancel-pad { padding: 0px 0.2em; }
+.katex .cancel-lap { margin-left: -0.2em; margin-right: -0.2em; }
+.katex .sout { border-bottom-style: solid; border-bottom-width: 0.08em; }
+.output_wrapper pre code { display: -webkit-box !important; } 
+.output_wrapper .hljs{color: rgb(169, 183, 198); background: rgb(40, 43, 46) none repeat scroll 0% 0%; display: block; overflow-x: auto; padding: 0.5em;}
+
+.output_wrapper .hljs-params{color: rgb(255, 152, 35);}
+
+.output_wrapper .hljs-number,.output_wrapper  .hljs-literal,.output_wrapper  .hljs-symbol,.output_wrapper  .hljs-bullet{color: rgb(174, 135, 250);}
+
+.output_wrapper .hljs-function,.output_wrapper  .hljs-built_in,.output_wrapper  .hljs-name,.output_wrapper  .hljs-keyword,.output_wrapper  .hljs-selector-tag,.output_wrapper  .hljs-deletion{color: rgb(248, 35, 117);}
+
+.output_wrapper .hljs-variable,.output_wrapper  .hljs-template-variable,.output_wrapper  .hljs-link{color: rgb(98, 151, 85);}
+
+.output_wrapper .hljs-comment,.output_wrapper  .hljs-quote{color: rgb(128, 128, 128);}
+
+.output_wrapper .hljs-meta{color: rgb(91, 218, 237);}
+
+.output_wrapper .hljs-string,.output_wrapper  .hljs-attribute,.output_wrapper  .hljs-addition{color: rgb(238, 220, 112);}
+
+.output_wrapper .hljs-attr,.output_wrapper  .hljs-section,.output_wrapper  .hljs-title,.output_wrapper  .hljs-type{color: rgb(165, 218, 45);}
+
+.output_wrapper .hljs-selector-class{color: rgb(165, 218, 45);}
+
+.output_wrapper .hljs-emphasis{font-style: italic;}
+
+.output_wrapper .hljs-strong{font-weight: bold;}
+ 
+.output_wrapper pre code {line-height: 18px; font-size: 14px; font-weight: normal; word-spacing: 0px; letter-spacing: 0px;} 
+.output_wrapper{font-size: 16px; color: rgb(62, 62, 62); line-height: 1.6; word-spacing: 0px; letter-spacing: 0px; font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;}
+
+.output_wrapper *{font-size: inherit; color: inherit; line-height: inherit; margin: 0px; padding: 0px;}
+
+.output_wrapper p{margin: 1.5em 0px;}
+
+.output_wrapper h1,.output_wrapper  h2,.output_wrapper  h3,.output_wrapper  h4,.output_wrapper  h5,.output_wrapper  h6{margin: 1.5em 0px; font-weight: bold;}
+
+.output_wrapper h1{font-size: 1.6em;}
+
+.output_wrapper h2{font-size: 1.4em;}
+
+.output_wrapper h3{font-size: 1.3em;}
+
+.output_wrapper h4{font-size: 1.2em;}
+
+.output_wrapper h5{font-size: 1em;}
+
+.output_wrapper h6{font-size: 1em;}
+
+.output_wrapper h3{margin-bottom: 2em; margin-right: 5px; padding: 8px 15px; letter-spacing: 2px; background-image: linear-gradient(to right bottom, rgb(0, 188, 212), rgb(63, 81, 181)); background-color: rgb(63, 81, 181); color: rgb(255, 255, 255); border-left: 10px solid rgb(51, 51, 51); border-radius: 5px; text-shadow: rgb(102, 102, 102) 1px 1px 1px; box-shadow: rgb(102, 102, 102) 1px 1px 2px;}
+
+.output_wrapper ul,.output_wrapper  ol{padding-left: 32px;}
+
+.output_wrapper ul{list-style-type: disc;}
+
+.output_wrapper ol{list-style-type: decimal;}
+
+.output_wrapper li *{}
+
+.output_wrapper li{margin-bottom: 0.5em;}
+
+.output_wrapper .code_size_default{line-height: 18px; font-size: 14px; font-weight: normal; word-spacing: 0px; letter-spacing: 0px;}
+
+.output_wrapper .code_size_tight{line-height: 15px; font-size: 11px; font-weight: normal; word-spacing: -3px; letter-spacing: 0px;}
+
+.output_wrapper pre code{font-family: Consolas, Inconsolata, Courier, monospace; border-radius: 0px;}
+
+.output_wrapper blockquote{display: block; padding: 15px 15px 15px 1rem; font-size: 0.9em; margin: 1em 0px; color: rgb(129, 145, 152); border-left: 6px solid rgb(220, 230, 240); background: rgb(242, 247, 251) none repeat scroll 0% 0%; overflow: auto; overflow-wrap: normal; word-break: normal;}
+
+.output_wrapper blockquote p{margin: 0px;}
+
+.output_wrapper a{text-decoration: none; color: rgb(30, 107, 184); overflow-wrap: break-word;}
+
+.output_wrapper strong{font-weight: bold;}
+
+.output_wrapper em{font-style: italic;}
+
+.output_wrapper del{font-style: italic;}
+
+.output_wrapper strong em{font-weight: bold;}
+
+.output_wrapper hr{height: 1px; margin: 1.5rem 0px; border-color: rgb(165, 165, 165) currentcolor currentcolor; border-style: dashed none none; border-width: 1px medium medium; border-image: none 100% / 1 / 0 stretch;}
+
+.output_wrapper code{overflow-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0px 2px; color: rgb(233, 105, 0); background: rgb(248, 248, 248) none repeat scroll 0% 0%;}
+
+.output_wrapper img{display: block; margin: 0px auto; max-width: 100%;}
+
+.output_wrapper figcaption{margin-top: 10px; text-align: center; color: rgb(153, 153, 153); font-size: 0.7em;}
+
+.output_wrapper table{display: table; width: 100%; text-align: left;}
+
+.output_wrapper tbody{border: 0px none;}
+
+.output_wrapper table tr{border-color: rgb(204, 204, 204) currentcolor currentcolor; border-style: solid none none; border-width: 1px 0px 0px; border-image: none 100% / 1 / 0 stretch; background-color: white;}
+
+.output_wrapper table tr th,.output_wrapper  table tr td{font-size: 1em; border: 1px solid rgb(204, 204, 204); padding: 0.5em 1em; text-align: left;}
+
+.output_wrapper table tr th{font-weight: bold; background-color: rgb(240, 240, 240);}
+
+.output_wrapper .katex-display{font-size: 1.22em;}
+
+.output_wrapper .katex{padding: 8px 3px;}
+
+.output_wrapper .katex-display > .katex{display: inline-block; text-align: center; padding: 3px;}
+
+.output_wrapper .katex img{display: inline-block; vertical-align: middle;}
+
+.output_wrapper a[href^="#"] sup{vertical-align: super; margin: 0px 2px; padding: 1px 3px; color: rgb(255, 255, 255); background: rgb(102, 102, 102) none repeat scroll 0% 0%; font-size: 0.7em;}
+
+.output_wrapper .task-list-list{list-style-type: none;}
+
+.output_wrapper .task-list-list.checked{color: rgb(62, 62, 62);}
+
+.output_wrapper .task-list-list.uncheck{color: rgb(191, 193, 191);}
+
+.output_wrapper .task-list-list .icon_uncheck,.output_wrapper  .task-list-list .icon_check{display: inline-block; vertical-align: middle; margin-right: 10px;}
+
+.output_wrapper .task-list-list .icon_check::before{content: "√"; border: 2px solid rgb(62, 62, 62); color: red;}
+
+.output_wrapper .task-list-list .icon_uncheck::before{content: "x"; border: 2px solid rgb(191, 193, 191); color: rgb(191, 193, 191);}
+
+.output_wrapper .task-list-list .icon_check::before,.output_wrapper  .task-list-list .icon_uncheck::before{padding: 2px 8px 2px 5px; border-radius: 5px;}
+
+.output_wrapper .toc{margin-left: 25px;}
+
+.output_wrapper .toc_item{display: block;}
+
+.output_wrapper .toc_left{margin-left: 25px;}
+ 
+</style>  
+  <style type="text/css" id="export_setting_css">body { width: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }
+#export_content { margin: 40px 20%; padding: 20px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }</style>  
+
+</head><body><div id="export_content"><div class="output_wrapper" id="output_wrapper_id"><h1 id="hpaligncenterfontsize6llvmclang6fontp"><span><p align="center"><strong><font size="6">LLVM 之 Clang 静态分析器篇（6）：程序缺陷诊断——内存重复释放</font></strong></p></span></h1>
+<p align="right">Author: stormQ</p>
+<p align="right">Created: Wednesday, 09. June 2021 08:21PM</p>
+<p align="right">Last Modified: Thursday, 17. June 2021 08:27PM</p>
+<hr>
+<ul>
+<li><h3 id="h"><span>目录</span></h3>
+<ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump摘要">摘要</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1">研究过程</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump2">研究结论</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jumpReferences">References</a></p></ul><p></p>
+</li></ul>
+<hr>
+<h3 id="hspanidjumpspan"><span><span id="jump摘要">摘要</span></span></h3>
+<p>本文基于<code>release/12.x</code>版本的 LLVM 源码，以插件方式实现了用于检测 C 程序中<code>内存重复释放</code>程序缺陷的<code>plugin.unix.Malloc</code>检查器。从而，便于真正地理解 Clang 静态分析器是如何在<code>unix.Malloc</code>检查器中实现该功能的。除此之外，也有助于按照自身需求修改或扩展 Clang 静态分析器。</p>
+<hr>
+<h3 id="hspanidjump1span"><span><span id="jump1">研究过程</span></span></h3>
+<ul>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_0">C 程序中典型的内存重复释放</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_1">原检查器订阅的程序点</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_2">自己动手实现内存重复释放的检测</a></p>
+<p class="task-list-list checked" style="list-style-type: none;"><i class="icon_check"></i><a href="#jump1_3">如何调试</a></p>
+</ul>
+<hr>
+<p><code>unix.Malloc</code>检查器的源码实现目录如下：</p>
+<ul>
+<li>源文件为<code>clang/lib/StaticAnalyzer/Checkers/MallocChecker.cpp</code></li>
+</ul>
+<p><code>plugin.unix.Malloc</code>检查器的源码实现目录如下：</p>
+<ul>
+<li>源文件为<code>clang/lib/Analysis/plugins/CheckerMalloc/MallocChecker.cpp</code></li>
+</ul>
+<hr>
+<h4 id="hspanidjump1_0cspan"><span><span id="jump1_0">C 程序中典型的内存重复释放</span></span></h4>
+<p>本节介绍了几个 C 程序中典型的内存重复释放示例，涉及<code>malloc</code>、<code>free</code>和<code>realloc</code>函数。这些示例均来自 LLVM 项目中的测试文件 malloc.c（定义在 clang/test/Analysis/malloc.c 文件中）。</p>
+<p><strong>示例 1：</strong></p>
+<pre><code class="hljs cpp"><span class="hljs-number">54</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">f2</span><span class="hljs-params">()</span>&nbsp;</span>{<br><span class="hljs-number">55</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">int</span>&nbsp;*p&nbsp;=&nbsp;<span class="hljs-built_in">malloc</span>(<span class="hljs-number">12</span>);<br><span class="hljs-number">56</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);<br><span class="hljs-number">57</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">58</span>&nbsp;}<br></code></pre>
+<p>如果局部变量<code>p</code>所指向的内存分配成功（大多数情况下），那么上述程序会对该内存重复调用<code>free</code>函数。也就是说，在该情况下会发生内存重复释放。</p>
+<p><strong>示例 2：</strong></p>
+<pre><code class="hljs cpp"><span class="hljs-number">60</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">f2_realloc_0</span><span class="hljs-params">()</span>&nbsp;</span>{<br><span class="hljs-number">61</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">int</span>&nbsp;*p&nbsp;=&nbsp;<span class="hljs-built_in">malloc</span>(<span class="hljs-number">12</span>);<br><span class="hljs-number">62</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">realloc</span>(p,<span class="hljs-number">0</span>);<br><span class="hljs-number">63</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">realloc</span>(p,<span class="hljs-number">0</span>);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">64</span>&nbsp;}<br></code></pre>
+<p>如果<code>realloc</code>函数的第一个参数<code>oldmem</code>的值不为<code>NULL</code>且第二个参数<code>bytes</code>的值为 0，那么调用<code>realloc(oldmem, bytes)</code>相当于调用<code>free(oldmem)</code>，并且<code>realloc</code>函数的返回值为<code>NULL</code>。</p>
+<p>因此，如果局部变量<code>p</code>所指向的内存分配成功（大多数情况下），那么上述程序相当于对该内存重复调用<code>free</code>函数。也就是说，在该情况下会发生内存重复释放。</p>
+<p><strong>示例 3：</strong></p>
+<pre><code class="hljs cpp"><span class="hljs-number">109</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">reallocSizeZero1</span><span class="hljs-params">()</span>&nbsp;</span>{<br><span class="hljs-number">110</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*p&nbsp;=&nbsp;<span class="hljs-built_in">malloc</span>(<span class="hljs-number">12</span>);<br><span class="hljs-number">111</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*r&nbsp;=&nbsp;<span class="hljs-built_in">realloc</span>(p,&nbsp;<span class="hljs-number">0</span>);<br><span class="hljs-number">112</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!r)&nbsp;{<br><span class="hljs-number">113</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">114</span>&nbsp;&nbsp;&nbsp;}&nbsp;<span class="hljs-keyword">else</span>&nbsp;{<br><span class="hljs-number">115</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(r);<br><span class="hljs-number">116</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">117</span>&nbsp;}<br></code></pre>
+<p>如果局部变量<code>p</code>所指向的内存分配成功（大多数情况下），那么在执行语句<code>char *r = realloc(p, 0);</code>后，<code>p</code>所指向的内存会被释放并且局部变量<code>r</code>的值为<code>NULL</code>。因此，<code>if</code>语句中的条件表达式<code>!r</code>的求值结果会为<code>true</code>，从而调用<code>free(p)</code>（再次释放<code>p</code>所指向的内存）。也就是说，在该情况下会发生内存重复释放。</p>
+<p>如果<code>realloc</code>函数的第一个参数<code>oldmem</code>的值为<code>NULL</code>（无论第二个参数<code>bytes</code>的值是什么），那么调用<code>realloc(oldmem, bytes)</code>相当于调用<code>malloc(bytes)</code>。</p>
+<p>因此，如果局部变量<code>p</code>所指向的内存分配失败（少数情况下），那么在执行语句<code>char *r = realloc(p, 0);</code>后，如果局部变量<code>r</code>所指向的内存也分配失败，那么会调用<code>free(p);</code>语句（由于<code>p</code>的值为<code>NULL</code>，所以什么都不做）；否则，会调用<code>free(r);</code>语句（正常释放了<code>r</code>所指向的内存）。因此，这两种情况下程序都是正确的。</p>
+<p><strong>示例 4：</strong></p>
+<pre><code class="hljs cpp"><span class="hljs-number">1474</span>&nbsp;<span class="hljs-comment">//&nbsp;Make&nbsp;sure&nbsp;we&nbsp;catch&nbsp;errors&nbsp;when&nbsp;we&nbsp;free&nbsp;in&nbsp;a&nbsp;function&nbsp;which&nbsp;does&nbsp;not&nbsp;allocate&nbsp;memory.</span><br><span class="hljs-number">1475</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">freeButNoMalloc</span><span class="hljs-params">(<span class="hljs-keyword">int</span>&nbsp;*p,&nbsp;<span class="hljs-keyword">int</span>&nbsp;x)</span></span>{<br><span class="hljs-number">1476</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(x)&nbsp;{<br><span class="hljs-number">1477</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);<br><span class="hljs-number">1478</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">//user&nbsp;forgot&nbsp;a&nbsp;return&nbsp;here.</span><br><span class="hljs-number">1479</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">1480</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">1481</span>&nbsp;}<br></code></pre>
+<p>如果参数<code>p</code>的值不为<code>NULL</code>且参数<code>x</code>的求值结果为<code>true</code>，那么上述程序会对<code>p</code>所指向的内存重复调用<code>free</code>函数。也就是说，在该情况下会发生内存重复释放。</p>
+<p><strong>示例 5：</strong></p>
+<pre><code class="hljs cpp"><span class="hljs-number">1655</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">testOffsetZeroDoubleFree</span><span class="hljs-params">()</span>&nbsp;</span>{<br><span class="hljs-number">1656</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">int</span>&nbsp;*<span class="hljs-built_in">array</span>&nbsp;=&nbsp;<span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">int</span>)*<span class="hljs-number">2</span>);<br><span class="hljs-number">1657</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">int</span>&nbsp;*p&nbsp;=&nbsp;&amp;<span class="hljs-built_in">array</span>[<span class="hljs-number">0</span>];<br><span class="hljs-number">1658</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);<br><span class="hljs-number">1659</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(&amp;<span class="hljs-built_in">array</span>[<span class="hljs-number">0</span>]);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">1660</span>&nbsp;}<br></code></pre>
+<p>如果局部变量<code>array</code>所指向的内存分配成功，那么由于局部变量<code>p</code>和<code>&amp;array[0]</code>都指向同一块内存，因此上述程序会对该内存重复调用<code>free</code>函数。也就是说，在该情况下会发生内存重复释放。</p>
+<p><a href="#jump1">返回上一级</a></p>
+<hr>
+<h4 id="hspanidjump1_1span"><span><span id="jump1_1">原检查器订阅的程序点</span></span></h4>
+<p>在<code>unix.Malloc</code>检查器中，检查器类<code>MallocChecker</code>用于实现内存相关错误（比如：<code>内存泄露</code>、<code>内存重复释放</code>）的诊断功能，其源码实现如下（定义在 clang/lib/StaticAnalyzer/Checkers/MallocChecker.cpp 文件中）：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">286</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;{<br><span class="hljs-number">287</span>&nbsp;<br><span class="hljs-number">288</span>&nbsp;<span class="hljs-class"><span class="hljs-keyword">class</span>&nbsp;<span class="hljs-title">MallocChecker</span><br>289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>&nbsp;<span class="hljs-keyword">public</span>&nbsp;Checker&lt;check::DeadSymbols,&nbsp;check::PointerEscape,<br><span class="hljs-number">290</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check::ConstPointerEscape,&nbsp;check::PreStmt&lt;ReturnStmt&gt;,<br><span class="hljs-number">291</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check::EndFunction,&nbsp;check::PreCall,&nbsp;check::PostCall,<br><span class="hljs-number">292</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check::NewAllocator,&nbsp;check::PostStmt&lt;BlockExpr&gt;,<br><span class="hljs-number">293</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check::PostObjCMessage,&nbsp;check::Location,&nbsp;eval::Assume&gt;&nbsp;{<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">728</span>&nbsp;};<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">859</span>&nbsp;}&nbsp;<span class="hljs-comment">//&nbsp;end&nbsp;anonymous&nbsp;namespace</span><br></code></pre>
+<p>从上面的代码可以看出，该检查器类共订阅了 12 个程序点。如果只实现检测 C 程序中内存重复释放的程序缺陷，那么至少需要订阅<code>clang::ento::check::PostCall</code>和<code>clang::ento::eval::Assume</code>程序点。</p>
+<ul>
+<li><p><code>clang::ento::check::PostCall</code>，表示分析器引擎在每个函数被调用之后才会调用检查器的程序点。这意味着，如果启用了该检查器，那么<code>MallocChecker::checkPostCall()</code>函数在每个函数执行之后都会被调用。</p></li>
+<li><p><code>clang::ento::eval::Assume</code>，表示分析器引擎在每次程序状态中出现新的范围约束时就会调用检查器的程序点。这意味着，如果启用了该检查器，那么<code>MallocChecker::evalAssume()</code>函数在每次程序状态中出现新的范围约束时都会被调用。</p></li>
+</ul>
+<p>订阅<code>clang::ento::check::PostCall</code>程序点是为了获取<code>malloc</code>、<code>free</code>和<code>realloc</code>函数的参数或返回值，从而用于跟踪内存相关的自定义程序状态。</p>
+<p>订阅<code>clang::ento::eval::Assume</code>程序点是为了当程序状态中表示已分配内存的符号被约束为空指针时做一些处理。从而避免在某些情况下误报<code>内存重复释放</code>的程序缺陷。这些情况比如：<code>realloc</code>函数重新分配内存失败。</p>
+<p><a href="#jump1">返回上一级</a></p>
+<hr>
+<h4 id="hspanidjump1_2span"><span><span id="jump1_2">自己动手实现内存重复释放的检测</span></span></h4>
+<p><strong>step 1：</strong> 定义检查器类</p>
+<p><strong>1）</strong> 需要订阅哪些程序点</p>
+<p>要实现检测<code>内存重复释放</code>的功能，我们至少需要订阅<code>clang::ento::check::PostCall</code>和<code>clang::ento::eval::Assume</code>程序点。除此之外，最好也订阅<code>clang::ento::check::DeadSymbols</code>程序点（但不是必须的），从而清除不会再用到的自定义程序状态。</p>
+<p><strong>2）</strong> 定义检查器类</p>
+<pre><code class="hljs cpp"><span class="hljs-number">10</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;{<br><span class="hljs-number">11</span>&nbsp;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">16</span>&nbsp;<br><span class="hljs-number">17</span>&nbsp;<span class="hljs-class"><span class="hljs-keyword">class</span>&nbsp;<span class="hljs-title">MallocChecker</span>&nbsp;:</span>&nbsp;<span class="hljs-keyword">public</span>&nbsp;Checker&lt;check::PostCall,&nbsp;eval::Assume&gt;&nbsp;{<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">36</span>&nbsp;<br><span class="hljs-number">37</span>&nbsp;<span class="hljs-keyword">public</span>:<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">39</span>&nbsp;<br><span class="hljs-number">40</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">checkPostCall</span><span class="hljs-params">(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,&nbsp;CheckerContext&nbsp;&amp;C)</span>&nbsp;<span class="hljs-keyword">const</span></span>;<br><span class="hljs-number">41</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function">ProgramStateRef&nbsp;<span class="hljs-title">evalAssume</span><span class="hljs-params">(ProgramStateRef&nbsp;State,&nbsp;<span class="hljs-keyword">const</span>&nbsp;SVal&nbsp;&amp;Cond,<br><span class="hljs-number">42</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">bool</span>&nbsp;Assumption)</span>&nbsp;<span class="hljs-keyword">const</span></span>;<br><span class="hljs-number">43</span>&nbsp;};<br><span class="hljs-number">44</span>&nbsp;<br><span class="hljs-number">45</span>&nbsp;}&nbsp;<span class="hljs-comment">//&nbsp;anonymous&nbsp;namespace</span><br></code></pre>
+<p><em>注：</em></p>
+<p>如果确定仅在局部范围内使用该类，那么可以将检查器类的定义置于匿名空间中。从而，避免链接器将这些符号导出至外部。</p>
+<p>订阅<code>clang::ento::check::PostCall</code>程序点后，检查器类必须实现一个函数原型为<code>void checkPostCall(const CallEvent &amp;Call, CheckerContext &amp;C) const</code>的成员函数。否则，会发生编译错误。</p>
+<p>同样地，订阅<code>clang::ento::eval::Assume</code>程序点后，检查器类必须实现一个函数原型为<code>ProgramStateRef evalAssume(ProgramStateRef State, const SVal &amp;Cond, bool Assumption) const</code>的成员函数。否则，也会发生编译错误。</p>
+<p><strong>step 2：</strong> 自定义程序状态</p>
+<p><strong>1）</strong> 定义状态枚举</p>
+<pre><code class="hljs cs"><span class="hljs-number">10</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;{<br><span class="hljs-number">11</span>&nbsp;<br><span class="hljs-number">12</span>&nbsp;<span class="hljs-keyword">enum</span>&nbsp;Kind&nbsp;{<br><span class="hljs-number">13</span>&nbsp;&nbsp;&nbsp;Allocated,<br><span class="hljs-number">14</span>&nbsp;&nbsp;&nbsp;Released,<br><span class="hljs-number">15</span>&nbsp;};<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">44</span>&nbsp;<br><span class="hljs-number">45</span>&nbsp;}&nbsp;<span class="hljs-comment">//&nbsp;anonymous&nbsp;namespace</span><br></code></pre>
+<p>其中，枚举值<code>Allocated</code>表示内存处于<code>已分配</code>的状态，枚举值<code>Released</code>表示内存处于<code>已释放</code>的状态。</p>
+<p><strong>2）</strong> 调用注册宏</p>
+<pre><code class="hljs cpp"><span class="hljs-number">47</span>&nbsp;REGISTER_MAP_WITH_PROGRAMSTATE(RegionState,&nbsp;SymbolRef,&nbsp;<span class="hljs-keyword">int</span>)<br></code></pre>
+<p>参数<code>RegionState</code>，表示自定义程序状态的类型（实质上是一个 C++ 类名，在该宏定义的内部进行定义）。</p>
+<p>参数<code>SymbolRef</code>，为<code>llvm::ImmutableMap&lt;Key, Value&gt;</code>中<code>Key</code>的数据类型，表示所分配内存对应的符号表达式。</p>
+<p>参数<code>int</code>，为<code>llvm::ImmutableMap&lt;Key, Value&gt;</code>中<code>Value</code>的数据类型，表示所分配内存的状态（是<code>已分配</code>还是<code>已释放</code>）。</p>
+<p>上述宏用于跟踪通过<code>malloc</code>或<code>realloc</code>函数分配的内存的状态，用于判断是否发生了<code>内存重复释放</code>。</p>
+<p><strong>3）</strong> 调用注册宏</p>
+<pre><code class="hljs">48&nbsp;REGISTER_MAP_WITH_PROGRAMSTATE(ReallocPairs,&nbsp;SymbolRef,&nbsp;SymbolRef)<br></code></pre>
+<p>第一个参数<code>ReallocPairs</code>，表示自定义程序状态的类型（实质上是一个 C++ 类名，在该宏定义的内部进行定义）。</p>
+<p>第二个参数<code>SymbolRef</code>，为<code>llvm::ImmutableMap&lt;Key, Value&gt;</code>中<code>Key</code>的数据类型，表示<code>realloc</code>函数所分配的新内存对应的符号表达式。</p>
+<p>第三个参数<code>SymbolRef</code>，为<code>llvm::ImmutableMap&lt;Key, Value&gt;</code>中<code>Value</code>的数据类型，表示<code>realloc</code>函数所释放的旧内存对应的符号表达式。</p>
+<p>上述宏用于跟踪<code>realloc</code>函数所分配的新内存和所释放的旧内存之间的关联关系，用于在适当的时候处理<code>realloc</code>函数重新分配内存失败的情况，从而避免误报<code>内存重复释放</code>。</p>
+<p><strong>step 3：</strong> 实现检查器类</p>
+<p><strong>1）</strong> 实现<code>checkPostCall()</code>成员函数</p>
+<pre><code class="hljs vbscript"><span class="hljs-number">50</span>&nbsp;void&nbsp;MallocChecker::checkPostCall(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;<span class="hljs-keyword">Call</span>,<br><span class="hljs-number">51</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerContext&nbsp;&amp;C)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">52</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!<span class="hljs-keyword">Call</span>.isGlobalCFunction())&nbsp;{<br><span class="hljs-number">53</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br><span class="hljs-number">54</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">55</span>&nbsp;<br><span class="hljs-number">56</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(<span class="hljs-keyword">Call</span>.isCalled(MallocFn))&nbsp;{<br><span class="hljs-number">57</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;checkMalloc(<span class="hljs-keyword">Call</span>,&nbsp;C);<br><span class="hljs-number">58</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br><span class="hljs-number">59</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">60</span>&nbsp;<br><span class="hljs-number">61</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(<span class="hljs-keyword">Call</span>.isCalled(FreeFn))&nbsp;{<br><span class="hljs-number">62</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;checkFree(<span class="hljs-keyword">Call</span>,&nbsp;C);<br><span class="hljs-number">63</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br><span class="hljs-number">64</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">65</span>&nbsp;<br><span class="hljs-number">66</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(<span class="hljs-keyword">Call</span>.isCalled(ReallocFn))&nbsp;{<br><span class="hljs-number">67</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;checkRealloc(<span class="hljs-keyword">Call</span>,&nbsp;C);<br><span class="hljs-number">68</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br><span class="hljs-number">69</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">70</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：</p>
+<ul>
+<li><p>第 52~54 行，如果被调用的函数不是 C 语言风格的全局函数，那么直接返回。从而，避免不必要的后续处理。</p></li>
+<li><p>第 56~59 行，如果被调用的函数是<code>malloc</code>，那么调用<code>checkMalloc()</code>函数进行实际处理并返回。</p></li>
+<li><p>第 61~64 行，如果被调用的函数是<code>free</code>，那么调用<code>checkFree()</code>函数进行实际处理并返回。</p></li>
+<li><p>第 66~69 行，如果被调用的函数是<code>realloc</code>，那么调用<code>checkRealloc()</code>函数进行实际处理并返回。</p></li>
+</ul>
+<p><strong>a）</strong> 定义并初始化数据成员<code>MallocFn</code>、<code>FreeFn</code>和<code>ReallocFn</code></p>
+<pre><code class="hljs cpp"><span class="hljs-number">10</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;{<br><span class="hljs-number">11</span>&nbsp;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">16</span>&nbsp;<br><span class="hljs-number">17</span>&nbsp;<span class="hljs-class"><span class="hljs-keyword">class</span>&nbsp;<span class="hljs-title">MallocChecker</span>&nbsp;:</span>&nbsp;<span class="hljs-keyword">public</span>&nbsp;Checker&lt;check::PostCall,&nbsp;eval::Assume&gt;&nbsp;{<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">20</span>&nbsp;&nbsp;&nbsp;CallDescription&nbsp;MallocFn;<br><span class="hljs-number">21</span>&nbsp;&nbsp;&nbsp;CallDescription&nbsp;FreeFn;<br><span class="hljs-number">22</span>&nbsp;&nbsp;&nbsp;CallDescription&nbsp;ReallocFn;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">37</span>&nbsp;<span class="hljs-keyword">public</span>:<br><span class="hljs-number">38</span>&nbsp;&nbsp;&nbsp;MallocChecker()&nbsp;:&nbsp;MallocFn(<span class="hljs-string">"malloc"</span>),&nbsp;FreeFn(<span class="hljs-string">"free"</span>),&nbsp;ReallocFn(<span class="hljs-string">"realloc"</span>)&nbsp;{}<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">43</span>&nbsp;};<br><span class="hljs-number">44</span>&nbsp;<br><span class="hljs-number">45</span>&nbsp;}&nbsp;<span class="hljs-comment">//&nbsp;anonymous&nbsp;namespace</span><br></code></pre>
+<p><strong>2）</strong> 实现<code>malloc</code>函数被调用的处理逻辑</p>
+<p><code>malloc</code>函数被调用的处理逻辑封装在成员函数<code>checkMalloc()</code>中，其源码实现如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">72</span>&nbsp;<span class="hljs-keyword">void</span>&nbsp;MallocChecker::checkMalloc(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,<br><span class="hljs-number">73</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerContext&nbsp;&amp;C)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">74</span>&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State&nbsp;=&nbsp;C.getState();<br><span class="hljs-number">75</span>&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;MallocMemAux(Call,&nbsp;C,&nbsp;State);<br><span class="hljs-number">76</span>&nbsp;&nbsp;&nbsp;C.addTransition(State);<br><span class="hljs-number">77</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：获取当前程序状态并调用辅助函数<code>MallocMemAux()</code>进行实际的处理。如果程序状态发生了变化，那么扩展程序状态图，从而让后继节点获知这一信息，并且可以继续探索该执行路径。</p>
+<p><strong>需要注意的是，</strong> 函数<code>MallocMemAux()</code>的第三个参数<code>ProgramStateRef State</code>之所以存在，是因为 C 语言中除了<code>free</code>函数之外<code>realloc</code>函数也会释放内存，但后者基于的程序状态可以不是当前程序状态。所以，通过添加该参数从而可以在<code>realloc</code>函数中复用该处理逻辑。</p>
+<p><strong>a）</strong> 实现<code>MallocMemAux()</code>成员函数</p>
+<pre><code class="hljs cpp"><span class="hljs-number">79</span>&nbsp;ProgramStateRef<br><span class="hljs-number">80</span>&nbsp;MallocChecker::MallocMemAux(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,&nbsp;CheckerContext&nbsp;&amp;C,<br><span class="hljs-number">81</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">82</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!State)&nbsp;{<br><span class="hljs-number">83</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">84</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">85</span>&nbsp;<br><span class="hljs-number">86</span>&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;Mem&nbsp;=&nbsp;Call.getReturnValue().getAsSymbol();<br><span class="hljs-number">87</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!Mem)&nbsp;{<br><span class="hljs-number">88</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">89</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">90</span>&nbsp;<br><span class="hljs-number">91</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State-&gt;<span class="hljs-built_in">set</span>&lt;RegionState&gt;(Mem,&nbsp;Allocated);<br><span class="hljs-number">92</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：</p>
+<ul>
+<li><p>第 86~89 行，获取被调用函数（可以是<code>malloc</code>函数，也可以是<code>realloc</code>函数）的返回值（即指向已分配内存的指针）所对应的符号表达式。如果获取失败，则返回一个空的程序状态。</p></li>
+<li><p>第 91 行，返回一个新的程序状态，并且该程序状态中保存了这一信息：所分配的内存的状态为<code>已分配</code>。</p></li>
+</ul>
+<p><strong>3）</strong> 实现<code>free</code>函数被调用的处理逻辑</p>
+<p><code>free</code>函数被调用的处理逻辑封装在成员函数<code>checkFree()</code>中，其源码实现如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">94</span>&nbsp;<span class="hljs-keyword">void</span>&nbsp;MallocChecker::checkFree(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,<br><span class="hljs-number">95</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerContext&nbsp;&amp;C)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">96</span>&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State&nbsp;=&nbsp;C.getState();<br><span class="hljs-number">97</span>&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;FreeMemAux(Call,&nbsp;C,&nbsp;State);<br><span class="hljs-number">98</span>&nbsp;&nbsp;&nbsp;C.addTransition(State);<br><span class="hljs-number">99</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：获取当前程序状态并调用辅助函数<code>FreeMemAux()</code>进行实际的处理。如果程序状态发生了变化，那么扩展程序状态图，从而让后继节点获知这一信息，并且可以继续探索该执行路径。</p>
+<p><strong>a）</strong> 实现<code>FreeMemAux()</code>成员函数</p>
+<pre><code class="hljs cpp"><span class="hljs-number">101</span>&nbsp;ProgramStateRef<br><span class="hljs-number">102</span>&nbsp;MallocChecker::FreeMemAux(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,&nbsp;CheckerContext&nbsp;&amp;C,<br><span class="hljs-number">103</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">104</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!State)&nbsp;{<br><span class="hljs-number">105</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">106</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">107</span>&nbsp;<br><span class="hljs-number">108</span>&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;Mem&nbsp;=&nbsp;Call.getArgSVal(<span class="hljs-number">0</span>).getAsSymbol();<br><span class="hljs-number">109</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!Mem)&nbsp;{<br><span class="hljs-number">110</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">111</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">112</span>&nbsp;<br><span class="hljs-number">113</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">auto</span>&nbsp;K&nbsp;=&nbsp;State-&gt;get&lt;RegionState&gt;(Mem);<br><span class="hljs-number">114</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!K&nbsp;||&nbsp;*K&nbsp;==&nbsp;Allocated)&nbsp;{<br><span class="hljs-number">115</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State-&gt;<span class="hljs-built_in">set</span>&lt;RegionState&gt;(Mem,&nbsp;Released);<br><span class="hljs-number">116</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">117</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(*K&nbsp;==&nbsp;Released)&nbsp;{<br><span class="hljs-number">118</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reportDoubleFree(C);<br><span class="hljs-number">119</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">120</span>&nbsp;<br><span class="hljs-number">121</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">122</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：</p>
+<ul>
+<li><p>第 108~111 行，获取被调用函数（可以是<code>free</code>函数，也可以是<code>realloc</code>函数）的第一个参数（即指向要释放内存的指针）所对应的符号表达式。如果获取失败，则返回一个空的程序状态。</p></li>
+<li><p>第 113~116 行，获取要释放的内存的状态。如果获取失败或者要释放的内存的状态为<code>已分配</code>，那么返回一个新的程序状态，并且该程序状态中保存了这一信息：所分配的内存的状态为<code>已释放</code>。</p></li>
+<li><p>第 117~119 行，如果要释放的内存的状态为<code>已释放</code>，那么表明发生了<code>内存重复释放</code>，报告该程序缺陷并返回一个空的程序状态。</p></li>
+</ul>
+<p><strong>需要注意的是：</strong></p>
+<ul>
+<li><p>函数<code>FreeMemAux()</code>在获取要释放的内存的状态失败时仍将所分配的内存的状态设置为<code>已释放</code>。这样做，是因为如果要释放的内存是以函数参数的形式传入的，那么可能不会跟踪到该内存的分配情况。在该情况下，如果返回一个空的程序状态，那么会发生漏报<code>内存重复释放</code>。</p></li>
+<li><p>函数<code>FreeMemAux()</code>在检测到<code>内存重复释放</code>时，返回了一个空的程序状态。这样做，是因为如果程序发生了<code>内存重复释放</code>，那么应该终止该执行路径的探索。也就是说，该执行路径不会再有后继节点。因此，不需要更新程序状态。</p></li>
+</ul>
+<p><strong>4）</strong> 实现<code>realloc</code>函数被调用的处理逻辑</p>
+<p><code>realloc</code>函数被调用的处理逻辑封装在成员函数<code>checkRealloc()</code>中，其源码实现如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">124</span>&nbsp;<span class="hljs-keyword">void</span>&nbsp;MallocChecker::checkRealloc(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,<br><span class="hljs-number">125</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckerContext&nbsp;&amp;C)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">126</span>&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State&nbsp;=&nbsp;C.getState();<br><span class="hljs-number">127</span>&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;ReallocMemAux(Call,&nbsp;C,&nbsp;State);<br><span class="hljs-number">128</span>&nbsp;&nbsp;&nbsp;C.addTransition(State);<br><span class="hljs-number">129</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：获取当前程序状态并调用辅助函数<code>ReallocMemAux()</code>进行实际的处理。如果程序状态发生了变化，那么扩展程序状态图，从而让后继节点获知这一信息，并且可以继续探索该执行路径。</p>
+<p><strong>a）</strong> 实现<code>ReallocMemAux()</code>成员函数</p>
+<pre><code class="hljs cpp"><span class="hljs-number">131</span>&nbsp;ProgramStateRef<br><span class="hljs-number">132</span>&nbsp;MallocChecker::ReallocMemAux(<span class="hljs-keyword">const</span>&nbsp;CallEvent&nbsp;&amp;Call,&nbsp;CheckerContext&nbsp;&amp;C,<br><span class="hljs-number">133</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;State)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">134</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!State)&nbsp;{<br><span class="hljs-number">135</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">136</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">137</span>&nbsp;<br><span class="hljs-number">138</span>&nbsp;&nbsp;&nbsp;Optional&lt;DefinedSVal&gt;&nbsp;Arg0&nbsp;=&nbsp;Call.getArgSVal(<span class="hljs-number">0</span>).getAs&lt;DefinedSVal&gt;();<br><span class="hljs-number">139</span>&nbsp;&nbsp;&nbsp;Optional&lt;DefinedSVal&gt;&nbsp;Arg1&nbsp;=&nbsp;Call.getArgSVal(<span class="hljs-number">1</span>).getAs&lt;DefinedSVal&gt;();<br><span class="hljs-number">140</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!Arg0&nbsp;||&nbsp;!Arg1)&nbsp;{<br><span class="hljs-number">141</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">142</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">143</span>&nbsp;<br><span class="hljs-number">144</span>&nbsp;&nbsp;&nbsp;ConstraintManager&nbsp;&amp;CM&nbsp;=&nbsp;C.getConstraintManager();<br><span class="hljs-number">145</span>&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;StatePtrNotNull,&nbsp;StatePtrIsNull;<br><span class="hljs-number">146</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">std</span>::tie(StatePtrNotNull,&nbsp;StatePtrIsNull)&nbsp;=&nbsp;CM.assumeDual(State,&nbsp;*Arg0);<br><span class="hljs-number">147</span>&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;StateSizeNotZero,&nbsp;StateSizeIsZero;<br><span class="hljs-number">148</span>&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">std</span>::tie(StateSizeNotZero,&nbsp;StateSizeIsZero)&nbsp;=&nbsp;CM.assumeDual(State,&nbsp;*Arg1);<br><span class="hljs-number">149</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">bool</span>&nbsp;PtrIsNull&nbsp;=&nbsp;StatePtrIsNull&nbsp;&amp;&amp;&nbsp;!StatePtrNotNull;<br><span class="hljs-number">150</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;<span class="hljs-keyword">bool</span>&nbsp;SizeIsZero&nbsp;=&nbsp;StateSizeIsZero&nbsp;&amp;&amp;&nbsp;!StateSizeNotZero;<br><span class="hljs-number">151</span>&nbsp;<br><span class="hljs-number">152</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(PtrIsNull)&nbsp;{<br><span class="hljs-number">153</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;StateMalloc&nbsp;=&nbsp;MallocMemAux(Call,&nbsp;C,&nbsp;StatePtrIsNull);<br><span class="hljs-number">154</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;StateMalloc;<br><span class="hljs-number">155</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">156</span>&nbsp;<br><span class="hljs-number">157</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!PtrIsNull&nbsp;&amp;&amp;&nbsp;SizeIsZero)&nbsp;{<br><span class="hljs-number">158</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;StateFree&nbsp;=&nbsp;FreeMemAux(Call,&nbsp;C,&nbsp;StateSizeIsZero);<br><span class="hljs-number">159</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;StateFree;<br><span class="hljs-number">160</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">161</span>&nbsp;<br><span class="hljs-number">162</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(ProgramStateRef&nbsp;StateFree&nbsp;=&nbsp;FreeMemAux(Call,&nbsp;C,&nbsp;State))&nbsp;{<br><span class="hljs-number">163</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProgramStateRef&nbsp;StateRealloc&nbsp;=&nbsp;MallocMemAux(Call,&nbsp;C,&nbsp;StateFree);<br><span class="hljs-number">164</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!StateRealloc)&nbsp;{<br><span class="hljs-number">165</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">166</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">167</span>&nbsp;<br><span class="hljs-number">168</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;FromPtr&nbsp;=&nbsp;Call.getArgSVal(<span class="hljs-number">0</span>).getAsSymbol();<br><span class="hljs-number">169</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;ToPtr&nbsp;=&nbsp;Call.getReturnValue().getAsSymbol();<br><span class="hljs-number">170</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert(FromPtr&nbsp;&amp;&amp;&nbsp;ToPtr&nbsp;&amp;&amp;<br><span class="hljs-number">171</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"By&nbsp;this&nbsp;point,&nbsp;FreeMemAux&nbsp;and&nbsp;MallocMemAux&nbsp;should&nbsp;have&nbsp;checked&nbsp;"</span><br><span class="hljs-number">172</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-string">"whether&nbsp;the&nbsp;argument&nbsp;or&nbsp;the&nbsp;return&nbsp;value&nbsp;is&nbsp;symbolic!"</span>);<br><span class="hljs-number">173</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;StateRealloc-&gt;<span class="hljs-built_in">set</span>&lt;ReallocPairs&gt;(ToPtr,&nbsp;FromPtr);<br><span class="hljs-number">174</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">175</span>&nbsp;<br><span class="hljs-number">176</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;<span class="hljs-literal">nullptr</span>;<br><span class="hljs-number">177</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：</p>
+<ul>
+<li><p>第 138~142 行，获取<code>realloc</code>函数的第一个参数（指向要释放的内存）和第二个参数（新分配内存的大小，单位：字节）的符号并转换为<code>已定义的符号</code>。如果失败，则返回一个空的程序状态。</p></li>
+<li><p>第 144~150 行，评估<code>realloc</code>函数的第一个参数和第二个参数的值，并将评估结果保存到局部变量<code>PtrIsNull</code>和<code>SizeIsZero</code>中。如果<code>PtrIsNull</code>的值为<code>true</code>，那么表示<code>realloc</code>函数的第一个参数的值为<code>NULL</code>。如果<code>SizeIsZero</code>的值为<code>true</code>，那么表示<code>realloc</code>函数的第二个参数的值为 0。</p></li>
+<li><p>第 152~155 行，处理<code>realloc</code>函数第一个参数的值为<code>NULL</code>（无论第二个参数的值是什么）的情况。在该情况下，调用<code>realloc(oldmem, bytes)</code>相当于调用<code>malloc(bytes)</code>。</p></li>
+<li><p>第 157~160 行，处理<code>realloc</code>函数第一个参数的值不为<code>NULL</code>且第二个参数的值为 0 的情况。在该情况下，调用<code>realloc(oldmem, bytes)</code>相当于调用<code>free(oldmem)</code>，并且<code>realloc</code>函数的返回值为<code>NULL</code>。</p></li>
+<li><p>第 162~174 行，处理<code>realloc</code>函数第一个参数的值不为<code>NULL</code>且第二个参数的值不为 0 的情况。在该情况下，调用<code>realloc(oldmem, bytes)</code>相当于调用<code>free(oldmem)</code>和<code>malloc(bytes)</code>。</p></li>
+<li><p>第 168~173 行，用于保存<code>realloc</code>函数所分配的新内存和所释放的旧内存之间的关联关系。从而，可以在适当的时候处理<code>realloc</code>函数重新分配内存失败的情况以避免误报<code>内存重复释放</code>。</p></li>
+</ul>
+<p><strong>需要注意的是，</strong> 在<code>plugin.unix.Malloc</code>检查器的实现中，如果<code>realloc</code>函数第一个参数的值为<code>NULL</code>且第二个参数的值为 0，那么相当于调用<code>malloc(bytes)</code>。而在<code>unix.Malloc</code>检查器的实现中，如果遇到该情况就直接返回传入的程序状态，未进行其他处理。</p>
+<p><strong>5）</strong> 报告程序缺陷</p>
+<p><strong>a）</strong> 定义相关数据成员和成员函数</p>
+<pre><code class="hljs cpp"><span class="hljs-number">10</span>&nbsp;<span class="hljs-keyword">namespace</span>&nbsp;{<br><span class="hljs-number">11</span>&nbsp;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">16</span>&nbsp;<br><span class="hljs-number">17</span>&nbsp;<span class="hljs-class"><span class="hljs-keyword">class</span>&nbsp;<span class="hljs-title">MallocChecker</span>&nbsp;:</span>&nbsp;<span class="hljs-keyword">public</span>&nbsp;Checker&lt;check::PostCall,&nbsp;eval::Assume&gt;&nbsp;{<br><span class="hljs-number">18</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">mutable</span>&nbsp;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BugType&gt;&nbsp;DoubleFreeBT;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">35</span>&nbsp;&nbsp;&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">reportDoubleFree</span><span class="hljs-params">(CheckerContext&nbsp;&amp;C)</span>&nbsp;<span class="hljs-keyword">const</span></span>;<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">43</span>&nbsp;};<br><span class="hljs-number">44</span>&nbsp;<br><span class="hljs-number">45</span>&nbsp;}&nbsp;<span class="hljs-comment">//&nbsp;anonymous&nbsp;namespace</span><br></code></pre>
+<p>我们需要定义一个数据类型为<code>std::unique_ptr&lt;BugType&gt;</code>的数据成员（这里是<code>DoubleFreeBT</code>），用于表示一个新的程序缺陷。为了在对象析构时能够自动释放内存，因此使用了智能指针。</p>
+<p>另外，我们将报告该程序缺陷的处理逻辑封装到成员函数<code>reportDoubleFree()</code>中。</p>
+<p><strong>b）</strong> 实现程序缺陷报告逻辑</p>
+<pre><code class="hljs cpp"><span class="hljs-number">179</span>&nbsp;<span class="hljs-keyword">void</span>&nbsp;MallocChecker::reportDoubleFree(CheckerContext&nbsp;&amp;C)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">180</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!DoubleFreeBT)&nbsp;{<br><span class="hljs-number">181</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DoubleFreeBT.reset(<span class="hljs-keyword">new</span>&nbsp;BugType(<span class="hljs-keyword">this</span>,&nbsp;<span class="hljs-string">"Double&nbsp;free"</span>,&nbsp;<span class="hljs-string">"Memory&nbsp;Error"</span>));<br><span class="hljs-number">182</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">183</span>&nbsp;<br><span class="hljs-number">184</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(ExplodedNode&nbsp;*N&nbsp;=&nbsp;C.generateErrorNode())&nbsp;{<br><span class="hljs-number">185</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">auto</span>&nbsp;R&nbsp;=&nbsp;<span class="hljs-built_in">std</span>::make_unique&lt;PathSensitiveBugReport&gt;(<br><span class="hljs-number">186</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*DoubleFreeBT,&nbsp;DoubleFreeBT-&gt;getDescription(),&nbsp;N);<br><span class="hljs-number">187</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C.emitReport(<span class="hljs-built_in">std</span>::move(R));<br><span class="hljs-number">188</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">189</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：报告<code>内存重复释放</code>的程序缺陷，并终止该执行路径的探索。</p>
+<p><strong>6）</strong> 实现<code>evalAssume()</code>成员函数</p>
+<pre><code class="hljs php"><span class="hljs-number">191</span>&nbsp;ProgramStateRef&nbsp;MallocChecker::evalAssume(ProgramStateRef&nbsp;State,<br><span class="hljs-number">192</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">const</span>&nbsp;SVal&nbsp;&amp;Cond,<br><span class="hljs-number">193</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;Assumption)&nbsp;<span class="hljs-keyword">const</span>&nbsp;{<br><span class="hljs-number">194</span>&nbsp;&nbsp;&nbsp;auto&nbsp;isNull&nbsp;=&nbsp;[&amp;](ProgramStateRef&nbsp;State,&nbsp;SymbolRef&nbsp;Sym)&nbsp;{<br><span class="hljs-number">195</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-comment">//&nbsp;Return&nbsp;true&nbsp;if&nbsp;a&nbsp;symbol&nbsp;is&nbsp;NULL.</span><br><span class="hljs-number">196</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State-&gt;getConstraintManager().isNull(State,&nbsp;Sym).isConstrainedTrue();<br><span class="hljs-number">197</span>&nbsp;&nbsp;&nbsp;};<br><span class="hljs-number">198</span>&nbsp;<br><span class="hljs-number">199</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">for</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;auto&nbsp;&amp;TrackedRegion&nbsp;:&nbsp;State-&gt;get&lt;RegionState&gt;())&nbsp;{<br><span class="hljs-number">200</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;R&nbsp;=&nbsp;TrackedRegion.first;<br><span class="hljs-number">201</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(isNull(State,&nbsp;R))&nbsp;{<br><span class="hljs-number">202</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;State-&gt;remove&lt;RegionState&gt;(R);<br><span class="hljs-number">203</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">204</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">205</span>&nbsp;<br><span class="hljs-number">206</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">for</span>&nbsp;(<span class="hljs-keyword">const</span>&nbsp;auto&nbsp;&amp;ReallocPair&nbsp;:&nbsp;State-&gt;get&lt;ReallocPairs&gt;())&nbsp;{<br><span class="hljs-number">207</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;ToPtr&nbsp;=&nbsp;ReallocPair.first;<br><span class="hljs-number">208</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(isNull(State,&nbsp;ToPtr))&nbsp;{<br><span class="hljs-number">209</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;State-&gt;remove&lt;ReallocPairs&gt;(ToPtr);<br><span class="hljs-number">210</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SymbolRef&nbsp;FromPtr&nbsp;=&nbsp;ReallocPair.second;<br><span class="hljs-number">211</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State&nbsp;=&nbsp;State-&gt;set&lt;RegionState&gt;(FromPtr,&nbsp;Allocated);<br><span class="hljs-number">212</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">213</span>&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">214</span>&nbsp;<br><span class="hljs-number">215</span>&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>&nbsp;State;<br><span class="hljs-number">216</span>&nbsp;}<br></code></pre>
+<p>上述代码的逻辑为：</p>
+<ul>
+<li><p>第 198~201 行，定义一个 lambda 表达式，用于判断符号的值是否<code>NULL</code>（根据程序状态中的约束条件）。</p></li>
+<li><p>第 203~208 行，清除自定义程序状态<code>RegionState</code>中所分配的内存对应的符号的值为<code>NULL</code>的信息（最好这样做，但不是必须的）。</p></li>
+<li><p>第 210~217 行，处理<code>realloc</code>函数重新分配内存失败的情况。也就是说，如果<code>realloc</code>函数重新分配内存失败，那么将其要释放的内存的状态重新设置为<code>已分配</code>，并清除自定义程序状态<code>ReallocPairs</code>中的相关信息。这样做，是为了避免误报<code>内存重复释放</code>。</p></li>
+</ul>
+<p><strong>step 4：</strong> 构建测试</p>
+<p><strong>1）</strong> 构建</p>
+<p><em>注：</em>具体过程可参考笔者的另一篇文章：《LLVM 之 Clang 静态分析器篇（2）：如何扩展 Clang 静态分析器》。</p>
+<p><strong>2）</strong> 诊断结果对比</p>
+<p>对于同一个测试文件<code>malloc.c</code>，分别运行自己实现的检查器<code>plugin.unix.malloc</code>和 Clang 静态分析器实现的检查器<code>unix.malloc</code>。</p>
+<p><strong>1）</strong> 运行检查器<code>plugin.unix.malloc</code></p>
+<p>执行命令：</p>
+<pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-w&nbsp;-<span class="hljs-keyword">load</span>&nbsp;~/git-projects/llvm-<span class="hljs-keyword">project</span>/build_ninja/lib/MallocCheckerPlugin.so&nbsp;-<span class="hljs-keyword">analyze</span>&nbsp;-analyzer-checker=plugin.unix.Malloc&nbsp;malloc.c&nbsp;-I&nbsp;~/git-projects/llvm-<span class="hljs-keyword">project</span>/clang/<span class="hljs-keyword">test</span>/Analysis/<br></code></pre>
+<p>输出结果如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">57</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">63</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">realloc</span>(p,<span class="hljs-number">0</span>);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">113</span>:<span class="hljs-number">5</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">123</span>:<span class="hljs-number">5</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">127</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">749</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1480</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1490</span>:<span class="hljs-number">13</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*m&nbsp;=&nbsp;<span class="hljs-built_in">realloc</span>(a-&gt;p,&nbsp;size);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~~~~~~~~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1659</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Double&nbsp;<span class="hljs-built_in">free</span>&nbsp;[plugin.unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(&amp;<span class="hljs-built_in">array</span>[<span class="hljs-number">0</span>]);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~~~~~~~~~<br><span class="hljs-number">9</span>&nbsp;warnings&nbsp;generated.<br></code></pre>
+<p>从上面的输出结果可以看出，检查器<code>plugin.unix.malloc</code>检测到<code>malloc.c</code>文件中存在 9 个<code>内存重复释放</code>的程序缺陷。</p>
+<p><strong>2）</strong> 运行检查器<code>unix.malloc</code></p>
+<p>执行命令：</p>
+<pre><code class="hljs sql">$&nbsp;clang&nbsp;-cc1&nbsp;-w&nbsp;-<span class="hljs-keyword">analyze</span>&nbsp;-analyzer-checker=unix.Malloc&nbsp;malloc.c&nbsp;-I&nbsp;~/git-projects/llvm-<span class="hljs-keyword">project</span>/clang/<span class="hljs-keyword">test</span>/Analysis/<br></code></pre>
+<p>输出结果如下（省略无关的程序缺陷）：</p>
+<pre><code class="hljs cpp"><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">57</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">63</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">realloc</span>(p,<span class="hljs-number">0</span>);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">113</span>:<span class="hljs-number">5</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">123</span>:<span class="hljs-number">5</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">127</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">222</span>:<span class="hljs-number">9</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(buf);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">749</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1480</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(p);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~<br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1490</span>:<span class="hljs-number">13</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*m&nbsp;=&nbsp;<span class="hljs-built_in">realloc</span>(a-&gt;p,&nbsp;size);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^~~~~~~~~~~~~~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-built_in">malloc</span>.c:<span class="hljs-number">1659</span>:<span class="hljs-number">3</span>:&nbsp;warning:&nbsp;Attempt&nbsp;to&nbsp;<span class="hljs-built_in">free</span>&nbsp;released&nbsp;memory&nbsp;[unix.Malloc]<br>&nbsp;&nbsp;<span class="hljs-built_in">free</span>(&amp;<span class="hljs-built_in">array</span>[<span class="hljs-number">0</span>]);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br>&nbsp;&nbsp;^~~~~~~~~~~~~~~<br><span class="hljs-comment">//&nbsp;省略&nbsp;...</span><br><span class="hljs-number">95</span>&nbsp;warnings&nbsp;generated.<br></code></pre>
+<p>从上面的输出结果可以看出，对于同一个测试文件<code>malloc.c</code>而言，检查器<code>unix.malloc</code>检测到该文件中存在 10 个<code>内存重复释放</code>的程序缺陷。</p>
+<p>其中，检查器<code>plugin.unix.malloc</code>未检测到的程序缺陷如下：</p>
+<pre><code class="hljs cpp"><span class="hljs-number">217</span>&nbsp;<span class="hljs-function"><span class="hljs-keyword">void</span>&nbsp;<span class="hljs-title">reallocfRadar6337483_3</span><span class="hljs-params">()</span>&nbsp;</span>{<br><span class="hljs-number">218</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*&nbsp;buf&nbsp;=&nbsp;<span class="hljs-built_in">malloc</span>(<span class="hljs-number">100</span>);<br><span class="hljs-number">219</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">char</span>&nbsp;*&nbsp;tmp;<br><span class="hljs-number">220</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp&nbsp;=&nbsp;(<span class="hljs-keyword">char</span>*)reallocf(buf,&nbsp;<span class="hljs-number">0x1000000</span>);<br><span class="hljs-number">221</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">if</span>&nbsp;(!tmp)&nbsp;{<br><span class="hljs-number">222</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(buf);&nbsp;<span class="hljs-comment">//&nbsp;expected-warning&nbsp;{{Attempt&nbsp;to&nbsp;free&nbsp;released&nbsp;memory}}</span><br><span class="hljs-number">223</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-keyword">return</span>;<br><span class="hljs-number">224</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br><span class="hljs-number">225</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf&nbsp;=&nbsp;tmp;<br><span class="hljs-number">226</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hljs-built_in">free</span>(buf);<br><span class="hljs-number">227</span>&nbsp;}<br></code></pre>
+<p>上述程序中的<code>reallocf</code>函数不是 C 语言提供的 API 而是用户自定义的，其行为与<code>realloc</code>的唯一区别在于：前者在重新分配内存失败后仍会释放旧内存。由于检查器<code>plugin.unix.malloc</code>中未对该函数进行建模。因此，不会检测到该程序缺陷。</p>
+<p><a href="#jump1">返回上一级</a></p>
+<hr>
+<h4 id="hspanidjump1_3span"><span><span id="jump1_3">如何调试</span></span></h4>
+<p><strong>step 1：</strong> gdb 调试</p>
+<p><strong>1）</strong> gdb 调试文件</p>
+<p>plugin.malloc.gdb 的内容如下：</p>
+<pre><code class="hljs vbnet">file&nbsp;/usr/local/bin/clang<br><span class="hljs-keyword">set</span>&nbsp;args&nbsp;-cc1&nbsp;-w&nbsp;-load&nbsp;~/git-projects/llvm-project/build_ninja/<span class="hljs-keyword">lib</span>/MallocCheckerPlugin.so&nbsp;-analyze&nbsp;-analyzer-checker=plugin.unix.Malloc&nbsp;-I&nbsp;~/git-projects/llvm-project/clang/test/Analysis/&nbsp;malloc.c<br><span class="hljs-keyword">set</span>&nbsp;listsize&nbsp;<span class="hljs-number">20</span><br><span class="hljs-keyword">set</span>&nbsp;breakpoint&nbsp;pending&nbsp;<span class="hljs-keyword">on</span><br><br>start<br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">57</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">62</span><br><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">67</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">141</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">153</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">158</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">162</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">163</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">165</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">173</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">176</span><br><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">199</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">202</span><br>b&nbsp;clang/<span class="hljs-keyword">lib</span>/Analysis/plugins/CheckerMalloc/MallocChecker.cpp:<span class="hljs-number">211</span><br></code></pre>
+<p><strong>2）</strong> 如何启动</p>
+<pre><code class="hljs cpp">$&nbsp;gdb&nbsp;-q&nbsp;-x&nbsp;plugin.<span class="hljs-built_in">malloc</span>.gdb<br></code></pre>
+<p><strong>step 2：</strong> 辅助调试的 Clang API</p>
+<table>
+<thead>
+<tr>
+<th>Clang API</th>
+<th>示例</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clang::ento::ProgramState::dump()</td>
+<td><li><span>命令：p C.getState()-&gt;dump()</span></li> <li><span>注：C 的数据类型为 clang::ento::CheckerContext &amp;</span></li></td>
+<td>打印程序状态</td>
+</tr>
+<tr>
+<td>clang::ento::SymExpr::dump()</td>
+<td><li><span>命令：p Mem-&gt;dump()</span></li> <li><span>注：Mem 的数据类型为 clang::ento::SymbolRef（即 const clang::ento::SymExpr *）</span></li></td>
+<td>打印符号</td>
+</tr>
+<tr>
+<td>clang::Stmt::dump()</td>
+<td><li><span>命令：p Call.getOriginExpr()-&gt;dump()</span></li> <li><span>注：Call 的数据类型为 const clang::ento::CallEvent &amp;</span></li></td>
+<td>打印表达式的抽象语法树</td>
+</tr>
+</tbody>
+</table>
+<p><a href="#jump1">返回上一级</a></p>
+<hr>
+<h3 id="hspanidjump2span"><span><span id="jump2">研究结论</span></span></h3>
+<p>要实现检测<code>内存重复释放</code>的功能，我们需要跟踪内存的已分配和已释放情况。通过自定义程序状态<code>RegionState</code>和<code>ReallocPairs</code>可以做到这一点。前者用于跟踪内存的已分配和已释放情况。从而，在释放内存时可以根据该信息判断是否发生了<code>内存重复释放</code>。后者用于跟踪<code>realloc</code>函数所分配的新内存和所释放的旧内存之间的关联关系。从而，可以在适当的时候处理<code>realloc</code>函数重新分配内存失败的情况以避免误报<code>内存重复释放</code>。</p>
+<p>检测<code>内存重复释放</code>的工作原理：当程序调用<code>malloc</code>函数后，将其所分配内存<code>已分配</code>的信息保存到自定义程序状态<code>RegionState</code>中。当程序调用<code>free</code>函数时，如果要释放的内存处于<code>已分配</code>状态或者无法获知确切状态，那么将其更新为<code>已释放</code>状态；如果要释放的内存处于<code>已释放</code>状态，那么表明发生了<code>内存重复释放</code>。当程序调用<code>realloc</code>函数后，根据参数取值的不同可以分为以下三种情况：</p>
+<ul>
+<li><p>如果<code>realloc</code>函数第一个参数的值为<code>NULL</code>（无论第二个参数的值是什么），那么调用<code>realloc(oldmem, bytes)</code>相当于调用<code>malloc(bytes)</code>。</p></li>
+<li><p>如果<code>realloc</code>函数第一个参数的值不为<code>NULL</code>且第二个参数的值为 0，那么调用<code>realloc(oldmem, bytes)</code>相当于调用<code>free(oldmem)</code>，并且<code>realloc</code>函数的返回值为<code>NULL</code>。</p></li>
+<li><p>如果<code>realloc</code>函数第一个参数的值不为<code>NULL</code>且第二个参数的值不为 0，那么调用<code>realloc(oldmem, bytes)</code>相当于调用<code>free(oldmem)</code>和<code>malloc(bytes)</code>。在该情况下，需要保存<code>realloc</code>函数所分配的新内存和所释放的旧内存之间的关联关系。</p></li>
+</ul>
+<hr>
+<h3 id="hspanidjumpreferencesreferencesspan"><span><span id="jumpReferences">References</span></span></h3>
+<ul>
+<li><p><a href="https://clang.llvm.org/doxygen/MallocChecker_8cpp.html"><font size="4">MallocChecker.cpp File Reference</font></a></p></li>
+<li><p><a href="https://csstormq.github.io/blog/LLVM%20%E4%B9%8B%20Clang%20%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%99%A8%E7%AF%87%EF%BC%882%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%20Clang%20%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%99%A8"><font size="4">LLVM 之 Clang 静态分析器篇（2）：如何扩展 Clang 静态分析器</font></a></p></li>
+</ul>
+<hr>
+<p><font size="4"><strong>下一篇：</strong><a href="https://csstormq.github.io/blog/LLVM%20%E4%B9%8B%20Clang%20%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%99%A8%E7%AF%87%EF%BC%887%EF%BC%89%EF%BC%9A%E7%A8%8B%E5%BA%8F%E7%BC%BA%E9%99%B7%E8%AF%8A%E6%96%AD%E2%80%94%E2%80%94%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2">LLVM 之 Clang 静态分析器篇（7）：程序缺陷诊断——内存泄露</a></font></p>
+<p><font size="4"><strong>上一篇：</strong><a href="https://csstormq.github.io/blog/LLVM%20%E4%B9%8B%20Clang%20%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%99%A8%E7%AF%87%EF%BC%885%EF%BC%89%EF%BC%9A%E7%A8%8B%E5%BA%8F%E7%BC%BA%E9%99%B7%E8%AF%8A%E6%96%AD%E2%80%94%E2%80%94fopen%20%E5%92%8C%20fclose%20API%20%E8%AF%AF%E7%94%A8">LLVM 之 Clang 静态分析器篇（5）：程序缺陷诊断——fopen 和 fclose API 误用</a></font></p>
+<p><font size="4"></font></p><p align="center"><font size="4"><a href="https://csstormq.github.io"><strong>首页</strong></a> </font></p><p></p></div></div></body>
+</html>
