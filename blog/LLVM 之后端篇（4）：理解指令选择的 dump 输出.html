@@ -407,7 +407,7 @@
 <hr>
 <h3 id="hspanidjump1span"><span><span id="jump1">指令选择的整体阶段</span></span></h3>
 <p>指令选择是将<code>LLVM IR</code>转换为代表目标指令的 SelectionDAG 节点——<code>SDNode</code>。它是由一些较小的阶段组成的，这些阶段如下图所示。</p>
-<figure><img src="image/SelectionDAG_Overview.jpg" alt="" title=""><figcaption></figcaption></figure> <p></p>
+<figure><img src="image/SelectionDAG_Overview.png" alt="" title=""><figcaption></figcaption></figure> <p></p>
 <p>为了直观地展示<code>llc</code>中常用 SelectionDAG 命令选项与各阶段之间的对应关系，图中除了指令选择阶段<code>(1)~(10)</code>以外，还包括了指令调度阶段<code>(11)</code>。</p>
 <p>查看各阶段输出结果的常见方式有以下两种：</p>
 <ul>
